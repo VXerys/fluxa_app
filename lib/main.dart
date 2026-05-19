@@ -3,9 +3,11 @@ import 'package:get/get.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/constants/constants.dart';
+import 'core/database/local_database_service.dart';
 import 'core/storage/storage_service.dart';
 import 'core/network/supabase_client.dart';
 import 'core/di/initial_binding.dart';
+import 'core/routes/app_pages.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +17,9 @@ Future<void> main() async {
 
   // Initialize local storage
   await StorageService.init();
+
+  // Initialize local database
+  await LocalDatabaseService.init();
 
   // Initialize Supabase client (reads keys from AppConstants)
   await SupabaseService.initialize();
@@ -37,26 +42,8 @@ class MyApp extends StatelessWidget {
         textTheme: const TextTheme(bodyMedium: AppTextStyles.roboto14w400),
         fontFamily: 'Roboto',
       ),
-      home: const MyHomePage(title: AppConstants.appName),
-    );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title, style: AppTextStyles.roboto16w400),
-        backgroundColor: AppColors.primary,
-      ),
-      body: const Center(
-        child: Text('Fluxa — Basic MVP', style: AppTextStyles.lora24w400),
-      ),
+      initialRoute: AppPages.initial,
+      getPages: AppPages.routes,
     );
   }
 }

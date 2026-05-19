@@ -1,6 +1,7 @@
+import 'package:dartz/dartz.dart';
+
 import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../../../../core/utils/either.dart';
 import '../entities/category_entity.dart';
 import '../repositories/category_repository.dart';
 

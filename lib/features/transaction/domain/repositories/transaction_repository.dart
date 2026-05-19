@@ -1,5 +1,6 @@
+import 'package:dartz/dartz.dart';
+
 import '../../../../core/errors/failures.dart';
-import '../../../../core/utils/either.dart';
 import '../entities/transaction_entity.dart';
 import '../entities/transaction_summary_entity.dart';
 

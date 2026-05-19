@@ -17,6 +17,10 @@ class StorageService {
     await _box.write(key, value);
   }
 
+  static Future<void> remove(String key) async {
+    await _box.remove(key);
+  }
+
   static Future<void> clear() async {
     await _box.erase();
   }
