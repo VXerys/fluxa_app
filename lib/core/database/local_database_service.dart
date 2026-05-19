@@ -14,11 +14,7 @@ class LocalDatabaseService {
     final dbPath = await getDatabasesPath();
     final fullPath = path.join(dbPath, AppConstants.localDbName);
 
-    _database = await openDatabase(
-      fullPath,
-      version: 1,
-      onCreate: _onCreate,
-    );
+    _database = await openDatabase(fullPath, version: 1, onCreate: _onCreate);
   }
 
   static Database get database {

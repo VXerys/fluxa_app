@@ -20,9 +20,7 @@ class PlaceholderPage extends StatelessWidget {
         title: Text(title, style: AppTextStyles.roboto16w400),
         backgroundColor: AppColors.primary,
       ),
-      body: Center(
-        child: Text(message, style: AppTextStyles.lora24w400),
-      ),
+      body: Center(child: Text(message, style: AppTextStyles.lora24w400)),
     );
   }
 }
