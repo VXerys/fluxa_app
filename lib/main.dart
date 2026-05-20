@@ -13,7 +13,11 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Load environment variables from .env (local, ignored file)
-  await dotenv.load(fileName: '.env');
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // Ignore when .env is missing in dev builds.
+  }
 
   // Initialize local storage
   await StorageService.init();
