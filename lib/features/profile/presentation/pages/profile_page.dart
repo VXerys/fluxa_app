@@ -113,10 +113,10 @@ class ProfilePage extends GetView<ProfileController> {
         ListTile(
           leading: const Icon(Icons.delete_outline, color: AppColors.error),
           title: Text(
-            'Reset Data',
+            'Reset Data Lokal',
             style: AppTextStyles.roboto14w400.copyWith(color: AppColors.error),
           ),
-          subtitle: const Text('Hapus semua data lokal dari perangkat ini'),
+          subtitle: const Text('Hapus cache dan data lokal di perangkat ini'),
           trailing: Obx(
             () => controller.isResetting
                 ? SizedBox(
@@ -152,10 +152,10 @@ class ProfilePage extends GetView<ProfileController> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Reset Data?'),
+          title: const Text('Reset Data Lokal?'),
           content: const Text(
-            'Semua transaksi dan data lokal akan dihapus permanen.\n'
-            'Tindakan ini tidak dapat dibatalkan.',
+            'Cache dan data lokal di perangkat ini akan dihapus.\n'
+            'Transaksi di cloud tidak dihapus.',
           ),
           actions: [
             TextButton(

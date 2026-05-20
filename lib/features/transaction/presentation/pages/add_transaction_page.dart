@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_text_styles.dart';
 import '../controllers/transaction_controller.dart';
 
 class AddTransactionPage extends GetView<TransactionController> {
@@ -99,14 +98,14 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
     final title = _titleController.text.trim();
     final finalNote = [title, note].where((e) => e.isNotEmpty).join(' - ');
 
-    await widget.controller.addTransaction(
+    final success = await widget.controller.addTransaction(
       type: widget.controller.selectedType,
       amount: amount,
       categoryId: widget.controller.selectedCategory?.id,
       note: finalNote.isEmpty ? null : finalNote,
       date: _selectedDate,
     );
-    if (widget.controller.errorMessage.isEmpty) {
+    if (success) {
       Get.back();
     }
   }
@@ -136,8 +135,6 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                 _buildTypeToggle(),
                 const SizedBox(height: AppSpacing.s24),
                 _buildCategories(),
-                const SizedBox(height: AppSpacing.s16),
-                _buildSubcategories(),
                 const SizedBox(height: AppSpacing.s24),
                 const Text('Amount', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
                 const SizedBox(height: AppSpacing.s8),
@@ -175,15 +172,6 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.qr_code_scanner, color: AppColors.textSecondary, size: 22),
-          )
         ],
       ),
     );
@@ -300,40 +288,6 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
     });
   }
 
-  Widget _buildSubcategories() {
-    return SizedBox(
-      height: 36,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
-        children: [
-          _buildSubItem('Breakfast', Icons.bakery_dining_outlined),
-          _buildSubItem('Lunch', Icons.lunch_dining_outlined),
-          _buildSubItem('Dinner', Icons.local_pizza_outlined),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSubItem(String label, IconData icon) {
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: AppColors.textSecondary),
-          const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildAmountDisplay() {
     String formattedAmount = _amountStr;
     if (formattedAmount.length > 3 && !formattedAmount.contains('.')) {
@@ -350,11 +304,9 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
             color: AppColors.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Row(
-            children: const [
-              Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
-              Icon(Icons.arrow_drop_down, size: 16, color: AppColors.primary),
-            ],
+          child: const Text(
+            'Rp',
+            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
           ),
         ),
         const SizedBox(width: 12),
@@ -395,54 +347,28 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: TextField(
-                  controller: _noteController,
-                  decoration: InputDecoration(
-                    hintText: 'Add a note...',
-                    hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                    prefixIcon: const Icon(Icons.notes, color: AppColors.textSecondary, size: 20),
-                    filled: true,
-                    fillColor: AppColors.surface,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.2)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.2)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.primary),
-                    ),
-                  ),
-                ),
+          TextField(
+            controller: _noteController,
+            decoration: InputDecoration(
+              hintText: 'Add a note...',
+              hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              prefixIcon: const Icon(Icons.notes, color: AppColors.textSecondary, size: 20),
+              filled: true,
+              fillColor: AppColors.surface,
+              contentPadding: const EdgeInsets.symmetric(vertical: 14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.2)),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 1,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text('Cash', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
-                      Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.textSecondary),
-                    ],
-                  ),
-                ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.2)),
               ),
-            ],
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.primary),
+              ),
+            ),
           ),
         ],
       ),
@@ -475,7 +401,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
               _buildNumBtn('4'),
               _buildNumBtn('5'),
               _buildNumBtn('6'),
-              _buildNumBtn('+-=', isAction: true, bgColor: AppColors.numpadActionBg),
+              const SizedBox(width: 75, height: 60),
             ],
           ),
           const SizedBox(height: 12),

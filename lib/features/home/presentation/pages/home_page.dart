@@ -205,7 +205,7 @@ class HomePage extends GetView<HomeController> {
               const Color(0xFF9C27B0),
               onTap: () {
                 try {
-                  Get.find<MainNavigationController>().changeTab(2);
+                  Get.find<MainNavigationController>().changeTab(3);
                 } catch (e) {
                   Get.snackbar('Info', 'Navigasi profil belum tersedia');
                 }

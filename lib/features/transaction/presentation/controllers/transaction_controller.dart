@@ -10,6 +10,7 @@ import '../../domain/usecases/delete_transaction_usecase.dart';
 import '../../domain/usecases/get_categories_usecase.dart';
 import '../../domain/usecases/get_transaction_summary_usecase.dart';
 import '../../domain/usecases/get_transactions_usecase.dart';
+import '../../../home/presentation/controllers/home_controller.dart';
 
 class TransactionController extends GetxController {
   final AddTransactionUseCase addTransactionUseCase;
@@ -118,7 +119,7 @@ class TransactionController extends GetxController {
     );
   }
 
-  Future<void> addTransaction({
+  Future<bool> addTransaction({
     required String type,
     required double amount,
     String? categoryId,
@@ -126,38 +127,50 @@ class TransactionController extends GetxController {
     required DateTime date,
     String? time,
   }) async {
-    if (_isSubmitting.value) return;
+    if (_isSubmitting.value) return false;
+    _errorMessage.value = '';
     if (amount <= 0) {
       _errorMessage.value = 'Amount must be greater than 0';
       Get.snackbar('Error', _errorMessage.value);
-      return;
+      return false;
+    }
+
+    final resolvedCategoryId = categoryId ?? _selectedCategory.value?.id;
+    if (resolvedCategoryId == null || resolvedCategoryId.isEmpty) {
+      _errorMessage.value = 'Pilih kategori terlebih dahulu';
+      Get.snackbar('Error', _errorMessage.value);
+      return false;
     }
 
     _isSubmitting.value = true;
     try {
-      final resolvedCategoryId = categoryId ?? _selectedCategory.value?.id;
-
       final params = AddTransactionParams(
         type: type,
         amount: amount,
-        categoryId: resolvedCategoryId?.isEmpty == true
-            ? null
-            : resolvedCategoryId,
+        categoryId: resolvedCategoryId,
         note: note,
         date: date,
         time: time,
       );
 
       final result = await addTransactionUseCase(params);
-      await result.fold(
+      return await result.fold(
         (failure) async {
           _errorMessage.value = failure.message;
           Get.snackbar('Error', failure.message);
+          return false;
         },
         (_) async {
           await loadTransactions();
           await loadSummary();
+
+          if (Get.isRegistered<HomeController>()) {
+            await Get.find<HomeController>().loadSummary();
+          }
+
+          _errorMessage.value = '';
           Get.snackbar('Success', 'Transaction added');
+          return true;
         },
       );
     } finally {

@@ -20,7 +20,7 @@ class ProfileController extends GetxController {
 
     Get.snackbar(
       'Berhasil',
-      'Semua data lokal telah dihapus',
+      'Data lokal/cache telah dihapus',
       backgroundColor: AppColors.success,
       colorText: Colors.white,
     );
