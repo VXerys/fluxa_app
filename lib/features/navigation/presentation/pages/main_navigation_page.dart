@@ -13,19 +13,23 @@ class MainNavigationPage extends GetView<MainNavigationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Obx(
-        () => IndexedStack(
-          index: controller.currentIndex,
-          children: const [HomePage(), TransactionListPage(), ProfilePage()],
+      body: SafeArea(
+        child: Obx(
+          () => IndexedStack(
+            index: controller.currentIndex,
+            children: const [HomePage(), TransactionListPage(), ProfilePage()],
+          ),
         ),
       ),
-      bottomNavigationBar: SizedBox(
-        height: 88,
-        child: Stack(
-          children: [
-            Positioned(left: 16, right: 88, bottom: 16, child: _buildPillNav()),
-            Positioned(right: 16, bottom: 16, child: _buildFAB()),
-          ],
+      bottomNavigationBar: SafeArea(
+        child: SizedBox(
+          height: 88,
+          child: Stack(
+            children: [
+              Positioned(left: 16, right: 88, bottom: 16, child: _buildPillNav()),
+              Positioned(right: 16, bottom: 16, child: _buildFAB()),
+            ],
+          ),
         ),
       ),
     );

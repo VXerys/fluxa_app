@@ -171,7 +171,7 @@ class _RegisterFormState extends State<_RegisterForm> {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.s12),
-        borderSide: const BorderSide(color: AppColors.primaryVariant),
+        borderSide: const BorderSide(color: AppColors.primaryLight),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.s12),

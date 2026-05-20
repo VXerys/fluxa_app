@@ -34,23 +34,34 @@ class RecentTransactionItemWidget extends StatelessWidget {
         ? '+$formattedAmount'
         : '-$formattedAmount';
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
+      padding: const EdgeInsets.all(AppSpacing.s16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: AppSpacing.s32,
-            height: AppSpacing.s32,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: accentColor,
-              shape: BoxShape.circle,
+              color: const Color(0xFFFFF3E0),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
               child: Text(
                 icon,
-                style: AppTextStyles.roboto16w400.copyWith(
-                  color: AppColors.surface,
-                ),
+                style: const TextStyle(fontSize: 24),
               ),
             ),
           ),
@@ -63,38 +74,54 @@ class RecentTransactionItemWidget extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.roboto14w400.copyWith(
+                  style: AppTextStyles.roboto16w400.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: AppSpacing.s4),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.roboto12w400.copyWith(
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.account_balance_wallet_outlined,
+                      size: 14,
                       color: AppColors.textSecondary,
                     ),
-                  ),
-                ],
-                const SizedBox(height: AppSpacing.s4),
-                Text(
-                  dateText,
-                  style: AppTextStyles.roboto12w400.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        subtitle ?? 'Cash',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.roboto12w400.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.s12),
-          Text(
-            amountText,
-            style: AppTextStyles.roboto14w400.copyWith(
-              color: accentColor,
-              fontWeight: FontWeight.w600,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                DateFormat('HH:mm').format(transaction.date),
+                style: AppTextStyles.roboto12w400.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                amountText,
+                style: AppTextStyles.roboto14w400.copyWith(
+                  color: accentColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
         ],
       ),

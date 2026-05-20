@@ -49,8 +49,8 @@ class _LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<_LoginForm> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController(text: 'sehanaf4@gmail.com');
+  final TextEditingController _passwordController = TextEditingController(text: 'Sehan123');
   bool _obscurePassword = true;
 
   @override
@@ -162,7 +162,7 @@ class _LoginFormState extends State<_LoginForm> {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.s12),
-        borderSide: const BorderSide(color: AppColors.primaryVariant),
+        borderSide: const BorderSide(color: AppColors.primaryLight),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.s12),

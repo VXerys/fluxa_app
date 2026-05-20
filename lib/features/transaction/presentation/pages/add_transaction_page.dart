@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
-import '../../domain/entities/category_entity.dart';
 import '../controllers/transaction_controller.dart';
-import '../widgets/category_chip_widget.dart';
-import '../widgets/transaction_type_toggle_widget.dart';
 
 class AddTransactionPage extends GetView<TransactionController> {
   const AddTransactionPage({super.key});
@@ -17,18 +13,25 @@ class AddTransactionPage extends GetView<TransactionController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text('Tambah Transaksi', style: AppTextStyles.roboto18w500),
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.back(),
+      backgroundColor: AppColors.surface,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: AppSpacing.s12),
+            // Fake drag handle for bottom sheet look
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.neutral.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.s24),
+            Expanded(child: _AddTransactionForm(controller: controller)),
+          ],
         ),
       ),
-      body: _AddTransactionForm(controller: controller),
     );
   }
 }
@@ -43,29 +46,78 @@ class _AddTransactionForm extends StatefulWidget {
 }
 
 class _AddTransactionFormState extends State<_AddTransactionForm> {
-  static const int _dateRangeYears = 5;
-  static const int _shimmerItemCount = 6;
-
-  final TextEditingController _amountController = TextEditingController();
+  String _amountStr = '0';
+  final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
 
   @override
   void dispose() {
-    _amountController.dispose();
+    _titleController.dispose();
     _noteController.dispose();
     super.dispose();
   }
 
+  void _onNumpadTap(String value) {
+    setState(() {
+      if (value == 'DEL') {
+        if (_amountStr.length > 1) {
+          _amountStr = _amountStr.substring(0, _amountStr.length - 1);
+        } else {
+          _amountStr = '0';
+        }
+      } else if (value == '000') {
+        if (_amountStr != '0') {
+          _amountStr += '000';
+        }
+      } else if (value == '.') {
+        if (!_amountStr.contains('.')) {
+          _amountStr += '.';
+        }
+      } else {
+        if (_amountStr == '0') {
+          _amountStr = value;
+        } else {
+          _amountStr += value;
+        }
+      }
+    });
+  }
+
+  void _handleSave() async {
+    final double amount = double.tryParse(_amountStr) ?? 0;
+    if (amount <= 0) {
+      Get.snackbar('Error', 'Nominal harus lebih dari 0');
+      return;
+    }
+    if (widget.controller.selectedCategory == null) {
+      Get.snackbar('Error', 'Pilih kategori terlebih dahulu');
+      return;
+    }
+
+    final note = _noteController.text.trim();
+    final title = _titleController.text.trim();
+    final finalNote = [title, note].where((e) => e.isNotEmpty).join(' - ');
+
+    await widget.controller.addTransaction(
+      type: widget.controller.selectedType,
+      amount: amount,
+      categoryId: widget.controller.selectedCategory?.id,
+      note: finalNote.isEmpty ? null : finalNote,
+      date: _selectedDate,
+    );
+    if (widget.controller.errorMessage.isEmpty) {
+      Get.back();
+    }
+  }
+
   Future<void> _pickDate() async {
-    final DateTime now = DateTime.now();
-    final DateTime? picked = await showDatePicker(
+    final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime(now.year - _dateRangeYears),
-      lastDate: DateTime(now.year + _dateRangeYears),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
     );
-
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
@@ -73,227 +125,429 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
     }
   }
 
-  double _parseAmount() {
-    final String raw = _amountController.text.trim();
-    final String normalized = raw.replaceAll(',', '').replaceAll(' ', '');
-    return double.tryParse(normalized) ?? 0;
-  }
-
-  Future<void> _handleSave() async {
-    if (widget.controller.isSubmitting) {
-      return;
-    }
-
-    FocusScope.of(context).unfocus();
-
-    final double amount = _parseAmount();
-    if (amount <= 0) {
-      Get.snackbar('Error', 'Nominal wajib diisi dan harus lebih dari 0');
-      return;
-    }
-
-    if (widget.controller.selectedCategory == null) {
-      Get.snackbar('Error', 'Pilih kategori terlebih dahulu');
-      return;
-    }
-
-    final String previousError = widget.controller.errorMessage;
-    final String note = _noteController.text.trim();
-
-    await widget.controller.addTransaction(
-      type: widget.controller.selectedType,
-      amount: amount,
-      categoryId: widget.controller.selectedCategory?.id,
-      note: note.isEmpty ? null : note,
-      date: _selectedDate,
-    );
-
-    if (widget.controller.errorMessage == previousError) {
-      Get.back();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.s16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Obx(
-              () => TransactionTypeToggleWidget(
-                selectedType: widget.controller.selectedType,
-                onChanged: widget.controller.changeType,
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildTypeToggle(),
+                const SizedBox(height: AppSpacing.s24),
+                _buildCategories(),
+                const SizedBox(height: AppSpacing.s16),
+                _buildSubcategories(),
+                const SizedBox(height: AppSpacing.s24),
+                const Text('Amount', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                const SizedBox(height: AppSpacing.s8),
+                _buildAmountDisplay(),
+                const SizedBox(height: AppSpacing.s24),
+                _buildInputs(),
+                const SizedBox(height: AppSpacing.s24),
+              ],
+            ),
+          ),
+        ),
+        _buildNumpad(),
+      ],
+    );
+  }
+
+  Widget _buildTypeToggle() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(child: _buildToggleBtn('expense', 'Pengeluaran')),
+                  Expanded(child: _buildToggleBtn('income', 'Pemasukan')),
+                ],
               ),
             ),
-            const SizedBox(height: AppSpacing.s24),
-            TextField(
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.lora36w400,
-              decoration: const InputDecoration(
-                prefixText: 'Rp ',
-                prefixStyle: AppTextStyles.lora36w400,
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: AppSpacing.s8),
-              ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(height: AppSpacing.s24),
-            Obx(() {
-              if (widget.controller.isLoading) {
-                return _buildCategoryShimmer();
-              }
+            child: const Icon(Icons.qr_code_scanner, color: AppColors.textSecondary, size: 22),
+          )
+        ],
+      ),
+    );
+  }
 
-              final List<CategoryEntity> categories =
-                  widget.controller.categories;
-              final String? selectedId = widget.controller.selectedCategory?.id;
-
-              return GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: AppSpacing.s12,
-                  mainAxisSpacing: AppSpacing.s12,
-                  childAspectRatio: AppSpacing.s48 / AppSpacing.s16,
-                ),
-                itemCount: categories.length,
-                itemBuilder: (context, index) {
-                  final category = categories[index];
-
-                  return CategoryChipWidget(
-                    category: category,
-                    isSelected: category.id == selectedId,
-                    onTap: () => widget.controller.selectCategory(category),
-                  );
-                },
-              );
-            }),
-            const SizedBox(height: AppSpacing.s24),
-            TextFormField(
-              controller: _noteController,
-              maxLines: 2,
-              style: AppTextStyles.roboto14w400,
-              decoration: InputDecoration(
-                hintText: 'Catatan (opsional)',
-                hintStyle: AppTextStyles.roboto14w400.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                filled: true,
-                fillColor: AppColors.surface,
-                contentPadding: const EdgeInsets.all(AppSpacing.s12),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.s8),
-                  borderSide: const BorderSide(color: AppColors.neutral),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.s8),
-                  borderSide: const BorderSide(color: AppColors.primary),
-                ),
-              ),
+  Widget _buildToggleBtn(String type, String label, {bool disabled = false}) {
+    return Obx(() {
+      final isSelected = widget.controller.selectedType == type;
+      return GestureDetector(
+        onTap: disabled ? null : () => widget.controller.changeType(type),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? AppColors.surface : AppColors.textSecondary,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              fontSize: 14,
             ),
-            const SizedBox(height: AppSpacing.s16),
-            InkWell(
-              onTap: _pickDate,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.s12,
-                  horizontal: AppSpacing.s16,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border.all(color: AppColors.neutral),
-                  borderRadius: BorderRadius.circular(AppSpacing.s8),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildCategories() {
+    return Obx(() {
+      if (widget.controller.isLoading) return const SizedBox(height: 70);
+      final categories = widget.controller.categories;
+      return SizedBox(
+        height: 75,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
+          itemCount: categories.length,
+          itemBuilder: (context, index) {
+            final cat = categories[index];
+            final isSelected = widget.controller.selectedCategory?.id == cat.id;
+            
+            // Assign a unique color based on index for variety
+            final colors = [
+              AppColors.categoryFood,
+              AppColors.categoryTransport,
+              AppColors.categoryShopping,
+              AppColors.categoryHousing,
+            ];
+            final color = colors[index % colors.length];
+
+            // Map category name to icon
+            IconData catIcon = Icons.category_outlined;
+            final nameLower = cat.name.toLowerCase();
+            if (nameLower.contains('makan') || nameLower.contains('minum')) {
+              catIcon = Icons.restaurant_outlined;
+            } else if (nameLower.contains('transport')) {
+              catIcon = Icons.directions_bus_outlined;
+            } else if (nameLower.contains('belanja')) {
+              catIcon = Icons.shopping_bag_outlined;
+            } else if (nameLower.contains('rumah') || nameLower.contains('tagihan')) {
+              catIcon = Icons.home_outlined;
+            } else if (nameLower.contains('hiburan')) {
+              catIcon = Icons.movie_outlined;
+            } else if (nameLower.contains('kesehatan')) {
+              catIcon = Icons.medical_services_outlined;
+            } else if (nameLower.contains('pendidikan')) {
+              catIcon = Icons.school_outlined;
+            }
+
+            return GestureDetector(
+              onTap: () => widget.controller.selectCategory(cat),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: Column(
                   children: [
-                    Text(
-                      'Tanggal',
-                      style: AppTextStyles.roboto14w400.copyWith(
-                        color: AppColors.textSecondary,
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isSelected ? color : AppColors.surface,
+                        border: isSelected ? null : Border.all(color: AppColors.neutral.withOpacity(0.2)),
+                        boxShadow: isSelected ? [
+                          BoxShadow(color: color.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))
+                        ] : [],
+                      ),
+                      child: Center(
+                        child: Icon(
+                          catIcon,
+                          size: 24,
+                          color: isSelected ? AppColors.surface : color,
+                        ),
                       ),
                     ),
+                    const SizedBox(height: 6),
                     Text(
-                      DateFormat('dd MMMM yyyy').format(_selectedDate),
-                      style: AppTextStyles.roboto14w400,
+                      cat.name,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.s24),
-            Obx(() {
-              final bool isSubmitting = widget.controller.isSubmitting;
-
-              return SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _handleSave,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.surface,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.s16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSpacing.s8),
-                    ),
-                  ),
-                  child: isSubmitting
-                      ? SizedBox(
-                          width: AppSpacing.s16,
-                          height: AppSpacing.s16,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: AppSpacing.s4,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColors.surface,
-                            ),
-                          ),
-                        )
-                      : Text(
-                          'Simpan',
-                          style: AppTextStyles.roboto16w400.copyWith(
-                            color: AppColors.surface,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                ),
-              );
-            }),
-          ],
+            );
+          },
         ),
+      );
+    });
+  }
+
+  Widget _buildSubcategories() {
+    return SizedBox(
+      height: 36,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
+        children: [
+          _buildSubItem('Breakfast', Icons.bakery_dining_outlined),
+          _buildSubItem('Lunch', Icons.lunch_dining_outlined),
+          _buildSubItem('Dinner', Icons.local_pizza_outlined),
+        ],
       ),
     );
   }
 
-  Widget _buildCategoryShimmer() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: AppSpacing.s12,
-        mainAxisSpacing: AppSpacing.s12,
-        childAspectRatio: AppSpacing.s48 / AppSpacing.s16,
+  Widget _buildSubItem(String label, IconData icon) {
+    return Container(
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
       ),
-      itemCount: _shimmerItemCount,
-      itemBuilder: (context, index) {
-        return Shimmer.fromColors(
-          baseColor: AppColors.background,
-          highlightColor: AppColors.surface,
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppSpacing.s8),
-              border: Border.all(color: AppColors.neutral),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: AppColors.textSecondary),
+          const SizedBox(width: 8),
+          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAmountDisplay() {
+    String formattedAmount = _amountStr;
+    if (formattedAmount.length > 3 && !formattedAmount.contains('.')) {
+      final doubleval = double.tryParse(_amountStr) ?? 0;
+      formattedAmount = NumberFormat.decimalPattern('id_ID').format(doubleval);
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: const [
+              Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              Icon(Icons.arrow_drop_down, size: 16, color: AppColors.primary),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          formattedAmount,
+          style: const TextStyle(fontSize: 44, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInputs() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
+      child: Column(
+        children: [
+          TextField(
+            controller: _titleController,
+            decoration: InputDecoration(
+              hintText: 'Title',
+              hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              prefixIcon: const Icon(Icons.description_outlined, color: AppColors.textSecondary, size: 20),
+              filled: true,
+              fillColor: AppColors.surface,
+              contentPadding: const EdgeInsets.symmetric(vertical: 14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.2)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.2)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.primary),
+              ),
             ),
           ),
-        );
-      },
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: _noteController,
+                  decoration: InputDecoration(
+                    hintText: 'Add a note...',
+                    hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                    prefixIcon: const Icon(Icons.notes, color: AppColors.textSecondary, size: 20),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.2)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.2)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('Cash', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+                      Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.textSecondary),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNumpad() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24, vertical: AppSpacing.s16),
+      decoration: const BoxDecoration(
+        color: AppColors.background,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildNumBtn('1'),
+              _buildNumBtn('2'),
+              _buildNumBtn('3'),
+              _buildNumBtn('DEL', isAction: true, bgColor: AppColors.numpadDeleteBg, icon: Icons.backspace_outlined, iconColor: AppColors.numpadDeleteIcon),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildNumBtn('4'),
+              _buildNumBtn('5'),
+              _buildNumBtn('6'),
+              _buildNumBtn('+-=', isAction: true, bgColor: AppColors.numpadActionBg),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildNumBtn('7'),
+              _buildNumBtn('8'),
+              _buildNumBtn('9'),
+              _buildNumBtn('DATE', isAction: true, bgColor: AppColors.numpadButtonBg, customWidget: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(DateFormat('MMM dd').format(_selectedDate), style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  Text(DateFormat('HH:mm').format(_selectedDate), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                ],
+              ), onTap: _pickDate),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildNumBtn('.'),
+              _buildNumBtn('0'),
+              _buildNumBtn('000'),
+              Obx(() {
+                final isSubmitting = widget.controller.isSubmitting;
+                return _buildNumBtn(
+                  'SUBMIT', 
+                  isAction: true, 
+                  bgColor: AppColors.numpadSubmitBg, 
+                  customWidget: isSubmitting 
+                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppColors.surface, strokeWidth: 3))
+                      : const Icon(Icons.check, color: AppColors.surface, size: 28),
+                  onTap: _handleSave
+                );
+              }),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNumBtn(String value, {bool isAction = false, Color? bgColor, IconData? icon, Color? iconColor, Widget? customWidget, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap ?? () => _onNumpadTap(value),
+      child: Container(
+        width: 75,
+        height: 60,
+        decoration: BoxDecoration(
+          color: bgColor ?? AppColors.numpadButtonBg,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            if (bgColor == AppColors.numpadButtonBg || bgColor == AppColors.numpadActionBg)
+              BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))
+          ],
+        ),
+        child: Center(
+          child: customWidget ?? (icon != null
+              ? Icon(icon, color: iconColor ?? AppColors.textPrimary, size: 24)
+              : Text(
+                  isAction ? (value == '+-=' ? '+-\nx=' : value) : value,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: isAction ? 16 : 28,
+                    fontWeight: isAction ? FontWeight.w500 : FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                )),
+        ),
+      ),
     );
   }
 }
