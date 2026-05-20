@@ -20,45 +20,58 @@ class HomePage extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: RefreshIndicator(
-        onRefresh: controller.loadSummary,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(AppSpacing.s16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('~ Hai!', style: AppTextStyles.lora24w400),
-              const SizedBox(height: AppSpacing.s16),
-              Obx(() => BalanceCardWidget(summary: controller.summary)),
-              const SizedBox(height: AppSpacing.s24),
-              _buildMenu(),
-              const SizedBox(height: AppSpacing.s24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Transaksi Terakhir',
-                    style: AppTextStyles.roboto16w400.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: controller.loadSummary,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.s16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('~ Hai!', style: AppTextStyles.lora24w400),
+                        const SizedBox(height: AppSpacing.s16),
+                        Obx(() => BalanceCardWidget(summary: controller.summary)),
+                        const SizedBox(height: AppSpacing.s24),
+                        _buildMenu(),
+                        const SizedBox(height: AppSpacing.s24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Transaksi Terakhir',
+                              style: AppTextStyles.roboto16w400.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => Get.toNamed(Routes.transactionList),
+                              child: Text(
+                                'Lihat Semua',
+                                style: AppTextStyles.roboto14w400.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.s8),
+                        Obx(() => _buildRecentTransactions(controller)),
+                      ],
                     ),
                   ),
-                  TextButton(
-                    onPressed: () => Get.toNamed(Routes.transactionList),
-                    child: Text(
-                      'Lihat Semua',
-                      style: AppTextStyles.roboto14w400.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.s8),
-              Obx(() => _buildRecentTransactions(controller)),
-            ],
+                ),
+              );
+            },
           ),
         ),
       ),

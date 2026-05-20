@@ -9,6 +9,7 @@ import '../../domain/entities/transaction_entity.dart';
 import '../controllers/transaction_controller.dart';
 import '../widgets/transaction_filter_widget.dart';
 import '../widgets/transaction_item_widget.dart';
+import 'transaction_detail_page.dart';
 
 class TransactionListPage extends GetView<TransactionController> {
   const TransactionListPage({super.key});
@@ -18,10 +19,14 @@ class TransactionListPage extends GetView<TransactionController> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Transaksi', style: AppTextStyles.roboto18w500),
+        title: Text('Log Transaksi', style: AppTextStyles.roboto18w600.copyWith(color: AppColors.textPrimary)),
+        centerTitle: true,
         backgroundColor: AppColors.surface,
         elevation: 0,
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary, size: 20),
+          onPressed: () => Get.back(),
+        ),
       ),
       body: _TransactionListBody(controller: controller),
     );
@@ -38,25 +43,15 @@ class _TransactionListBody extends StatefulWidget {
 }
 
 class _TransactionListBodyState extends State<_TransactionListBody> {
-  String _selectedFilter = 'Semua';
+  List<TransactionEntity> _applyLocalSearch(List<TransactionEntity> items) {
+    final query = widget.controller.searchQuery.toLowerCase();
+    if (query.isEmpty) return items;
 
-  void _onFilterChanged(String filter) {
-    setState(() {
-      _selectedFilter = filter;
-    });
-  }
-
-  List<TransactionEntity> _applyFilter(List<TransactionEntity> items) {
-    final List<TransactionEntity> sorted = List.from(items)
-      ..sort((a, b) => b.date.compareTo(a.date));
-
-    if (_selectedFilter == 'Pemasukan') {
-      return sorted.where((item) => item.type == 'income').toList();
-    }
-    if (_selectedFilter == 'Pengeluaran') {
-      return sorted.where((item) => item.type == 'expense').toList();
-    }
-    return sorted;
+    return items.where((item) {
+      final titleMatch = item.note?.toLowerCase().contains(query) ?? false;
+      final categoryMatch = item.category?.name.toLowerCase().contains(query) ?? false;
+      return titleMatch || categoryMatch;
+    }).toList();
   }
 
   Future<void> _confirmDelete(TransactionEntity transaction) async {
@@ -103,15 +98,37 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
         return const AppEmptyStateWidget(message: 'Belum ada transaksi');
       }
 
-      final List<TransactionEntity> filtered = _applyFilter(
+      final List<TransactionEntity> filtered = _applyLocalSearch(
         widget.controller.transactions,
       );
 
       return Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s8),
+            child: TextField(
+              onChanged: widget.controller.setSearchQuery,
+              decoration: InputDecoration(
+                hintText: 'Cari transaksi...',
+                hintStyle: AppTextStyles.roboto14w400.copyWith(color: AppColors.textSecondary),
+                prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+                filled: true,
+                fillColor: AppColors.background,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ),
           TransactionFilterWidget(
-            selectedFilter: _selectedFilter,
-            onFilterChanged: _onFilterChanged,
+            onOpenTypeFilter: _showTypeFilterBottomSheet,
+            onOpenCategoryFilter: _showCategoryFilterBottomSheet,
+            onOpenDateFilter: _showDateFilterBottomSheet,
+            onOpenSortFilter: _showSortFilterBottomSheet,
+            onOpenNominalFilter: _showNominalFilterBottomSheet,
+            onOpenWalletFilter: () {}, // Wallet is static for now
           ),
           const SizedBox(height: AppSpacing.s8),
           Expanded(
@@ -119,14 +136,17 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
               onRefresh: widget.controller.loadTransactions,
               child: ListView.separated(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
+                padding: EdgeInsets.zero,
                 itemCount: filtered.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: AppSpacing.s8),
+                separatorBuilder: (_, __) => Divider(
+                  color: AppColors.neutral.withOpacity(0.1),
+                  height: 1,
+                ),
                 itemBuilder: (context, index) {
                   final transaction = filtered[index];
 
                   return GestureDetector(
+                    onTap: () => Get.to(() => TransactionDetailPage(transaction: transaction)),
                     onLongPress: () => _confirmDelete(transaction),
                     child: TransactionItemWidget(transaction: transaction),
                   );
@@ -159,6 +179,109 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
           ),
         );
       },
+    );
+  }
+  void _showTypeFilterBottomSheet() {
+    final options = ['Semua', 'Pemasukan', 'Pengeluaran'];
+    _showOptionsBottomSheet('Tipe Transaksi', options, widget.controller.filterType, (val) {
+      widget.controller.setFilterType(val);
+    });
+  }
+
+  void _showDateFilterBottomSheet() {
+    final options = ['Semua Waktu', 'Bulan Ini', 'Minggu Ini', 'Hari Ini'];
+    _showOptionsBottomSheet('Rentang Waktu', options, widget.controller.filterDateRange, (val) {
+      widget.controller.setFilterDateRange(val);
+    });
+  }
+
+  void _showSortFilterBottomSheet() {
+    final options = ['Tanggal (Terbaru)', 'Tanggal (Terlama)', 'Nominal Tertinggi', 'Nominal Terendah'];
+    _showOptionsBottomSheet('Urutkan', options, widget.controller.filterSortBy, (val) {
+      widget.controller.setFilterSortBy(val);
+    });
+  }
+
+  void _showNominalFilterBottomSheet() {
+    final options = ['Semua', '< 50.000', '50.000 - 100.000', '> 100.000'];
+    _showOptionsBottomSheet('Rentang Nominal', options, widget.controller.filterNominal == 'Rentang Nominal' ? 'Semua' : widget.controller.filterNominal, (val) {
+      widget.controller.setFilterNominal(val);
+    });
+  }
+
+  void _showOptionsBottomSheet(String title, List<String> options, String selected, ValueChanged<String> onSelect) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.s24),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.neutral.withOpacity(0.2), borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: AppSpacing.s16),
+            Text(title, style: AppTextStyles.roboto16w600),
+            const SizedBox(height: AppSpacing.s16),
+            ...options.map((option) => ListTile(
+              title: Text(option, style: AppTextStyles.roboto14w400),
+              trailing: selected == option ? const Icon(Icons.check, color: AppColors.textPrimary) : null,
+              onTap: () {
+                onSelect(option);
+                Get.back();
+              },
+            )),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  void _showCategoryFilterBottomSheet() {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.s24),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.neutral.withOpacity(0.2), borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: AppSpacing.s16),
+            Text('Kategori', style: AppTextStyles.roboto16w600),
+            const SizedBox(height: AppSpacing.s16),
+            Expanded(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  ListTile(
+                    title: Text('Semua Kategori', style: AppTextStyles.roboto14w400),
+                    trailing: widget.controller.filterCategory == null ? const Icon(Icons.check, color: AppColors.textPrimary) : null,
+                    onTap: () {
+                      widget.controller.setFilterCategory(null);
+                      Get.back();
+                    },
+                  ),
+                  ...widget.controller.categories.map((category) => ListTile(
+                    leading: const Icon(Icons.category_outlined, color: AppColors.textSecondary), // generic icon for now
+                    title: Text(category.name, style: AppTextStyles.roboto14w400),
+                    trailing: widget.controller.filterCategory?.id == category.id ? const Icon(Icons.check, color: AppColors.textPrimary) : null,
+                    onTap: () {
+                      widget.controller.setFilterCategory(category);
+                      Get.back();
+                    },
+                  )),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 }

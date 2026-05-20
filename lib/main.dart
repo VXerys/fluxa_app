@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'core/constants/constants.dart';
 import 'core/database/local_database_service.dart';
 import 'core/storage/storage_service.dart';
@@ -11,6 +13,7 @@ import 'core/routes/app_pages.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID', null);
 
   // Load environment variables from .env (local, ignored file)
   try {

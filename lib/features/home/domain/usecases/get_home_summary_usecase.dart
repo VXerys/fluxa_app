@@ -13,7 +13,7 @@ class GetHomeSummaryUseCase implements UseCase<HomeSummaryEntity, NoParams> {
 
   @override
   Future<Either<Failure, HomeSummaryEntity>> call(NoParams params) async {
-    final result = await repository.getTransactions();
+    final result = await repository.getTransactions(GetTransactionsParams());
 
     return result.fold((failure) => Left(failure), (transactions) {
       final activeTransactions = transactions

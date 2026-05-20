@@ -14,24 +14,69 @@ class ProfilePage extends GetView<ProfileController> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Profil'),
+        title: Text(
+          'Profil',
+          style: AppTextStyles.roboto18w500.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
         automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(vertical: AppSpacing.s16),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildAvatarSection(),
-              SizedBox(height: AppSpacing.s32),
+              const SizedBox(height: AppSpacing.s32),
+              _buildPremiumBanner(),
+              const SizedBox(height: AppSpacing.s24),
               _buildSectionLabel('Aplikasi'),
-              _buildAppSettingsCard(),
-              SizedBox(height: AppSpacing.s16),
+              _buildCard([
+                _buildCardItem(
+                  icon: Icons.info_outline,
+                  title: 'Tentang Fluxa',
+                  onTap: () {},
+                ),
+                _buildCardItem(
+                  icon: Icons.tag,
+                  title: 'Versi',
+                  trailing: Obx(
+                    () => Text(
+                      controller.appVersion,
+                      style: AppTextStyles.roboto14w400.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+              ]),
+              const SizedBox(height: AppSpacing.s16),
               _buildSectionLabel('Data'),
-              _buildDataSettingsCard(context),
-              SizedBox(height: AppSpacing.s32),
+              _buildCard([
+                _buildCardItem(
+                  icon: Icons.delete_outline,
+                  title: 'Reset Data Lokal',
+                  iconColor: AppColors.error,
+                  trailing: Obx(
+                    () => controller.isResetting
+                        ? const SizedBox(
+                            width: AppSpacing.s16,
+                            height: AppSpacing.s16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                  ),
+                  onTap: () => _showResetConfirmDialog(context),
+                ),
+              ]),
+              const SizedBox(height: AppSpacing.s32),
               Center(
                 child: Text(
                   'Fluxa © 2026',
@@ -40,6 +85,7 @@ class ProfilePage extends GetView<ProfileController> {
                   ),
                 ),
               ),
+              const SizedBox(height: AppSpacing.s32),
             ],
           ),
         ),
@@ -51,17 +97,111 @@ class ProfilePage extends GetView<ProfileController> {
     return Center(
       child: Column(
         children: [
-          CircleAvatar(
-            radius: AppSpacing.s48,
-            backgroundColor: AppColors.neutral,
-            child: Icon(
-              Icons.person,
-              size: AppSpacing.s48,
-              color: AppColors.surface,
+          Stack(
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.person,
+                  size: 48,
+                  color: AppColors.neutral,
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.edit,
+                    size: 16,
+                    color: AppColors.surface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s16),
+          Text(
+            'Pengguna Fluxa',
+            style: AppTextStyles.roboto18w500.copyWith(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: AppSpacing.s12),
-          const Text('Pengguna Fluxa', style: AppTextStyles.roboto18w500),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumBanner() {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [AppColors.cardGradient1Start, AppColors.cardGradient1End],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.star_border,
+              color: AppColors.surface,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.s16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Upgrade to Premium',
+                  style: AppTextStyles.roboto16w400.copyWith(
+                    color: AppColors.surface,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s4),
+                Text(
+                  'Unlock all features & remove\nlimits.',
+                  style: AppTextStyles.roboto12w400.copyWith(
+                    color: AppColors.surface.withOpacity(0.9),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.chevron_right,
+            color: AppColors.surface,
+          ),
         ],
       ),
     );
@@ -69,80 +209,72 @@ class ProfilePage extends GetView<ProfileController> {
 
   Widget _buildSectionLabel(String text) {
     return Padding(
-      padding: EdgeInsets.only(left: AppSpacing.s16),
+      padding: const EdgeInsets.only(left: AppSpacing.s8, bottom: AppSpacing.s8),
       child: Text(
         text,
-        style: AppTextStyles.roboto12w400.copyWith(
+        style: AppTextStyles.roboto14w400.copyWith(
           color: AppColors.textSecondary,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
   }
 
-  Widget _buildAppSettingsCard() {
-    return _buildSettingsCard(
-      children: [
-        ListTile(
-          leading: const Icon(Icons.info_outline, color: AppColors.primary),
-          title: const Text('Tentang Fluxa'),
-          subtitle: const Text('Aplikasi pencatatan keuangan pribadi'),
-        ),
-        Divider(
-          height: AppSpacing.s4,
-          thickness: AppSpacing.s4 / AppSpacing.s4,
-        ),
-        ListTile(
-          leading: const Icon(Icons.tag, color: AppColors.primary),
-          title: const Text('Versi'),
-          trailing: Obx(
-            () => Text(
-              controller.appVersion,
-              style: AppTextStyles.roboto14w400.copyWith(
-                color: AppColors.textSecondary,
+  Widget _buildCard(List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildCardItem({
+    required IconData icon,
+    required String title,
+    Widget? trailing,
+    Color iconColor = AppColors.primary,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s16),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: const BoxDecoration(
+                color: AppColors.background,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 24,
               ),
             ),
-          ),
+            const SizedBox(width: AppSpacing.s16),
+            Expanded(
+              child: Text(
+                title,
+                style: AppTextStyles.roboto16w400.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            if (trailing != null)
+              trailing
+            else
+              const Icon(
+                Icons.chevron_right,
+                color: AppColors.textSecondary,
+              ),
+          ],
         ),
-      ],
-    );
-  }
-
-  Widget _buildDataSettingsCard(BuildContext context) {
-    return _buildSettingsCard(
-      children: [
-        ListTile(
-          leading: const Icon(Icons.delete_outline, color: AppColors.error),
-          title: Text(
-            'Reset Data Lokal',
-            style: AppTextStyles.roboto14w400.copyWith(color: AppColors.error),
-          ),
-          subtitle: const Text('Hapus cache dan data lokal di perangkat ini'),
-          trailing: Obx(
-            () => controller.isResetting
-                ? SizedBox(
-                    width: AppSpacing.s16,
-                    height: AppSpacing.s16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: AppSpacing.s8 / AppSpacing.s4,
-                    ),
-                  )
-                : const Icon(Icons.chevron_right, color: AppColors.neutral),
-          ),
-          onTap: () => _showResetConfirmDialog(context),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSettingsCard({required List<Widget> children}) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.s16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.s12),
-        ),
-        child: Column(children: children),
       ),
     );
   }

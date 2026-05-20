@@ -46,10 +46,42 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
-  Future<Either<Failure, List<TransactionEntity>>> getTransactions() async {
+  Future<Either<Failure, List<TransactionEntity>>> getTransactions(GetTransactionsParams params) async {
     try {
-      final models = await remoteDataSource.getTransactions();
+      final models = await remoteDataSource.getTransactions(params);
       return Right(models.map((model) => model.toEntity()).toList());
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TransactionEntity>> updateTransaction(
+    UpdateTransactionParams params,
+  ) async {
+    try {
+      final model = TransactionModel(
+        id: params.id,
+        userId: '', // Will be injected by remote data source
+        categoryId: params.categoryId,
+        type: params.type,
+        amount: params.amount,
+        currency: 'IDR',
+        note: params.note,
+        date: params.date,
+        time: params.time,
+        isDeleted: false,
+      );
+      final result = await remoteDataSource.updateTransaction(model);
+      return Right(result.toEntity());
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
     } on NetworkException catch (e) {

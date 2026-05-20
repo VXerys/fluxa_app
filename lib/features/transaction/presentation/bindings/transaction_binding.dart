@@ -11,6 +11,7 @@ import '../../domain/usecases/delete_transaction_usecase.dart';
 import '../../domain/usecases/get_categories_usecase.dart';
 import '../../domain/usecases/get_transaction_summary_usecase.dart';
 import '../../domain/usecases/get_transactions_usecase.dart';
+import '../../domain/usecases/update_transaction_usecase.dart';
 import '../controllers/transaction_controller.dart';
 
 class TransactionBinding extends Bindings {
@@ -32,6 +33,7 @@ class TransactionBinding extends Bindings {
     Get.lazyPut(() => AddTransactionUseCase(repository: Get.find()));
     Get.lazyPut(() => GetTransactionsUseCase(repository: Get.find()));
     Get.lazyPut(() => DeleteTransactionUseCase(repository: Get.find()));
+    Get.lazyPut(() => UpdateTransactionUseCase(Get.find()));
     Get.lazyPut(() => GetTransactionSummaryUseCase(repository: Get.find()));
 
     Get.lazyPut(
@@ -39,6 +41,7 @@ class TransactionBinding extends Bindings {
         addTransactionUseCase: Get.find(),
         getTransactionsUseCase: Get.find(),
         deleteTransactionUseCase: Get.find(),
+        updateTransactionUseCase: Get.find(),
         getTransactionSummaryUseCase: Get.find(),
         getCategoriesUseCase: Get.find(),
       ),

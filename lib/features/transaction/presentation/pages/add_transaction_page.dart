@@ -4,10 +4,12 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../domain/entities/transaction_entity.dart';
 import '../controllers/transaction_controller.dart';
 
 class AddTransactionPage extends GetView<TransactionController> {
-  const AddTransactionPage({super.key});
+  final TransactionEntity? transactionToEdit;
+  const AddTransactionPage({super.key, this.transactionToEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,7 @@ class AddTransactionPage extends GetView<TransactionController> {
               ),
             ),
             const SizedBox(height: AppSpacing.s24),
-            Expanded(child: _AddTransactionForm(controller: controller)),
+            Expanded(child: _AddTransactionForm(controller: controller, transactionToEdit: transactionToEdit)),
           ],
         ),
       ),
@@ -37,8 +39,9 @@ class AddTransactionPage extends GetView<TransactionController> {
 
 class _AddTransactionForm extends StatefulWidget {
   final TransactionController controller;
+  final TransactionEntity? transactionToEdit;
 
-  const _AddTransactionForm({required this.controller});
+  const _AddTransactionForm({required this.controller, this.transactionToEdit});
 
   @override
   State<_AddTransactionForm> createState() => _AddTransactionFormState();
@@ -49,6 +52,40 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
+  
+  @override
+  void initState() {
+    super.initState();
+    if (widget.transactionToEdit != null) {
+      final t = widget.transactionToEdit!;
+      _amountStr = t.amount.toInt().toString();
+      
+      // Parse note into title and note if separated by " - "
+      if (t.note != null && t.note!.contains(' - ')) {
+        final parts = t.note!.split(' - ');
+        _titleController.text = parts.first;
+        _noteController.text = parts.sublist(1).join(' - ');
+      } else {
+        _titleController.text = t.note ?? '';
+      }
+      
+      _selectedDate = t.date;
+      
+      // We must set the selected type and wait for categories to load, 
+      // then set the selected category.
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        widget.controller.changeType(t.type);
+        // Delay to allow categories to load from changeType
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (t.category != null) {
+          final cat = widget.controller.categories.firstWhereOrNull((c) => c.id == t.category!.id);
+          if (cat != null) {
+            widget.controller.selectCategory(cat);
+          }
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -98,13 +135,26 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
     final title = _titleController.text.trim();
     final finalNote = [title, note].where((e) => e.isNotEmpty).join(' - ');
 
-    final success = await widget.controller.addTransaction(
-      type: widget.controller.selectedType,
-      amount: amount,
-      categoryId: widget.controller.selectedCategory?.id,
-      note: finalNote.isEmpty ? null : finalNote,
-      date: _selectedDate,
-    );
+    bool success;
+    if (widget.transactionToEdit != null) {
+      success = await widget.controller.updateTransaction(
+        id: widget.transactionToEdit!.id,
+        type: widget.controller.selectedType,
+        amount: amount,
+        categoryId: widget.controller.selectedCategory?.id,
+        note: finalNote.isEmpty ? null : finalNote,
+        date: _selectedDate,
+      );
+    } else {
+      success = await widget.controller.addTransaction(
+        type: widget.controller.selectedType,
+        amount: amount,
+        categoryId: widget.controller.selectedCategory?.id,
+        note: finalNote.isEmpty ? null : finalNote,
+        date: _selectedDate,
+      );
+    }
+
     if (success) {
       Get.back();
     }

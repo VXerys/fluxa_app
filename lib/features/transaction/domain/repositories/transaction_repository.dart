@@ -22,11 +22,56 @@ class AddTransactionParams {
   });
 }
 
+class UpdateTransactionParams {
+  final String id;
+  final String type;
+  final double amount;
+  final String? categoryId;
+  final String? note;
+  final DateTime date;
+  final String? time;
+
+  UpdateTransactionParams({
+    required this.id,
+    required this.type,
+    required this.amount,
+    this.categoryId,
+    this.note,
+    required this.date,
+    this.time,
+  });
+}
+
+class GetTransactionsParams {
+  final String? type;
+  final String? categoryId;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String? sortBy; // 'dateDesc', 'dateAsc', 'amountDesc', 'amountAsc'
+  final double? minAmount;
+  final double? maxAmount;
+
+  GetTransactionsParams({
+    this.type,
+    this.categoryId,
+    this.startDate,
+    this.endDate,
+    this.sortBy,
+    this.minAmount,
+    this.maxAmount,
+  });
+}
+
 abstract class TransactionRepository {
   Future<Either<Failure, TransactionEntity>> addTransaction(
     AddTransactionParams params,
   );
-  Future<Either<Failure, List<TransactionEntity>>> getTransactions();
+  Future<Either<Failure, List<TransactionEntity>>> getTransactions(
+    GetTransactionsParams params,
+  );
+  Future<Either<Failure, TransactionEntity>> updateTransaction(
+    UpdateTransactionParams params,
+  );
   Future<Either<Failure, void>> deleteTransaction(String transactionId);
   Future<Either<Failure, TransactionSummaryEntity>> getTransactionSummary();
 }

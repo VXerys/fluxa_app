@@ -21,6 +21,13 @@ class AppTextStyles {
     color: AppColors.textPrimary,
   );
 
+  static const TextStyle roboto14w500 = TextStyle(
+    fontFamily: 'Roboto',
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textPrimary,
+  );
+
   static const TextStyle roboto16w400 = TextStyle(
     fontFamily: 'Roboto',
     fontSize: 16,
@@ -28,10 +35,31 @@ class AppTextStyles {
     color: AppColors.textPrimary,
   );
 
+  static const TextStyle roboto16w600 = TextStyle(
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+  );
+
   static const TextStyle roboto18w500 = TextStyle(
     fontFamily: 'Roboto',
     fontSize: 18,
     fontWeight: FontWeight.w500,
+    color: AppColors.textPrimary,
+  );
+
+  static const TextStyle roboto18w600 = TextStyle(
+    fontFamily: 'Roboto',
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+  );
+
+  static const TextStyle roboto32w600 = TextStyle(
+    fontFamily: 'Roboto',
+    fontSize: 32,
+    fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
 

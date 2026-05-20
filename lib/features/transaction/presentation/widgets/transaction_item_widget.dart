@@ -15,78 +15,77 @@ class TransactionItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isIncome = transaction.type == 'income';
     final Color accentColor = isIncome ? AppColors.success : AppColors.error;
-    final String icon = transaction.category?.icon ?? (isIncome ? '💰' : '💸');
 
     final String? note = transaction.note?.trim();
     final bool hasNote = note != null && note.isNotEmpty;
     final String title = hasNote
         ? note
         : (transaction.category?.name ?? 'Transaksi');
-    final String? subtitle = hasNote ? transaction.category?.name : null;
-    final String dateText = DateFormat('dd MMM yyyy').format(transaction.date);
+    final String subtitleText = transaction.category?.name ?? 'Umum';
+    final String subtitle = '$subtitleText • Tunai';
+    final String dateText = DateFormat('dd MMM yyyy', 'id_ID').format(transaction.date);
+    final String timeText = transaction.time ?? DateFormat('HH:mm', 'id_ID').format(transaction.date);
+    final String dateTimeText = '$timeText $dateText';
 
     final String formattedAmount = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp',
       decimalDigits: 0,
     ).format(transaction.amount);
+    
+    // Format to "k" for thousands if it ends with 000
+    String shortAmount = formattedAmount;
+    if (shortAmount.endsWith('.000')) {
+      shortAmount = '${shortAmount.substring(0, shortAmount.length - 4)}k';
+    }
+
     final String amountText = isIncome
-        ? '+$formattedAmount'
-        : '-$formattedAmount';
+        ? '+$shortAmount'
+        : '-$shortAmount';
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.s8),
-      padding: const EdgeInsets.all(AppSpacing.s12),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s12),
+      decoration: const BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.s12),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: AppSpacing.s32,
-            height: AppSpacing.s32,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: accentColor,
-              shape: BoxShape.circle,
+              color: AppColors.categoryFood.withOpacity(0.2), // Use orange-ish background as in design
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
-              child: Text(
-                icon,
-                style: AppTextStyles.roboto16w400.copyWith(
-                  color: AppColors.surface,
-                ),
+              child: Icon(
+                Icons.restaurant_outlined, // Placeholder for category icon, can be dynamic
+                color: AppColors.categoryFood,
+                size: 24,
               ),
             ),
           ),
-          const SizedBox(width: AppSpacing.s12),
+          const SizedBox(width: AppSpacing.s16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.roboto14w400.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTextStyles.roboto16w600.copyWith(
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: AppSpacing.s4),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.roboto12w400.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
                 const SizedBox(height: AppSpacing.s4),
                 Text(
-                  dateText,
-                  style: AppTextStyles.roboto12w400.copyWith(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.roboto14w400.copyWith(
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -94,12 +93,24 @@ class TransactionItemWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.s12),
-          Text(
-            amountText,
-            style: AppTextStyles.roboto14w400.copyWith(
-              color: accentColor,
-              fontWeight: FontWeight.w600,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                amountText,
+                style: AppTextStyles.roboto16w600.copyWith(
+                  color: accentColor,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s4),
+              Text(
+                dateTimeText,
+                style: AppTextStyles.roboto12w400.copyWith(
+                  color: AppColors.neutral,
+                ),
+              ),
+            ],
           ),
         ],
       ),
