@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
-import '../../../transaction/presentation/pages/transaction_list_page.dart';
+import '../../../statistics/presentation/pages/statistics_page.dart';
+import '../../../wallet/presentation/pages/wallet_page.dart';
 import '../controllers/main_navigation_controller.dart';
 
 class MainNavigationPage extends GetView<MainNavigationController> {
@@ -13,85 +16,71 @@ class MainNavigationPage extends GetView<MainNavigationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: SafeArea(
+        bottom: false,
         child: Obx(
           () => IndexedStack(
             index: controller.currentIndex,
-            children: const [HomePage(), TransactionListPage(), ProfilePage()],
-          ),
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: SizedBox(
-          height: 88,
-          child: Stack(
-            children: [
-              Positioned(left: 16, right: 88, bottom: 16, child: _buildPillNav()),
-              Positioned(right: 16, bottom: 16, child: _buildFAB()),
+            children: const [
+              HomePage(),
+              StatisticsPage(),
+              WalletPage(),
+              ProfilePage(),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildPillNav() {
-    return Container(
-      height: 64,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _NavItem(
-            icon: Icons.home_rounded,
-            outlinedIcon: Icons.home_outlined,
-            index: 0,
-            controller: controller,
-          ),
-          _NavItem(
-            icon: Icons.account_balance_wallet_rounded,
-            outlinedIcon: Icons.account_balance_wallet_outlined,
-            index: 1,
-            controller: controller,
-          ),
-          _NavItem(
-            icon: Icons.person_rounded,
-            outlinedIcon: Icons.person_outline_rounded,
-            index: 2,
-            controller: controller,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFAB() {
-    return GestureDetector(
-      onTap: () => Get.toNamed(Routes.addTransaction),
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Get.toNamed(Routes.addTransaction),
+        backgroundColor: AppColors.primary,
+        elevation: 4,
+        shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        color: AppColors.surface,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        elevation: 20,
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _NavItem(
+                icon: Icons.home_rounded,
+                outlinedIcon: Icons.home_outlined,
+                label: 'Home',
+                index: 0,
+                controller: controller,
+              ),
+              _NavItem(
+                icon: Icons.analytics_rounded,
+                outlinedIcon: Icons.bar_chart_outlined,
+                label: 'Statistics',
+                index: 1,
+                controller: controller,
+              ),
+              const SizedBox(width: 48), // Space for FAB
+              _NavItem(
+                icon: Icons.account_balance_wallet_rounded,
+                outlinedIcon: Icons.account_balance_wallet_outlined,
+                label: 'Wallet',
+                index: 2,
+                controller: controller,
+              ),
+              _NavItem(
+                icon: Icons.person_rounded,
+                outlinedIcon: Icons.person_outline_rounded,
+                label: 'Profile',
+                index: 3,
+                controller: controller,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -100,6 +89,7 @@ class MainNavigationPage extends GetView<MainNavigationController> {
 class _NavItem extends StatelessWidget {
   final IconData icon;
   final IconData outlinedIcon;
+  final String label;
   final int index;
   final MainNavigationController controller;
   final bool disabled;
@@ -107,6 +97,7 @@ class _NavItem extends StatelessWidget {
   const _NavItem({
     required this.icon,
     required this.outlinedIcon,
+    required this.label,
     required this.index,
     required this.controller,
     this.disabled = false,
@@ -114,32 +105,34 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: disabled ? null : () => controller.changeTab(index),
-        behavior: HitTestBehavior.opaque,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Obx(() {
-                final isActive = controller.currentIndex == index;
-                final color = disabled
-                    ? const Color(0xFFE0E0E0)
-                    : isActive
-                    ? const Color(0xFF1A1A2E)
-                    : const Color(0xFFBDBDBD);
+    return GestureDetector(
+      onTap: disabled ? null : () => controller.changeTab(index),
+      behavior: HitTestBehavior.opaque,
+      child: Obx(() {
+        final isActive = controller.currentIndex == index;
+        final color = disabled
+            ? AppColors.neutral
+            : isActive
+                ? AppColors.primary
+                : AppColors.textSecondary;
 
-                return Icon(
-                  isActive ? icon : outlinedIcon,
-                  color: color,
-                  size: 26,
-                );
-              }),
-            ],
-          ),
-        ),
-      ),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isActive ? icon : outlinedIcon,
+              color: color,
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: AppTextStyles.roboto12w400.copyWith(color: color),
+            ),
+          ],
+        );
+      }),
     );
   }
 }

@@ -56,7 +56,7 @@ class HomePage extends GetView<HomeController> {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.s16),
+              const SizedBox(height: AppSpacing.s8),
               Obx(() => _buildRecentTransactions(controller)),
             ],
           ),
@@ -90,11 +90,11 @@ class HomePage extends GetView<HomeController> {
     
     if (items.isNotEmpty) {
       final firstDate = items.first.date;
-      try {
-        dateHeader = DateFormat('EEEE, d MMM yyyy', 'id_ID').format(firstDate);
-      } catch (_) {
-        dateHeader = DateFormat('EEEE, d MMM yyyy').format(firstDate);
-      }
+      const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      final dayName = days[firstDate.weekday - 1];
+      final monthName = months[firstDate.month - 1];
+      dateHeader = '$dayName, ${firstDate.day} $monthName ${firstDate.year}';
       
       double total = 0;
       for(var item in items) {
