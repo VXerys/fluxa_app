@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
+import '../../../transaction/presentation/pages/transaction_list_page.dart';
 import '../controllers/main_navigation_controller.dart';
 
 class MainNavigationPage extends GetView<MainNavigationController> {
@@ -14,23 +15,15 @@ class MainNavigationPage extends GetView<MainNavigationController> {
     return Scaffold(
       body: Obx(
         () => IndexedStack(
-          index: controller.stackIndex,
-          children: const [
-            HomePage(),
-            ProfilePage(),
-          ],
+          index: controller.currentIndex,
+          children: const [HomePage(), TransactionListPage(), ProfilePage()],
         ),
       ),
       bottomNavigationBar: SizedBox(
         height: 88,
         child: Stack(
           children: [
-            Positioned(
-              left: 16,
-              right: 88,
-              bottom: 16,
-              child: _buildPillNav(),
-            ),
+            Positioned(left: 16, right: 88, bottom: 16, child: _buildPillNav()),
             Positioned(right: 16, bottom: 16, child: _buildFAB()),
           ],
         ),
@@ -61,23 +54,15 @@ class MainNavigationPage extends GetView<MainNavigationController> {
             controller: controller,
           ),
           _NavItem(
-            icon: Icons.bar_chart_rounded,
-            outlinedIcon: Icons.bar_chart,
-            index: 1,
-            controller: controller,
-            disabled: true,
-          ),
-          _NavItem(
             icon: Icons.account_balance_wallet_rounded,
             outlinedIcon: Icons.account_balance_wallet_outlined,
-            index: 2,
+            index: 1,
             controller: controller,
-            disabled: true,
           ),
           _NavItem(
             icon: Icons.person_rounded,
             outlinedIcon: Icons.person_outline_rounded,
-            index: 3,
+            index: 2,
             controller: controller,
           ),
         ],
@@ -138,8 +123,8 @@ class _NavItem extends StatelessWidget {
                 final color = disabled
                     ? const Color(0xFFE0E0E0)
                     : isActive
-                        ? const Color(0xFF1A1A2E)
-                        : const Color(0xFFBDBDBD);
+                    ? const Color(0xFF1A1A2E)
+                    : const Color(0xFFBDBDBD);
 
                 return Icon(
                   isActive ? icon : outlinedIcon,

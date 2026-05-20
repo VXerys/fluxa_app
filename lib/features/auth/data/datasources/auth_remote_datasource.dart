@@ -39,14 +39,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       final trimmedName = displayName.trim();
-      if (trimmedName.isNotEmpty) {
-        await _client
-            .from('profiles')
-            .update({'display_name': trimmedName})
-            .eq('id', user.id);
-      }
+      
+      await _client.from('profiles').upsert({
+        'id': user.id,
+        if (trimmedName.isNotEmpty) 'display_name': trimmedName,
+      }, onConflict: 'id');
 
-      final profile = await _fetchProfile(user.id);
+      final profile = await _client
+          .from('profiles')
+          .select('id, username, display_name, avatar_url, is_pro')
+          .eq('id', user.id)
+          .maybeSingle();
       return UserModel.fromSupabaseUser(user, profile: profile);
     } on AuthException {
       rethrow;

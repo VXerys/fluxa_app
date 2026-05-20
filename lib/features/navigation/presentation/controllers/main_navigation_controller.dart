@@ -5,13 +5,7 @@ class MainNavigationController extends GetxController {
 
   int get currentIndex => _currentIndex.value;
 
-  int get stackIndex => currentIndex == 3 ? 1 : 0;
-
   void changeTab(int index) {
-    if (index == 1 || index == 2) {
-      return;
-    }
-
     _currentIndex.value = index;
   }
 }

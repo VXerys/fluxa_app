@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 
 import '../../core/storage/storage_service.dart';
-import '../../core/widgets/placeholder_page.dart';
 import '../../features/auth/presentation/bindings/auth_binding.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
@@ -28,10 +27,8 @@ class AppPages {
     ),
     GetPage(
       name: Routes.main,
-      page: () => const PlaceholderPage(
-        title: 'Fluxa',
-        message: 'Main page placeholder',
-      ),
+      page: () => const MainNavigationPage(),
+      binding: MainNavigationBinding(),
     ),
     GetPage(
       name: Routes.login,
