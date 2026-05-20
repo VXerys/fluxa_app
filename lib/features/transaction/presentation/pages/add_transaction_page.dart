@@ -136,7 +136,13 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                 const SizedBox(height: AppSpacing.s24),
                 _buildCategories(),
                 const SizedBox(height: AppSpacing.s24),
-                const Text('Amount', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                const Text(
+                  'Amount',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.s8),
                 _buildAmountDisplay(),
                 const SizedBox(height: AppSpacing.s24),
@@ -215,7 +221,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
           itemBuilder: (context, index) {
             final cat = categories[index];
             final isSelected = widget.controller.selectedCategory?.id == cat.id;
-            
+
             // Assign a unique color based on index for variety
             final colors = [
               AppColors.categoryFood,
@@ -234,7 +240,8 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
               catIcon = Icons.directions_bus_outlined;
             } else if (nameLower.contains('belanja')) {
               catIcon = Icons.shopping_bag_outlined;
-            } else if (nameLower.contains('rumah') || nameLower.contains('tagihan')) {
+            } else if (nameLower.contains('rumah') ||
+                nameLower.contains('tagihan')) {
               catIcon = Icons.home_outlined;
             } else if (nameLower.contains('hiburan')) {
               catIcon = Icons.movie_outlined;
@@ -256,10 +263,20 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isSelected ? color : AppColors.surface,
-                        border: isSelected ? null : Border.all(color: AppColors.neutral.withOpacity(0.2)),
-                        boxShadow: isSelected ? [
-                          BoxShadow(color: color.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))
-                        ] : [],
+                        border: isSelected
+                            ? null
+                            : Border.all(
+                                color: AppColors.neutral.withOpacity(0.2),
+                              ),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: color.withOpacity(0.3),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ]
+                            : [],
                       ),
                       child: Center(
                         child: Icon(
@@ -274,8 +291,12 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                       cat.name,
                       style: TextStyle(
                         fontSize: 11,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: isSelected
+                            ? AppColors.textPrimary
+                            : AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -306,13 +327,20 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
           ),
           child: const Text(
             'Rp',
-            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
           ),
         ),
         const SizedBox(width: 12),
         Text(
           formattedAmount,
-          style: const TextStyle(fontSize: 44, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: const TextStyle(
+            fontSize: 44,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
         ),
       ],
     );
@@ -327,18 +355,29 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
             controller: _titleController,
             decoration: InputDecoration(
               hintText: 'Title',
-              hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              prefixIcon: const Icon(Icons.description_outlined, color: AppColors.textSecondary, size: 20),
+              hintStyle: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
+              prefixIcon: const Icon(
+                Icons.description_outlined,
+                color: AppColors.textSecondary,
+                size: 20,
+              ),
               filled: true,
               fillColor: AppColors.surface,
               contentPadding: const EdgeInsets.symmetric(vertical: 14),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.2)),
+                borderSide: BorderSide(
+                  color: AppColors.neutral.withOpacity(0.2),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.2)),
+                borderSide: BorderSide(
+                  color: AppColors.neutral.withOpacity(0.2),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -351,18 +390,29 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
             controller: _noteController,
             decoration: InputDecoration(
               hintText: 'Add a note...',
-              hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              prefixIcon: const Icon(Icons.notes, color: AppColors.textSecondary, size: 20),
+              hintStyle: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
+              prefixIcon: const Icon(
+                Icons.notes,
+                color: AppColors.textSecondary,
+                size: 20,
+              ),
               filled: true,
               fillColor: AppColors.surface,
               contentPadding: const EdgeInsets.symmetric(vertical: 14),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.2)),
+                borderSide: BorderSide(
+                  color: AppColors.neutral.withOpacity(0.2),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.2)),
+                borderSide: BorderSide(
+                  color: AppColors.neutral.withOpacity(0.2),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -377,10 +427,11 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
 
   Widget _buildNumpad() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24, vertical: AppSpacing.s16),
-      decoration: const BoxDecoration(
-        color: AppColors.background,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s24,
+        vertical: AppSpacing.s16,
       ),
+      decoration: const BoxDecoration(color: AppColors.background),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -391,7 +442,13 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
               _buildNumBtn('1'),
               _buildNumBtn('2'),
               _buildNumBtn('3'),
-              _buildNumBtn('DEL', isAction: true, bgColor: AppColors.numpadDeleteBg, icon: Icons.backspace_outlined, iconColor: AppColors.numpadDeleteIcon),
+              _buildNumBtn(
+                'DEL',
+                isAction: true,
+                bgColor: AppColors.numpadDeleteBg,
+                icon: Icons.backspace_outlined,
+                iconColor: AppColors.numpadDeleteIcon,
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -411,13 +468,32 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
               _buildNumBtn('7'),
               _buildNumBtn('8'),
               _buildNumBtn('9'),
-              _buildNumBtn('DATE', isAction: true, bgColor: AppColors.numpadButtonBg, customWidget: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(DateFormat('MMM dd').format(_selectedDate), style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                  Text(DateFormat('HH:mm').format(_selectedDate), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                ],
-              ), onTap: _pickDate),
+              _buildNumBtn(
+                'DATE',
+                isAction: true,
+                bgColor: AppColors.numpadButtonBg,
+                customWidget: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      DateFormat('MMM dd').format(_selectedDate),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      DateFormat('HH:mm').format(_selectedDate),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: _pickDate,
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -430,13 +506,24 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
               Obx(() {
                 final isSubmitting = widget.controller.isSubmitting;
                 return _buildNumBtn(
-                  'SUBMIT', 
-                  isAction: true, 
-                  bgColor: AppColors.numpadSubmitBg, 
-                  customWidget: isSubmitting 
-                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppColors.surface, strokeWidth: 3))
-                      : const Icon(Icons.check, color: AppColors.surface, size: 28),
-                  onTap: _handleSave
+                  'SUBMIT',
+                  isAction: true,
+                  bgColor: AppColors.numpadSubmitBg,
+                  customWidget: isSubmitting
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: AppColors.surface,
+                            strokeWidth: 3,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.check,
+                          color: AppColors.surface,
+                          size: 28,
+                        ),
+                  onTap: _handleSave,
                 );
               }),
             ],
@@ -446,7 +533,15 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
     );
   }
 
-  Widget _buildNumBtn(String value, {bool isAction = false, Color? bgColor, IconData? icon, Color? iconColor, Widget? customWidget, VoidCallback? onTap}) {
+  Widget _buildNumBtn(
+    String value, {
+    bool isAction = false,
+    Color? bgColor,
+    IconData? icon,
+    Color? iconColor,
+    Widget? customWidget,
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap ?? () => _onNumpadTap(value),
       child: Container(
@@ -456,22 +551,35 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
           color: bgColor ?? AppColors.numpadButtonBg,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
-            if (bgColor == AppColors.numpadButtonBg || bgColor == AppColors.numpadActionBg)
-              BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))
+            if (bgColor == AppColors.numpadButtonBg ||
+                bgColor == AppColors.numpadActionBg)
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
           ],
         ),
         child: Center(
-          child: customWidget ?? (icon != null
-              ? Icon(icon, color: iconColor ?? AppColors.textPrimary, size: 24)
-              : Text(
-                  isAction ? (value == '+-=' ? '+-\nx=' : value) : value,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: isAction ? 16 : 28,
-                    fontWeight: isAction ? FontWeight.w500 : FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                )),
+          child:
+              customWidget ??
+              (icon != null
+                  ? Icon(
+                      icon,
+                      color: iconColor ?? AppColors.textPrimary,
+                      size: 24,
+                    )
+                  : Text(
+                      isAction ? (value == '+-=' ? '+-\nx=' : value) : value,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: isAction ? 16 : 28,
+                        fontWeight: isAction
+                            ? FontWeight.w500
+                            : FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    )),
         ),
       ),
     );
