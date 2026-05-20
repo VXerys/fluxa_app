@@ -65,12 +65,13 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor =
-        isActive ? AppColors.primary : AppColors.surface;
-    final Color borderColor =
-        isActive ? AppColors.primary : AppColors.neutral;
-    final Color textColor =
-        isActive ? AppColors.surface : AppColors.textSecondary;
+    final Color backgroundColor = isActive
+        ? AppColors.primary
+        : AppColors.surface;
+    final Color borderColor = isActive ? AppColors.primary : AppColors.neutral;
+    final Color textColor = isActive
+        ? AppColors.surface
+        : AppColors.textSecondary;
 
     return GestureDetector(
       onTap: onTap,

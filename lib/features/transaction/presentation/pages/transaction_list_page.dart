@@ -79,9 +79,7 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.error,
-              ),
+              style: TextButton.styleFrom(foregroundColor: AppColors.error),
               child: Text('Hapus', style: AppTextStyles.roboto14w400),
             ),
           ],
@@ -102,13 +100,12 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
       }
 
       if (widget.controller.transactions.isEmpty) {
-        return const AppEmptyStateWidget(
-          message: 'Belum ada transaksi',
-        );
+        return const AppEmptyStateWidget(message: 'Belum ada transaksi');
       }
 
-      final List<TransactionEntity> filtered =
-          _applyFilter(widget.controller.transactions);
+      final List<TransactionEntity> filtered = _applyFilter(
+        widget.controller.transactions,
+      );
 
       return Column(
         children: [
@@ -169,10 +166,7 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
 class AppEmptyStateWidget extends StatelessWidget {
   final String message;
 
-  const AppEmptyStateWidget({
-    super.key,
-    required this.message,
-  });
+  const AppEmptyStateWidget({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {

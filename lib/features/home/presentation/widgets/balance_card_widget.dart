@@ -9,10 +9,7 @@ import '../../domain/entities/home_summary_entity.dart';
 class BalanceCardWidget extends StatelessWidget {
   final HomeSummaryEntity? summary;
 
-  const BalanceCardWidget({
-    super.key,
-    required this.summary,
-  });
+  const BalanceCardWidget({super.key, required this.summary});
 
   String _formatAmount(double value) {
     return NumberFormat.currency(
@@ -39,10 +36,7 @@ class BalanceCardWidget extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppSpacing.s24 - AppSpacing.s4),
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF1B5E20),
-            Color(0xFF1565C0),
-          ],
+          colors: [Color(0xFF1B5E20), Color(0xFF1565C0)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -59,9 +53,7 @@ class BalanceCardWidget extends StatelessWidget {
           const SizedBox(height: AppSpacing.s8),
           Text(
             balanceText,
-            style: AppTextStyles.lora36w400.copyWith(
-              color: AppColors.surface,
-            ),
+            style: AppTextStyles.lora36w400.copyWith(color: AppColors.surface),
           ),
           const SizedBox(height: AppSpacing.s16),
           Row(

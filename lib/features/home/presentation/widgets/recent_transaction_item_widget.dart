@@ -9,22 +9,19 @@ import '../../../transaction/domain/entities/transaction_entity.dart';
 class RecentTransactionItemWidget extends StatelessWidget {
   final TransactionEntity transaction;
 
-  const RecentTransactionItemWidget({
-    super.key,
-    required this.transaction,
-  });
+  const RecentTransactionItemWidget({super.key, required this.transaction});
 
   @override
   Widget build(BuildContext context) {
     final bool isIncome = transaction.type == 'income';
-    final Color accentColor =
-        isIncome ? AppColors.success : AppColors.error;
+    final Color accentColor = isIncome ? AppColors.success : AppColors.error;
     final String icon = transaction.category?.icon ?? (isIncome ? '💰' : '💸');
 
     final String? note = transaction.note?.trim();
     final bool hasNote = note != null && note.isNotEmpty;
-    final String title =
-        hasNote ? note : (transaction.category?.name ?? 'Transaksi');
+    final String title = hasNote
+        ? note
+        : (transaction.category?.name ?? 'Transaksi');
     final String? subtitle = hasNote ? transaction.category?.name : null;
     final String dateText = DateFormat('dd MMM yyyy').format(transaction.date);
 
@@ -33,8 +30,9 @@ class RecentTransactionItemWidget extends StatelessWidget {
       symbol: 'Rp',
       decimalDigits: 0,
     ).format(transaction.amount);
-    final String amountText =
-        isIncome ? '+$formattedAmount' : '-$formattedAmount';
+    final String amountText = isIncome
+        ? '+$formattedAmount'
+        : '-$formattedAmount';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.s8),

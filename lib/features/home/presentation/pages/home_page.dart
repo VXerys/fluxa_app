@@ -78,15 +78,13 @@ class HomePage extends GetView<HomeController> {
       );
     }
 
-    final List<TransactionEntity> items =
-        recentTransactions.take(5).toList();
+    final List<TransactionEntity> items = recentTransactions.take(5).toList();
 
     return Column(
       children: [
         for (int i = 0; i < items.length; i++) ...[
           RecentTransactionItemWidget(transaction: items[i]),
-          if (i < items.length - 1)
-            const SizedBox(height: AppSpacing.s8),
+          if (i < items.length - 1) const SizedBox(height: AppSpacing.s8),
         ],
       ],
     );
