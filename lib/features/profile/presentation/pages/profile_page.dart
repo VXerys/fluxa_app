@@ -42,21 +42,80 @@ class ProfilePage extends GetView<ProfileController> {
               _buildSectionLabel('Aplikasi'),
               _buildCard([
                 _buildCardItem(
-                  icon: Icons.info_outline,
-                  title: 'Tentang Fluxa',
+                  icon: Icons.upload_file,
+                  title: 'Impor Data',
                   onTap: () {},
                 ),
                 _buildCardItem(
-                  icon: Icons.tag,
-                  title: 'Versi',
+                  icon: Icons.date_range,
+                  title: 'Periode Pencatatan',
+                  onTap: () {},
+                ),
+                _buildCardItem(
+                  icon: Icons.category,
+                  title: 'Kategori',
+                  onTap: () {},
+                ),
+                _buildCardItem(
+                  icon: Icons.account_balance_wallet,
+                  title: 'Pengaturan Dompet',
+                  onTap: () {},
+                ),
+              ]),
+              const SizedBox(height: AppSpacing.s16),
+              _buildSectionLabel('Preferensi'),
+              _buildCard([
+                _buildCardItem(
+                  icon: Icons.dark_mode,
+                  title: 'Tema',
+                  onTap: () {},
+                ),
+                _buildCardItem(
+                  icon: Icons.credit_card,
+                  title: 'Tampilan Kartu',
+                  onTap: () => Get.toNamed(Routes.tampilanKartu),
+                ),
+                _buildCardItem(
+                  icon: Icons.menu,
+                  title: 'Tampilan Menu',
+                  onTap: () => Get.toNamed(Routes.tampilanMenu),
+                ),
+                _buildCardItem(
+                  icon: Icons.swap_vert,
+                  title: 'Urutan Menu',
+                  onTap: () {},
+                ),
+                _buildCardItem(
+                  icon: Icons.bar_chart,
+                  title: 'Urutan Section Statistik',
+                  onTap: () {},
+                ),
+              ]),
+              const SizedBox(height: AppSpacing.s16),
+              _buildSectionLabel('Data & Akun'),
+              _buildCard([
+                _buildCardItem(
+                  icon: Icons.delete_outline,
+                  title: 'Reset Data Lokal',
+                  iconColor: AppColors.error,
                   trailing: Obx(
-                    () => Text(
-                      controller.appVersion,
-                      style: AppTextStyles.roboto14w400.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
+                    () => controller.isResetting
+                        ? const SizedBox(
+                            width: AppSpacing.s16,
+                            height: AppSpacing.s16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.chevron_right, color: AppColors.textSecondary),
                   ),
+                  onTap: () => _showResetConfirmDialog(context),
+                ),
+                _buildCardItem(
+                  icon: Icons.logout,
+                  title: 'Keluar',
+                  iconColor: AppColors.error,
+                  onTap: () => _showLogoutConfirmDialog(context, authController),
                 ),
               ]),
               const SizedBox(height: AppSpacing.s16),

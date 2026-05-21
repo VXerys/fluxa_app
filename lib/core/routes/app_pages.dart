@@ -7,6 +7,8 @@ import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/navigation/presentation/bindings/main_navigation_binding.dart';
 import '../../features/navigation/presentation/pages/main_navigation_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
+import '../../features/profile/presentation/pages/tampilan_kartu_page.dart';
+import '../../features/profile/presentation/pages/tampilan_menu_page.dart';
 import '../../features/transaction/presentation/bindings/transaction_binding.dart';
 import '../../features/transaction/presentation/pages/add_transaction_page.dart';
 import '../../features/transaction/presentation/pages/transaction_list_page.dart';
@@ -54,6 +56,16 @@ class AppPages {
     GetPage(
       name: Routes.editProfile,
       page: () => const EditProfilePage(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.tampilanKartu,
+      page: () => const TampilanKartuPage(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.tampilanMenu,
+      page: () => const TampilanMenuPage(),
       binding: AuthBinding(),
     ),
   ];

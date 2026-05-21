@@ -34,7 +34,7 @@ class AddTransactionPage extends GetView<TransactionController> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          transactionToEdit != null ? 'Edit Transaction' : 'Add Transaction',
+          transactionToEdit != null ? 'Edit Transaksi' : 'Tambah Transaksi',
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -91,7 +91,23 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
         _titleController.text = t.note ?? '';
       }
 
-      _selectedDate = t.date;
+      // Restore date; if time string is available, combine it back
+      DateTime baseDate = t.date;
+      if (t.time != null && t.time!.isNotEmpty) {
+        final timeParts = t.time!.split(':');
+        if (timeParts.length >= 2) {
+          final hour = int.tryParse(timeParts[0]) ?? 0;
+          final minute = int.tryParse(timeParts[1]) ?? 0;
+          baseDate = DateTime(
+            t.date.year,
+            t.date.month,
+            t.date.day,
+            hour,
+            minute,
+          );
+        }
+      }
+      _selectedDate = baseDate;
 
       // We must set the selected type and wait for categories to load,
       // then set the selected category.
@@ -143,7 +159,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                           ),
                           const SizedBox(width: AppSpacing.s12),
                           const Text(
-                            'Transaction Details',
+                            'Detail Transaksi',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -165,7 +181,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                   ),
                   const SizedBox(height: AppSpacing.s24),
                   const Text(
-                    'Title',
+                    'Judul',
                     style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,
@@ -177,7 +193,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                     autofocus: true,
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      hintText: 'e.g., Grocery Shopping',
+                      hintText: 'Contoh: Belanja Bulanan',
                       hintStyle: TextStyle(
                         color: AppColors.textSecondary.withValues(alpha: 0.5),
                         fontSize: 16,
@@ -196,7 +212,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                   ),
                   const SizedBox(height: AppSpacing.s16),
                   const Text(
-                    'Note',
+                    'Catatan',
                     style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,
@@ -207,7 +223,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                     controller: _noteController,
                     maxLines: 3,
                     decoration: InputDecoration(
-                      hintText: 'Add a note...',
+                      hintText: 'Tambahkan catatan...',
                       hintStyle: TextStyle(
                         color: AppColors.textSecondary.withValues(alpha: 0.5),
                         fontSize: 16,
@@ -239,7 +255,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                       ),
                     ),
                     child: const Text(
-                      'Confirm',
+                      'Konfirmasi',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -296,6 +312,11 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
     final title = _titleController.text.trim();
     final finalNote = [title, note].where((e) => e.isNotEmpty).join(' - ');
 
+    // Extract time string HH:mm:ss from the selected date
+    final timeStr =
+        '${_selectedDate.hour.toString().padLeft(2, '0')}:'
+        '${_selectedDate.minute.toString().padLeft(2, '0')}:00';
+
     bool success;
     if (widget.transactionToEdit != null) {
       success = await widget.controller.updateTransaction(
@@ -305,6 +326,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
         categoryId: widget.controller.resolvedSelectedCategoryId,
         note: finalNote.isEmpty ? null : finalNote,
         date: _selectedDate,
+        time: timeStr,
       );
     } else {
       success = await widget.controller.addTransaction(
@@ -313,6 +335,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
         categoryId: widget.controller.resolvedSelectedCategoryId,
         note: finalNote.isEmpty ? null : finalNote,
         date: _selectedDate,
+        time: timeStr,
       );
     }
 
@@ -352,7 +375,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                 _buildCategories(),
                 const SizedBox(height: AppSpacing.s24),
                 const Text(
-                  'Amount',
+                  'Jumlah',
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12,
@@ -383,7 +406,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
+                border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
@@ -432,6 +455,8 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
 
       final parentCategories = widget.controller.parentCategories;
       final childCategories = widget.controller.childCategories;
+      final selectedParentId = widget.controller.selectedParentCategory?.id;
+      final selectedChildId = widget.controller.selectedChildCategory?.id;
 
       if (parentCategories.isEmpty) {
         return Padding(
@@ -456,8 +481,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
               itemCount: parentCategories.length,
               itemBuilder: (context, index) {
                 final category = parentCategories[index];
-                final isSelected =
-                    widget.controller.selectedParentCategory?.id == category.id;
+                final isSelected = selectedParentId == category.id;
                 return _ParentCategoryItem(
                   category: category,
                   isSelected: isSelected,
@@ -478,16 +502,26 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                   final category = childCategories[index];
                   final parentCategory =
                       widget.controller.selectedParentCategory;
-                  final isSelected =
-                      widget.controller.selectedChildCategory?.id ==
-                      category.id;
+                  final isSelected = selectedChildId == category.id;
                   return _ChildCategoryChip(
                     key: ValueKey(category.id),
                     category: category,
                     parentCategory: parentCategory,
                     isSelected: isSelected,
-                    onTap: () =>
-                        widget.controller.selectChildCategory(category),
+                    onTap: () {
+                      final wasSelected = isSelected;
+                      widget.controller.selectChildCategory(category);
+                      final isSelectedAfter =
+                          widget.controller.selectedChildCategory?.id ==
+                          category.id;
+                      debugPrint(
+                        'Child chip tap: name=${category.name}, '
+                        'childColor=${category.color}, '
+                        'parentColor=${parentCategory?.color}, '
+                        'isSelectedBefore=$wasSelected, '
+                        'isSelectedAfter=$isSelectedAfter',
+                      );
+                    },
                   );
                 },
               ),
@@ -511,7 +545,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Text(
@@ -566,7 +600,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                     child: Text(
                       _titleController.text.isNotEmpty
                           ? _titleController.text
-                          : 'Title',
+                          : 'Judul',
                       style: TextStyle(
                         color: _titleController.text.isNotEmpty
                             ? AppColors.textPrimary
@@ -608,7 +642,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                     child: Text(
                       _noteController.text.isNotEmpty
                           ? _noteController.text
-                          : 'Add a note...',
+                          : 'Tambah catatan...',
                       style: TextStyle(
                         color: _noteController.text.isNotEmpty
                             ? AppColors.textPrimary
@@ -679,7 +713,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      DateFormat('MMM dd').format(_selectedDate),
+                      DateFormat('MMM dd', 'id_ID').format(_selectedDate),
                       style: const TextStyle(
                         fontSize: 11,
                         color: AppColors.textSecondary,
@@ -757,7 +791,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
             if (bgColor == AppColors.numpadButtonBg ||
                 bgColor == AppColors.numpadActionBg)
               BoxShadow(
-                color: Colors.black.withOpacity(0.02),
+                color: Colors.black.withValues(alpha: 0.02),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -1037,9 +1071,9 @@ class _CustomDateTimePickerSheetState extends State<CustomDateTimePickerSheet> {
                 GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
                   child: const Text(
-                    'Cancel',
+                    'Batal',
                     style: TextStyle(
-                      color: Color(0xFF1B496B), // Match image
+                      color: Color(0xFF1B496B),
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
                     ),
@@ -1066,7 +1100,7 @@ class _CustomDateTimePickerSheetState extends State<CustomDateTimePickerSheet> {
                     Navigator.of(context).pop();
                   },
                   child: const Text(
-                    'Done',
+                    'Selesai',
                     style: TextStyle(
                       color: Color(0xFF1B496B),
                       fontSize: 16,
@@ -1098,9 +1132,9 @@ class _CustomDateTimePickerSheetState extends State<CustomDateTimePickerSheet> {
                       final isToday = _isSameDay(date, today);
                       String text;
                       if (isToday) {
-                        text = 'Today';
+                        text = 'Hari Ini';
                       } else {
-                        text = DateFormat('EEE MMM dd').format(date);
+                        text = DateFormat('EEE MMM dd', 'id_ID').format(date);
                       }
                       return Center(
                         child: Text(
