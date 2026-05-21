@@ -8,6 +8,7 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../domain/entities/home_summary_entity.dart';
 import '../../../../features/transaction/presentation/pages/transaction_type_detail_page.dart';
 import '../../../../features/transaction/presentation/bindings/transaction_binding.dart';
+import '../../../../features/profile/presentation/controllers/profile_controller.dart';
 
 class BalanceCardWidget extends StatefulWidget {
   final HomeSummaryEntity? summary;
@@ -42,96 +43,103 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
         ? '—'
         : _formatAmount(widget.summary!.totalExpense);
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.s24),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          colors: [AppColors.cardGradient1Start, AppColors.cardGradient1End],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.cardGradient1Start.withOpacity(0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+    final profileController = Get.find<ProfileController>();
+
+    return Obx(() {
+      final selectedThemeIndex = profileController.selectedThemeIndex.value;
+      final theme = ProfileController.cardThemes[selectedThemeIndex];
+      final colors = theme['colors'] as List<Color>;
+      return Container(
+        padding: const EdgeInsets.all(AppSpacing.s24),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: LinearGradient(
+            colors: colors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Total Saldo (IDR)',
-                style: AppTextStyles.roboto14w400.copyWith(
-                  color: AppColors.surface.withOpacity(0.9),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s8),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _isObscured = !_isObscured;
-                  });
-                },
-                child: Icon(
-                  _isObscured ? Icons.visibility_off : Icons.visibility,
-                  color: AppColors.surface.withOpacity(0.9),
-                  size: 18,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s8),
-          Text(
-            balanceText,
-            style: AppTextStyles.lora36w400.copyWith(
-              color: AppColors.surface,
-              fontWeight: FontWeight.bold,
-              fontSize: 32,
+          boxShadow: [
+            BoxShadow(
+              color: colors[0].withOpacity(0.3),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
             ),
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          Row(
-            children: [
-              Expanded(
-                child: _SummaryBox(
-                  label: 'Pemasukan',
-                  amountText: incomeText,
-                  icon: Icons.arrow_downward,
-                  onTap: () {
-                    Get.to(
-                      () => const TransactionTypeDetailPage(isIncome: true),
-                      binding: TransactionBinding(),
-                      transition: Transition.rightToLeft,
-                    );
-                  },
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Total Saldo (IDR)',
+                  style: AppTextStyles.roboto14w400.copyWith(
+                    color: AppColors.surface.withOpacity(0.9),
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.s16),
-              Expanded(
-                child: _SummaryBox(
-                  label: 'Pengeluaran',
-                  amountText: expenseText,
-                  icon: Icons.arrow_upward,
+                const SizedBox(width: AppSpacing.s8),
+                GestureDetector(
                   onTap: () {
-                    Get.to(
-                      () => const TransactionTypeDetailPage(isIncome: false),
-                      binding: TransactionBinding(),
-                      transition: Transition.rightToLeft,
-                    );
+                    setState(() {
+                      _isObscured = !_isObscured;
+                    });
                   },
+                  child: Icon(
+                    _isObscured ? Icons.visibility_off : Icons.visibility,
+                    color: AppColors.surface.withOpacity(0.9),
+                    size: 18,
+                  ),
                 ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.s8),
+            Text(
+              balanceText,
+              style: AppTextStyles.lora36w400.copyWith(
+                color: AppColors.surface,
+                fontWeight: FontWeight.bold,
+                fontSize: 32,
               ),
-            ],
-          ),
-        ],
-      ),
-    );
+            ),
+            const SizedBox(height: AppSpacing.s12),
+            Row(
+              children: [
+                Expanded(
+                  child: _SummaryBox(
+                    label: 'Pemasukan',
+                    amountText: incomeText,
+                    icon: Icons.arrow_downward,
+                    onTap: () {
+                      Get.to(
+                        () => const TransactionTypeDetailPage(isIncome: true),
+                        binding: TransactionBinding(),
+                        transition: Transition.rightToLeft,
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.s16),
+                Expanded(
+                  child: _SummaryBox(
+                    label: 'Pengeluaran',
+                    amountText: expenseText,
+                    icon: Icons.arrow_upward,
+                    onTap: () {
+                      Get.to(
+                        () => const TransactionTypeDetailPage(isIncome: false),
+                        binding: TransactionBinding(),
+                        transition: Transition.rightToLeft,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
 

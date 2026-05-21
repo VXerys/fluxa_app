@@ -341,9 +341,6 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
 
     if (success) {
       Get.back();
-      if (widget.transactionToEdit != null) {
-        Get.back(); // close detail page as well to avoid showing old data
-      }
     }
   }
 

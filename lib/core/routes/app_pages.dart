@@ -9,6 +9,7 @@ import '../../features/navigation/presentation/pages/main_navigation_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/tampilan_kartu_page.dart';
 import '../../features/profile/presentation/pages/tampilan_menu_page.dart';
+import '../../features/profile/presentation/pages/profile_detail_placeholder_page.dart';
 import '../../features/transaction/presentation/bindings/transaction_binding.dart';
 import '../../features/transaction/presentation/pages/add_transaction_page.dart';
 import '../../features/transaction/presentation/pages/transaction_list_page.dart';
@@ -66,6 +67,41 @@ class AppPages {
     GetPage(
       name: Routes.tampilanMenu,
       page: () => const TampilanMenuPage(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.imporData,
+      page: () => const ImporDataPage(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.periodePencatatan,
+      page: () => const PeriodePencatatanPage(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.kategori,
+      page: () => const KategoriPage(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.pengaturanDompet,
+      page: () => const PengaturanDompetPage(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.tema,
+      page: () => const TemaPage(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.urutanMenu,
+      page: () => const UrutanMenuPage(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.urutanStatistik,
+      page: () => const UrutanSectionStatistikPage(),
       binding: AuthBinding(),
     ),
   ];

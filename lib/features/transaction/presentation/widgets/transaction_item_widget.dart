@@ -31,13 +31,17 @@ class TransactionItemWidget extends StatelessWidget {
     );
     final IconData categoryIcon =
         CategoryIconMapper.fromKey(transaction.category?.icon);
+
     final String dateText = DateFormat(
       'dd MMM yyyy',
       'id_ID',
     ).format(transaction.date);
-    final String timeText =
-        transaction.time ??
-        DateFormat('HH:mm', 'id_ID').format(transaction.date);
+
+    // Trim HH:mm:ss → HH:mm; fall back to formatting date if no time stored
+    final String rawTime = transaction.time ?? '';
+    final String timeText = rawTime.isNotEmpty
+        ? (rawTime.length >= 5 ? rawTime.substring(0, 5) : rawTime)
+        : DateFormat('HH:mm', 'id_ID').format(transaction.date);
     final String dateTimeText = '$timeText $dateText';
 
     final String formattedAmount = NumberFormat.currency(
@@ -46,7 +50,7 @@ class TransactionItemWidget extends StatelessWidget {
       decimalDigits: 0,
     ).format(transaction.amount);
 
-    // Format to "k" for thousands if it ends with 000
+    // Format to "k" for thousands if it ends with .000
     String shortAmount = formattedAmount;
     if (shortAmount.endsWith('.000')) {
       shortAmount = '${shortAmount.substring(0, shortAmount.length - 4)}k';
@@ -69,7 +73,7 @@ class TransactionItemWidget extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: categoryColor.withOpacity(0.16),
+              color: categoryColor.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(

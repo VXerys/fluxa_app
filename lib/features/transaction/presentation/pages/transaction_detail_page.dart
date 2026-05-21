@@ -115,8 +115,15 @@ class TransactionDetailPage extends GetView<TransactionController> {
                     ),
                     _buildDetailRow(
                       'Waktu',
-                      transaction.time ??
-                          DateFormat('HH:mm', 'id_ID').format(transaction.date),
+                      () {
+                        final t = transaction.time ?? '';
+                        if (t.isNotEmpty) {
+                          return t.length >= 5 ? t.substring(0, 5) : t;
+                        }
+                        return DateFormat('HH:mm', 'id_ID').format(
+                          transaction.date,
+                        );
+                      }(),
                     ),
                     _buildDetailRow('Catatan', noteText, isLast: true),
                   ],
@@ -135,7 +142,7 @@ class TransactionDetailPage extends GetView<TransactionController> {
       width: 80,
       height: 80,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
       child: Center(
@@ -177,7 +184,7 @@ class TransactionDetailPage extends GetView<TransactionController> {
           ),
         ),
         if (!isLast)
-          Divider(color: AppColors.neutral.withOpacity(0.1), height: 1),
+          Divider(color: AppColors.neutral.withValues(alpha: 0.1), height: 1),
       ],
     );
   }
@@ -188,7 +195,7 @@ class TransactionDetailPage extends GetView<TransactionController> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(
-          top: BorderSide(color: AppColors.neutral.withOpacity(0.1)),
+          top: BorderSide(color: AppColors.neutral.withValues(alpha: 0.1)),
         ),
       ),
       child: Row(
@@ -210,7 +217,7 @@ class TransactionDetailPage extends GetView<TransactionController> {
           vertical: AppSpacing.s16,
         ),
         decoration: BoxDecoration(
-          color: AppColors.error.withOpacity(0.1),
+          color: AppColors.error.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Icon(Icons.delete_outline, color: AppColors.error),
@@ -221,11 +228,13 @@ class TransactionDetailPage extends GetView<TransactionController> {
   Widget _buildEditButton() {
     return GestureDetector(
       onTap: () {
-        Get.bottomSheet(
-          AddTransactionPage(transactionToEdit: transaction),
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-        );
+        Get.to(
+          () => AddTransactionPage(transactionToEdit: transaction),
+          transition: Transition.rightToLeft,
+        )?.then((_) {
+          // After editing, pop the detail page so home data is fresh
+          Get.back();
+        });
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.s16),
