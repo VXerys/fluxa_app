@@ -7,18 +7,21 @@ import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/sign_in_usecase.dart';
 import '../../domain/usecases/sign_out_usecase.dart';
 import '../../domain/usecases/sign_up_usecase.dart';
+import '../../domain/usecases/update_user_usecase.dart';
 
 class AuthController extends GetxController {
   final SignUpUseCase signUpUseCase;
   final SignInUseCase signInUseCase;
   final SignOutUseCase signOutUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
+  final UpdateUserUseCase updateUserUseCase;
 
   AuthController({
     required this.signUpUseCase,
     required this.signInUseCase,
     required this.signOutUseCase,
     required this.getCurrentUserUseCase,
+    required this.updateUserUseCase,
   });
 
   final RxBool _isLoading = false.obs;
@@ -153,6 +156,35 @@ class AuthController extends GetxController {
           _errorMessage.value = '';
           _currentUser.value = null;
           Get.offAllNamed(Routes.login);
+        },
+      );
+    } finally {
+      _isSubmitting.value = false;
+    }
+  }
+
+  Future<void> updateProfile({required String displayName}) async {
+    if (_isSubmitting.value) return;
+
+    final normalizedName = displayName.trim();
+    if (normalizedName.isEmpty) {
+      _setError('Display name is required');
+      return;
+    }
+
+    _isSubmitting.value = true;
+    try {
+      final result = await updateUserUseCase(
+        UpdateUserParams(displayName: normalizedName),
+      );
+      result.fold(
+        (failure) {
+          _setError(failure.message);
+        },
+        (user) {
+          _errorMessage.value = '';
+          _currentUser.value = user;
+          Get.snackbar('Success', 'Profile updated successfully');
         },
       );
     } finally {

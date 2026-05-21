@@ -36,7 +36,9 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
   }
 
   @override
-  Future<List<TransactionModel>> getTransactions(GetTransactionsParams params) async {
+  Future<List<TransactionModel>> getTransactions(
+    GetTransactionsParams params,
+  ) async {
     final userId = _requireUserId();
     try {
       var filterQuery = _client
@@ -45,9 +47,8 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
           .eq('user_id', userId)
           .eq('is_deleted', false);
 
-      if (params.type != null && params.type != 'All') {
-        final type = params.type == 'Income' ? 'income' : 'expense';
-        filterQuery = filterQuery.eq('type', type);
+      if (params.type != null) {
+        filterQuery = filterQuery.eq('type', params.type!);
       }
 
       if (params.categoryId != null) {
@@ -55,11 +56,11 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
       }
 
       if (params.startDate != null) {
-        filterQuery = filterQuery.gte('date', params.startDate!.toIso8601String());
+        filterQuery = filterQuery.gte('date', _formatDate(params.startDate!));
       }
 
       if (params.endDate != null) {
-        filterQuery = filterQuery.lte('date', params.endDate!.toIso8601String());
+        filterQuery = filterQuery.lt('date', _formatDate(params.endDate!));
       }
 
       if (params.minAmount != null) {
@@ -81,7 +82,7 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
         // default dateDesc
         sortedQuery = filterQuery.order('date', ascending: false);
       }
-      
+
       // Always add created_at as secondary sort for stable sorting
       final response = await sortedQuery.order('created_at', ascending: false);
 
@@ -138,11 +139,11 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
   Future<TransactionSummaryModel> getTransactionSummary() async {
     final userId = _requireUserId();
     try {
-      final response = await _client
-          .from('transactions')
-          .select('type, amount')
-          .eq('user_id', userId)
-          .eq('is_deleted', false);
+       final response = await _client
+           .from('transactions')
+           .select('type, amount')
+           .eq('user_id', userId)
+           .eq('is_deleted', false);
 
       final list = response as List;
       double totalIncome = 0;
@@ -180,5 +181,12 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
     if (value is num) return value.toDouble();
     if (value is String) return double.tryParse(value) ?? 0;
     return 0;
+  }
+
+  String _formatDate(DateTime date) {
+    final y = date.year.toString().padLeft(4, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
   }
 }

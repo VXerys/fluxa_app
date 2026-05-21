@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/utils/category_color_parser.dart';
+import '../../../../core/utils/category_icon_mapper.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../controllers/transaction_controller.dart';
 import 'add_transaction_page.dart';
@@ -18,17 +20,27 @@ class TransactionDetailPage extends GetView<TransactionController> {
   Widget build(BuildContext context) {
     final bool isIncome = transaction.type == 'income';
     final Color accentColor = isIncome ? AppColors.success : AppColors.error;
+    final Color categoryColor = CategoryColorParser.parse(
+      transaction.category?.color,
+      fallback: accentColor,
+    );
+    final IconData categoryIcon =
+        CategoryIconMapper.fromKey(transaction.category?.icon);
     final String formattedAmount = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp',
       decimalDigits: 2,
     ).format(transaction.amount);
-    
-    final String amountText = isIncome ? '+$formattedAmount' : '-$formattedAmount';
 
-    final String title = transaction.note?.split(' - ').first ?? (transaction.category?.name ?? 'Transaksi');
-    final String noteText = transaction.note?.contains(' - ') == true 
-        ? transaction.note!.split(' - ').sublist(1).join(' - ') 
+    final String amountText = isIncome
+        ? '+$formattedAmount'
+        : '-$formattedAmount';
+
+    final String title =
+        transaction.note?.split(' - ').first ??
+        (transaction.category?.name ?? 'Transaksi');
+    final String noteText = transaction.note?.contains(' - ') == true
+        ? transaction.note!.split(' - ').sublist(1).join(' - ')
         : '-';
 
     return Scaffold(
@@ -38,39 +50,74 @@ class TransactionDetailPage extends GetView<TransactionController> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.textPrimary,
+            size: 20,
+          ),
           onPressed: () => Get.back(),
         ),
-        title: Text('Detail Transaksi', style: AppTextStyles.roboto16w600.copyWith(color: AppColors.textPrimary)),
+        title: Text(
+          'Detail Transaksi',
+          style: AppTextStyles.roboto16w600.copyWith(
+            color: AppColors.textPrimary,
+          ),
+        ),
       ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24, vertical: AppSpacing.s16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s24,
+                  vertical: AppSpacing.s16,
+                ),
                 child: Column(
                   children: [
                     const SizedBox(height: AppSpacing.s16),
-                    _buildIcon(isIncome, accentColor),
+                    _buildIcon(categoryIcon, categoryColor),
                     const SizedBox(height: AppSpacing.s24),
                     Text(
                       amountText,
-                      style: AppTextStyles.roboto32w600.copyWith(color: accentColor, fontWeight: FontWeight.bold),
+                      style: AppTextStyles.roboto32w600.copyWith(
+                        color: accentColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.s4),
-                    Text('IDR', style: AppTextStyles.roboto14w400.copyWith(color: AppColors.textSecondary)),
+                    Text(
+                      'IDR',
+                      style: AppTextStyles.roboto14w400.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                     const SizedBox(height: AppSpacing.s8),
                     Text(
                       isIncome ? 'Pemasukan' : 'Pengeluaran',
-                      style: AppTextStyles.roboto14w400.copyWith(color: AppColors.textSecondary),
+                      style: AppTextStyles.roboto14w400.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.s32),
                     _buildDetailRow('Judul', title),
-                    _buildDetailRow('Kategori', transaction.category?.name ?? '-'),
+                    _buildDetailRow(
+                      'Kategori',
+                      transaction.category?.name ?? '-',
+                    ),
                     _buildDetailRow('Dompet', 'Tunai'),
-                    _buildDetailRow('Tanggal', DateFormat('dd MMM yyyy', 'id_ID').format(transaction.date)),
-                    _buildDetailRow('Waktu', transaction.time ?? DateFormat('HH:mm', 'id_ID').format(transaction.date)),
+                    _buildDetailRow(
+                      'Tanggal',
+                      DateFormat(
+                        'dd MMM yyyy',
+                        'id_ID',
+                      ).format(transaction.date),
+                    ),
+                    _buildDetailRow(
+                      'Waktu',
+                      transaction.time ??
+                          DateFormat('HH:mm', 'id_ID').format(transaction.date),
+                    ),
                     _buildDetailRow('Catatan', noteText, isLast: true),
                   ],
                 ),
@@ -83,7 +130,7 @@ class TransactionDetailPage extends GetView<TransactionController> {
     );
   }
 
-  Widget _buildIcon(bool isIncome, Color color) {
+  Widget _buildIcon(IconData icon, Color color) {
     return Container(
       width: 80,
       height: 80,
@@ -93,7 +140,7 @@ class TransactionDetailPage extends GetView<TransactionController> {
       ),
       child: Center(
         child: Icon(
-          isIncome ? Icons.arrow_downward : Icons.arrow_upward,
+          icon,
           color: color,
           size: 40,
         ),
@@ -112,13 +159,18 @@ class TransactionDetailPage extends GetView<TransactionController> {
             children: [
               Text(
                 label,
-                style: AppTextStyles.roboto14w400.copyWith(color: AppColors.textSecondary),
+                style: AppTextStyles.roboto14w400.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               Expanded(
                 child: Text(
                   value,
                   textAlign: TextAlign.right,
-                  style: AppTextStyles.roboto14w500.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                  style: AppTextStyles.roboto14w500.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -135,7 +187,9 @@ class TransactionDetailPage extends GetView<TransactionController> {
       padding: const EdgeInsets.all(AppSpacing.s24),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.neutral.withOpacity(0.1))),
+        border: Border(
+          top: BorderSide(color: AppColors.neutral.withOpacity(0.1)),
+        ),
       ),
       child: Row(
         children: [
@@ -151,7 +205,10 @@ class TransactionDetailPage extends GetView<TransactionController> {
     return GestureDetector(
       onTap: () => _confirmDelete(context),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s32, vertical: AppSpacing.s16),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s32,
+          vertical: AppSpacing.s16,
+        ),
         decoration: BoxDecoration(
           color: AppColors.error.withOpacity(0.1),
           borderRadius: BorderRadius.circular(16),
@@ -183,7 +240,9 @@ class TransactionDetailPage extends GetView<TransactionController> {
             const SizedBox(width: AppSpacing.s8),
             Text(
               'Edit',
-              style: AppTextStyles.roboto16w600.copyWith(color: AppColors.surface),
+              style: AppTextStyles.roboto16w600.copyWith(
+                color: AppColors.surface,
+              ),
             ),
           ],
         ),
@@ -204,7 +263,9 @@ class TransactionDetailPage extends GetView<TransactionController> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textSecondary,
+              ),
               child: Text('Batal', style: AppTextStyles.roboto14w400),
             ),
             TextButton(

@@ -13,8 +13,13 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
   @override
   Future<Either<Failure, List<CategoryEntity>>> getSystemCategories() async {
+    return getAllSystemCategories();
+  }
+
+  @override
+  Future<Either<Failure, List<CategoryEntity>>> getAllSystemCategories() async {
     try {
-      final models = await remoteDataSource.getSystemCategories();
+      final models = await remoteDataSource.getAllSystemCategories();
       return Right(models.map((model) => model.toEntity()).toList());
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
@@ -35,6 +40,66 @@ class CategoryRepositoryImpl implements CategoryRepository {
   ) async {
     try {
       final models = await remoteDataSource.getCategoriesByType(type);
+      return Right(models.map((model) => model.toEntity()).toList());
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<CategoryEntity>>> getParentCategoriesByType(
+    String type,
+  ) async {
+    try {
+      final models = await remoteDataSource.getParentCategoriesByType(type);
+      return Right(models.map((model) => model.toEntity()).toList());
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<CategoryEntity>>> getChildCategories(
+    String parentId,
+  ) async {
+    try {
+      final models = await remoteDataSource.getChildCategories(parentId);
+      return Right(models.map((model) => model.toEntity()).toList());
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<CategoryEntity>>> getCategoryTreeByType(
+    String type,
+  ) async {
+    try {
+      final models = await remoteDataSource.getCategoryTreeByType(type);
       return Right(models.map((model) => model.toEntity()).toList());
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));

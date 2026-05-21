@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../domain/entities/home_summary_entity.dart';
+import '../../../../features/transaction/presentation/pages/transaction_type_detail_page.dart';
+import '../../../../features/transaction/presentation/bindings/transaction_binding.dart';
 
 class BalanceCardWidget extends StatefulWidget {
   final HomeSummaryEntity? summary;
@@ -100,6 +103,13 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
                   label: 'Pemasukan',
                   amountText: incomeText,
                   icon: Icons.arrow_downward,
+                  onTap: () {
+                    Get.to(
+                      () => const TransactionTypeDetailPage(isIncome: true),
+                      binding: TransactionBinding(),
+                      transition: Transition.rightToLeft,
+                    );
+                  },
                 ),
               ),
               const SizedBox(width: AppSpacing.s16),
@@ -108,6 +118,13 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
                   label: 'Pengeluaran',
                   amountText: expenseText,
                   icon: Icons.arrow_upward,
+                  onTap: () {
+                    Get.to(
+                      () => const TransactionTypeDetailPage(isIncome: false),
+                      binding: TransactionBinding(),
+                      transition: Transition.rightToLeft,
+                    );
+                  },
                 ),
               ),
             ],
@@ -122,61 +139,73 @@ class _SummaryBox extends StatelessWidget {
   final String label;
   final String amountText;
   final IconData icon;
+  final VoidCallback? onTap;
 
   const _SummaryBox({
     required this.label,
     required this.amountText,
     required this.icon,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s16,
-        vertical: AppSpacing.s12,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surface.withOpacity(0.1),
-        border: Border.all(color: AppColors.surface.withOpacity(0.2), width: 1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: AppColors.surface.withOpacity(0.2),
-                  shape: BoxShape.circle,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s16,
+          vertical: AppSpacing.s12,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.surface.withOpacity(0.1),
+          border: Border.all(color: AppColors.surface.withOpacity(0.2), width: 1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: AppColors.surface, size: 14),
                 ),
-                child: Icon(icon, color: AppColors.surface, size: 14),
-              ),
-              const SizedBox(width: AppSpacing.s8),
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.roboto12w400.copyWith(
-                    color: AppColors.surface.withOpacity(0.9),
+                const SizedBox(width: AppSpacing.s8),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      label,
+                      style: AppTextStyles.roboto12w400.copyWith(
+                        color: AppColors.surface.withOpacity(0.9),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          Text(
-            amountText,
-            style: AppTextStyles.roboto14w400.copyWith(
-              color: AppColors.surface,
-              fontWeight: FontWeight.w600,
-              fontSize: 15,
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: AppSpacing.s12),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                amountText,
+                style: AppTextStyles.roboto14w400.copyWith(
+                  color: AppColors.surface,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

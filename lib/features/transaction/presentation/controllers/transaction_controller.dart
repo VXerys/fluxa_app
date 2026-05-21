@@ -7,7 +7,9 @@ import '../../domain/entities/transaction_summary_entity.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../domain/usecases/add_transaction_usecase.dart';
 import '../../domain/usecases/delete_transaction_usecase.dart';
+import '../../domain/usecases/get_all_system_categories_usecase.dart';
 import '../../domain/usecases/get_categories_usecase.dart';
+import '../../domain/usecases/get_category_tree_usecase.dart';
 import '../../domain/usecases/get_transaction_summary_usecase.dart';
 import '../../domain/usecases/get_transactions_usecase.dart';
 import '../../domain/usecases/update_transaction_usecase.dart';
@@ -20,6 +22,8 @@ class TransactionController extends GetxController {
   final UpdateTransactionUseCase updateTransactionUseCase;
   final GetTransactionSummaryUseCase getTransactionSummaryUseCase;
   final GetCategoriesUseCase getCategoriesUseCase;
+  final GetCategoryTreeUseCase getCategoryTreeUseCase;
+  final GetAllSystemCategoriesUseCase getAllSystemCategoriesUseCase;
 
   TransactionController({
     required this.addTransactionUseCase,
@@ -28,6 +32,8 @@ class TransactionController extends GetxController {
     required this.updateTransactionUseCase,
     required this.getTransactionSummaryUseCase,
     required this.getCategoriesUseCase,
+    required this.getCategoryTreeUseCase,
+    required this.getAllSystemCategoriesUseCase,
   });
 
   final RxBool _isLoading = false.obs;
@@ -36,11 +42,30 @@ class TransactionController extends GetxController {
   final RxBool _isSubmitting = false.obs;
   bool get isSubmitting => _isSubmitting.value;
 
+  final RxBool _isCategoryLoading = false.obs;
+  bool get isCategoryLoading => _isCategoryLoading.value;
+
   final RxList<TransactionEntity> _transactions = <TransactionEntity>[].obs;
   List<TransactionEntity> get transactions => _transactions;
 
   final RxList<CategoryEntity> _categories = <CategoryEntity>[].obs;
   List<CategoryEntity> get categories => _categories;
+
+  final RxList<CategoryEntity> _parentCategories = <CategoryEntity>[].obs;
+  List<CategoryEntity> get parentCategories => _parentCategories;
+
+  final RxList<CategoryEntity> _childCategories = <CategoryEntity>[].obs;
+  List<CategoryEntity> get childCategories => _childCategories;
+
+  final Rx<CategoryEntity?> _selectedParentCategory = Rx<CategoryEntity?>(null);
+  CategoryEntity? get selectedParentCategory => _selectedParentCategory.value;
+
+  final Rx<CategoryEntity?> _selectedChildCategory = Rx<CategoryEntity?>(null);
+  CategoryEntity? get selectedChildCategory => _selectedChildCategory.value;
+
+  final RxList<CategoryEntity> _filterCategories = <CategoryEntity>[].obs;
+  List<CategoryEntity> get filterCategories => _filterCategories;
+  List<CategoryEntity> get filterCategoriesList => _filterCategories;
 
   final Rx<TransactionSummaryEntity?> _summary = Rx<TransactionSummaryEntity?>(
     null,
@@ -50,8 +75,13 @@ class TransactionController extends GetxController {
   final RxString _selectedType = 'expense'.obs;
   String get selectedType => _selectedType.value;
 
-  final Rx<CategoryEntity?> _selectedCategory = Rx<CategoryEntity?>(null);
-  CategoryEntity? get selectedCategory => _selectedCategory.value;
+  CategoryEntity? get selectedCategory =>
+      _selectedChildCategory.value ?? _selectedParentCategory.value;
+
+  String? get resolvedSelectedCategoryId {
+    return _selectedChildCategory.value?.id ??
+        _selectedParentCategory.value?.id;
+  }
 
   final RxString _searchQuery = ''.obs;
   String get searchQuery => _searchQuery.value;
@@ -63,13 +93,13 @@ class TransactionController extends GetxController {
   final Rx<CategoryEntity?> _filterCategory = Rx<CategoryEntity?>(null);
   CategoryEntity? get filterCategory => _filterCategory.value;
 
-  final RxString _filterDateRange = 'Semua Waktu'.obs; 
+  final RxString _filterDateRange = 'Semua Waktu'.obs;
   String get filterDateRange => _filterDateRange.value;
 
-  final RxString _filterSortBy = 'Tanggal (Terbaru)'.obs; 
+  final RxString _filterSortBy = 'Tanggal (Terbaru)'.obs;
   String get filterSortBy => _filterSortBy.value;
 
-  final RxString _filterNominal = 'Rentang Nominal'.obs; 
+  final RxString _filterNominal = 'Rentang Nominal'.obs;
   String get filterNominal => _filterNominal.value;
 
   final RxString _errorMessage = ''.obs;
@@ -79,11 +109,52 @@ class TransactionController extends GetxController {
     _searchQuery.value = query;
   }
 
-  void setFilterType(String val) { _filterType.value = val; loadTransactions(); }
-  void setFilterCategory(CategoryEntity? val) { _filterCategory.value = val; loadTransactions(); }
-  void setFilterDateRange(String val) { _filterDateRange.value = val; loadTransactions(); }
-  void setFilterSortBy(String val) { _filterSortBy.value = val; loadTransactions(); }
-  void setFilterNominal(String val) { _filterNominal.value = val; loadTransactions(); }
+  List<CategoryEntity> get visibleFilterCategories {
+    final selectedFilterType = switch (_filterType.value) {
+      'Pemasukan' => 'income',
+      'Pengeluaran' => 'expense',
+      _ => null,
+    };
+
+    if (selectedFilterType == null) return _filterCategories;
+    return _filterCategories
+        .where((category) => category.type == selectedFilterType)
+        .toList();
+  }
+
+  void setFilterType(String val) {
+    _filterType.value = val;
+    final selectedFilterType = switch (val) {
+      'Pemasukan' => 'income',
+      'Pengeluaran' => 'expense',
+      _ => null,
+    };
+    if (selectedFilterType != null &&
+        _filterCategory.value?.type != selectedFilterType) {
+      _filterCategory.value = null;
+    }
+    loadTransactions();
+  }
+
+  void setFilterCategory(CategoryEntity? val) {
+    _filterCategory.value = val;
+    loadTransactions();
+  }
+
+  void setFilterDateRange(String val) {
+    _filterDateRange.value = val;
+    loadTransactions();
+  }
+
+  void setFilterSortBy(String val) {
+    _filterSortBy.value = val;
+    loadTransactions();
+  }
+
+  void setFilterNominal(String val) {
+    _filterNominal.value = val;
+    loadTransactions();
+  }
 
   @override
   void onInit() {
@@ -95,7 +166,8 @@ class TransactionController extends GetxController {
     _isLoading.value = true;
     try {
       await Future.wait([
-        loadCategories(type: _selectedType.value),
+        loadCategoryTree(type: _selectedType.value),
+        loadFilterCategories(),
         loadTransactions(),
         loadSummary(),
       ]);
@@ -104,21 +176,56 @@ class TransactionController extends GetxController {
     }
   }
 
-  Future<void> loadCategories({String? type}) async {
-    final result = await getCategoriesUseCase(
-      GetCategoriesParams(type: type ?? _selectedType.value),
-    );
+  Future<void> loadFilterCategories() async {
+    final result = await getAllSystemCategoriesUseCase(const NoParams());
 
     result.fold(
       (failure) {
         _errorMessage.value = failure.message;
-        _categories.clear();
-        Get.snackbar('Error', failure.message);
+        _filterCategories.clear();
       },
       (categories) {
-        _categories.value = categories;
+        _filterCategories.value = categories;
       },
     );
+  }
+
+  Future<void> loadCategories({String? type}) async {
+    await loadCategoryTree(type: type ?? _selectedType.value);
+  }
+
+  Future<void> loadCategoryTree({required String type}) async {
+    _isCategoryLoading.value = true;
+    try {
+      final result = await getCategoryTreeUseCase(
+        GetCategoryTreeParams(type: type),
+      );
+
+      result.fold(
+        (failure) {
+          _errorMessage.value = failure.message;
+          _categories.clear();
+          _parentCategories.clear();
+          _childCategories.clear();
+          _selectedParentCategory.value = null;
+          _selectedChildCategory.value = null;
+          Get.snackbar('Error', failure.message);
+        },
+        (categories) {
+          _categories.value = categories;
+          _parentCategories.value = categories;
+          if (categories.isEmpty) {
+            _childCategories.clear();
+            _selectedParentCategory.value = null;
+            _selectedChildCategory.value = null;
+            return;
+          }
+          selectParentCategory(categories.first);
+        },
+      );
+    } finally {
+      _isCategoryLoading.value = false;
+    }
   }
 
   Future<void> loadTransactions() async {
@@ -161,7 +268,11 @@ class TransactionController extends GetxController {
     }
 
     final params = GetTransactionsParams(
-      type: _filterType.value == 'Semua' ? 'All' : (_filterType.value == 'Pemasukan' ? 'Income' : 'Expense'),
+      type: switch (_filterType.value) {
+        'Pemasukan' => 'income',
+        'Pengeluaran' => 'expense',
+        _ => null,
+      },
       categoryId: _filterCategory.value?.id,
       startDate: startDate,
       endDate: endDate,
@@ -215,7 +326,7 @@ class TransactionController extends GetxController {
       return false;
     }
 
-    final resolvedCategoryId = categoryId ?? _selectedCategory.value?.id;
+    final resolvedCategoryId = categoryId ?? resolvedSelectedCategoryId;
     if (resolvedCategoryId == null || resolvedCategoryId.isEmpty) {
       _errorMessage.value = 'Pilih kategori terlebih dahulu';
       Get.snackbar('Error', _errorMessage.value);
@@ -296,7 +407,7 @@ class TransactionController extends GetxController {
       return false;
     }
 
-    final resolvedCategoryId = categoryId ?? _selectedCategory.value?.id;
+    final resolvedCategoryId = categoryId ?? resolvedSelectedCategoryId;
     if (resolvedCategoryId == null || resolvedCategoryId.isEmpty) {
       _errorMessage.value = 'Pilih kategori terlebih dahulu';
       Get.snackbar('Error', _errorMessage.value);
@@ -340,18 +451,80 @@ class TransactionController extends GetxController {
     }
   }
 
-  void changeType(String type) {
+  Future<void> changeType(String type) async {
     if (type != 'income' && type != 'expense') {
       _errorMessage.value = 'Invalid transaction type';
       Get.snackbar('Error', _errorMessage.value);
       return;
     }
+    if (_selectedType.value == type && _parentCategories.isNotEmpty) return;
     _selectedType.value = type;
-    _selectedCategory.value = null;
-    loadCategories(type: type);
+    _selectedParentCategory.value = null;
+    _selectedChildCategory.value = null;
+    _categories.clear();
+    _parentCategories.clear();
+    _childCategories.clear();
+    await loadCategoryTree(type: type);
   }
 
   void selectCategory(CategoryEntity category) {
-    _selectedCategory.value = category;
+    if (category.parentId == null) {
+      selectParentCategory(category);
+      return;
+    }
+    selectChildCategory(category);
+  }
+
+  void selectParentCategory(CategoryEntity category) {
+    _selectedParentCategory.value = category;
+    _selectedChildCategory.value = null;
+    _childCategories.value = category.children;
+  }
+
+  void selectChildCategory(CategoryEntity category) {
+    _selectedChildCategory.value = category;
+  }
+
+  Future<void> selectCategoryById(String? categoryId) async {
+    if (categoryId == null || categoryId.isEmpty) return;
+
+    for (final parent in _parentCategories) {
+      if (parent.id == categoryId) {
+        selectParentCategory(parent);
+        return;
+      }
+
+      final child = parent.children.firstWhereOrNull(
+        (category) => category.id == categoryId,
+      );
+      if (child != null) {
+        selectParentCategory(parent);
+        selectChildCategory(child);
+        return;
+      }
+    }
+
+    final result = await getCategoriesUseCase(
+      GetCategoriesParams(type: _selectedType.value),
+    );
+    result.fold(
+      (failure) {
+        _errorMessage.value = failure.message;
+      },
+      (categories) {
+        final category = categories.firstWhereOrNull(
+          (item) => item.id == categoryId,
+        );
+        final parentId = category?.parentId;
+        if (category == null || parentId == null) return;
+
+        final parent = _parentCategories.firstWhereOrNull(
+          (item) => item.id == parentId,
+        );
+        if (parent == null) return;
+        selectParentCategory(parent);
+        selectChildCategory(category);
+      },
+    );
   }
 }

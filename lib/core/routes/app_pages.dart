@@ -6,6 +6,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/navigation/presentation/bindings/main_navigation_binding.dart';
 import '../../features/navigation/presentation/pages/main_navigation_page.dart';
+import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/transaction/presentation/bindings/transaction_binding.dart';
 import '../../features/transaction/presentation/pages/add_transaction_page.dart';
 import '../../features/transaction/presentation/pages/transaction_list_page.dart';
@@ -49,6 +50,11 @@ class AppPages {
       name: Routes.transactionList,
       page: () => const TransactionListPage(),
       binding: TransactionBinding(),
+    ),
+    GetPage(
+      name: Routes.editProfile,
+      page: () => const EditProfilePage(),
+      binding: AuthBinding(),
     ),
   ];
 }

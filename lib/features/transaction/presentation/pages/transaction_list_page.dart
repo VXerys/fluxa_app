@@ -5,6 +5,8 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/utils/category_color_parser.dart';
+import '../../../../core/utils/category_icon_mapper.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../controllers/transaction_controller.dart';
 import '../widgets/transaction_filter_widget.dart';
@@ -304,6 +306,15 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
   }
 
   void _showCategoryFilterBottomSheet() {
+    final categories = widget.controller.visibleFilterCategories;
+    final allCategories = widget.controller.filterCategories;
+    final parentNameById = {
+      for (final category in allCategories.where(
+        (item) => item.parentId == null,
+      ))
+        category.id: category.name,
+    };
+
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.s24),
@@ -325,7 +336,8 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
             const SizedBox(height: AppSpacing.s16),
             Text('Kategori', style: AppTextStyles.roboto16w600),
             const SizedBox(height: AppSpacing.s16),
-            Expanded(
+            SizedBox(
+              height: Get.height * 0.45,
               child: ListView(
                 shrinkWrap: true,
                 children: [
@@ -342,16 +354,28 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
                       Get.back();
                     },
                   ),
-                  ...widget.controller.categories.map(
-                    (category) => ListTile(
-                      leading: const Icon(
-                        Icons.category_outlined,
-                        color: AppColors.textSecondary,
-                      ), // generic icon for now
+                  ...categories.map((category) {
+                    final color = CategoryColorParser.parse(category.color);
+                    final parentName = category.parentId == null
+                        ? null
+                        : parentNameById[category.parentId];
+                    return ListTile(
+                      leading: Icon(
+                        CategoryIconMapper.fromKey(category.icon),
+                        color: color,
+                      ),
                       title: Text(
                         category.name,
                         style: AppTextStyles.roboto14w400,
                       ),
+                      subtitle: parentName == null
+                          ? null
+                          : Text(
+                              parentName,
+                              style: AppTextStyles.roboto12w400.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
                       trailing:
                           widget.controller.filterCategory?.id == category.id
                           ? const Icon(
@@ -363,8 +387,8 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
                         widget.controller.setFilterCategory(category);
                         Get.back();
                       },
-                    ),
-                  ),
+                    );
+                  }),
                 ],
               ),
             ),

@@ -12,7 +12,9 @@ class GetTransactionsUseCase
   GetTransactionsUseCase({required this.repository});
 
   @override
-  Future<Either<Failure, List<TransactionEntity>>> call(GetTransactionsParams params) async {
+  Future<Either<Failure, List<TransactionEntity>>> call(
+    GetTransactionsParams params,
+  ) async {
     return repository.getTransactions(params);
   }
 }

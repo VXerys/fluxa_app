@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/utils/category_icon_mapper.dart';
 import '../../domain/entities/category_entity.dart';
 
 class CategoryChipWidget extends StatelessWidget {
@@ -20,7 +21,7 @@ class CategoryChipWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor = isSelected
-        ? AppColors.primary.withOpacity(0.1)
+        ? AppColors.primary.withValues(alpha: 0.1)
         : AppColors.surface;
     final Color borderColor = isSelected
         ? AppColors.primary
@@ -44,9 +45,10 @@ class CategoryChipWidget extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              category.icon ?? '📦',
-              style: AppTextStyles.roboto16w400.copyWith(color: textColor),
+            Icon(
+              CategoryIconMapper.fromKey(category.icon),
+              size: 18,
+              color: textColor,
             ),
             const SizedBox(width: AppSpacing.s8),
             Flexible(

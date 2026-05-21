@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:fluxa_app/core/constants/app_colors.dart';
 import 'package:fluxa_app/core/constants/app_spacing.dart';
 import 'package:fluxa_app/core/constants/app_text_styles.dart';
+import 'package:fluxa_app/core/routes/app_routes.dart';
+import 'package:fluxa_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:fluxa_app/features/profile/presentation/controllers/profile_controller.dart';
 
 class ProfilePage extends GetView<ProfileController> {
@@ -11,6 +13,7 @@ class ProfilePage extends GetView<ProfileController> {
 
   @override
   Widget build(BuildContext context) {
+    final authController = Get.find<AuthController>();
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -27,14 +30,15 @@ class ProfilePage extends GetView<ProfileController> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s16,
+            vertical: AppSpacing.s16,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildAvatarSection(),
+              _buildAvatarSection(authController),
               const SizedBox(height: AppSpacing.s32),
-              _buildPremiumBanner(),
-              const SizedBox(height: AppSpacing.s24),
               _buildSectionLabel('Aplikasi'),
               _buildCard([
                 _buildCardItem(
@@ -56,7 +60,7 @@ class ProfilePage extends GetView<ProfileController> {
                 ),
               ]),
               const SizedBox(height: AppSpacing.s16),
-              _buildSectionLabel('Data'),
+              _buildSectionLabel('Data & Akun'),
               _buildCard([
                 _buildCardItem(
                   icon: Icons.delete_outline,
@@ -67,13 +71,21 @@ class ProfilePage extends GetView<ProfileController> {
                         ? const SizedBox(
                             width: AppSpacing.s16,
                             height: AppSpacing.s16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                        : const Icon(
+                            Icons.chevron_right,
+                            color: AppColors.textSecondary,
+                          ),
                   ),
                   onTap: () => _showResetConfirmDialog(context),
+                ),
+                _buildCardItem(
+                  icon: Icons.logout,
+                  title: 'Keluar',
+                  iconColor: AppColors.error,
+                  onTap: () =>
+                      _showLogoutConfirmDialog(context, authController),
                 ),
               ]),
               const SizedBox(height: AppSpacing.s32),
@@ -93,7 +105,7 @@ class ProfilePage extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildAvatarSection() {
+  Widget _buildAvatarSection(AuthController authController) {
     return Center(
       child: Column(
         children: [
@@ -122,85 +134,33 @@ class ProfilePage extends GetView<ProfileController> {
               Positioned(
                 bottom: 0,
                 right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.edit,
-                    size: 16,
-                    color: AppColors.surface,
+                child: GestureDetector(
+                  onTap: () => Get.toNamed(Routes.editProfile),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.edit,
+                      size: 16,
+                      color: AppColors.surface,
+                    ),
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.s16),
-          Text(
-            'Pengguna Fluxa',
-            style: AppTextStyles.roboto18w500.copyWith(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
+          Obx(
+            () => Text(
+              authController.currentUser?.displayName ?? 'Pengguna Fluxa',
+              style: AppTextStyles.roboto18w500.copyWith(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPremiumBanner() {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
-          colors: [AppColors.cardGradient1Start, AppColors.cardGradient1End],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.star_border,
-              color: AppColors.surface,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.s16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Upgrade to Premium',
-                  style: AppTextStyles.roboto16w400.copyWith(
-                    color: AppColors.surface,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.s4),
-                Text(
-                  'Unlock all features & remove\nlimits.',
-                  style: AppTextStyles.roboto12w400.copyWith(
-                    color: AppColors.surface.withOpacity(0.9),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(
-            Icons.chevron_right,
-            color: AppColors.surface,
           ),
         ],
       ),
@@ -209,7 +169,10 @@ class ProfilePage extends GetView<ProfileController> {
 
   Widget _buildSectionLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(left: AppSpacing.s8, bottom: AppSpacing.s8),
+      padding: const EdgeInsets.only(
+        left: AppSpacing.s8,
+        bottom: AppSpacing.s8,
+      ),
       child: Text(
         text,
         style: AppTextStyles.roboto14w400.copyWith(
@@ -241,7 +204,10 @@ class ProfilePage extends GetView<ProfileController> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s16),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s16,
+          vertical: AppSpacing.s16,
+        ),
         child: Row(
           children: [
             Container(
@@ -251,11 +217,7 @@ class ProfilePage extends GetView<ProfileController> {
                 color: AppColors.background,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 24,
-              ),
+              child: Icon(icon, color: iconColor, size: 24),
             ),
             const SizedBox(width: AppSpacing.s16),
             Expanded(
@@ -269,10 +231,7 @@ class ProfilePage extends GetView<ProfileController> {
             if (trailing != null)
               trailing
             else
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.textSecondary,
-              ),
+              const Icon(Icons.chevron_right, color: AppColors.textSecondary),
           ],
         ),
       ),
@@ -304,6 +263,38 @@ class ProfilePage extends GetView<ProfileController> {
                 foregroundColor: Colors.white,
               ),
               child: const Text('Reset'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLogoutConfirmDialog(
+    BuildContext context,
+    AuthController authController,
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Keluar'),
+          content: const Text('Apakah Anda yakin ingin keluar dari akun ini?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                authController.signOut();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Keluar'),
             ),
           ],
         );

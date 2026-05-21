@@ -28,9 +28,7 @@ class HomePage extends GetView<HomeController> {
               return SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.s16),
                     child: Column(
@@ -38,22 +36,31 @@ class HomePage extends GetView<HomeController> {
                       children: [
                         Text('~ Hai!', style: AppTextStyles.lora24w400),
                         const SizedBox(height: AppSpacing.s16),
-                        Obx(() => BalanceCardWidget(summary: controller.summary)),
+                        Obx(
+                          () => BalanceCardWidget(summary: controller.summary),
+                        ),
                         const SizedBox(height: AppSpacing.s24),
                         _buildMenu(),
                         const SizedBox(height: AppSpacing.s24),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Transaksi Terakhir',
-                              style: AppTextStyles.roboto16w400.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                            Expanded(
+                              child: Text(
+                                'Transaksi Terakhir',
+                                style: AppTextStyles.roboto16w400.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
                               ),
                             ),
                             TextButton(
-                              onPressed: () => Get.toNamed(Routes.transactionList),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: () =>
+                                  Get.toNamed(Routes.transactionList),
                               child: Text(
                                 'Lihat Semua',
                                 style: AppTextStyles.roboto14w400.copyWith(
@@ -100,18 +107,39 @@ class HomePage extends GetView<HomeController> {
 
     String dateHeader = '';
     String totalStr = '';
-    
+
     if (items.isNotEmpty) {
       final firstDate = items.first.date;
-      const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const days = [
+        'Senin',
+        'Selasa',
+        'Rabu',
+        'Kamis',
+        'Jumat',
+        'Sabtu',
+        'Minggu',
+      ];
+      const months = [
+        'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember',
+      ];
       final dayName = days[firstDate.weekday - 1];
       final monthName = months[firstDate.month - 1];
       dateHeader = '$dayName, ${firstDate.day} $monthName ${firstDate.year}';
-      
+
       double total = 0;
-      for(var item in items) {
-        if(item.type == 'income') {
+      for (var item in items) {
+        if (item.type == 'income') {
           total += item.amount;
         } else {
           total -= item.amount;
@@ -140,7 +168,9 @@ class HomePage extends GetView<HomeController> {
               Text(
                 totalStr,
                 style: AppTextStyles.roboto14w400.copyWith(
-                  color: totalStr.startsWith('-') ? AppColors.error : AppColors.success,
+                  color: totalStr.startsWith('-')
+                      ? AppColors.error
+                      : AppColors.success,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -198,23 +228,23 @@ class HomePage extends GetView<HomeController> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildMenuItem(
-              Icons.add_circle_outline, 
-              'Catat', 
-              const Color(0xFFE8F5E9), 
+              Icons.add_circle_outline,
+              'Catat',
+              const Color(0xFFE8F5E9),
               const Color(0xFF4CAF50),
               onTap: () => Get.toNamed(Routes.addTransaction),
             ),
             _buildMenuItem(
-              Icons.history, 
-              'Riwayat', 
-              const Color(0xFFE3F2FD), 
+              Icons.history,
+              'Riwayat',
+              const Color(0xFFE3F2FD),
               const Color(0xFF2196F3),
               onTap: () => Get.toNamed(Routes.transactionList),
             ),
             _buildMenuItem(
-              Icons.person_outline, 
-              'Profil', 
-              const Color(0xFFF3E5F5), 
+              Icons.person_outline,
+              'Profil',
+              const Color(0xFFF3E5F5),
               const Color(0xFF9C27B0),
               onTap: () {
                 try {
@@ -225,9 +255,9 @@ class HomePage extends GetView<HomeController> {
               },
             ),
             _buildMenuItem(
-              Icons.more_horiz, 
-              'Lainnya', 
-              const Color(0xFFF5F5F5), 
+              Icons.more_horiz,
+              'Lainnya',
+              const Color(0xFFF5F5F5),
               const Color(0xFF9E9E9E),
               onTap: () => Get.snackbar('Info', 'Fitur belum tersedia'),
             ),
@@ -237,7 +267,13 @@ class HomePage extends GetView<HomeController> {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String label, Color bgColor, Color iconColor, {VoidCallback? onTap}) {
+  Widget _buildMenuItem(
+    IconData icon,
+    String label,
+    Color bgColor,
+    Color iconColor, {
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Column(

@@ -113,18 +113,14 @@ class _NavItem extends StatelessWidget {
         final color = disabled
             ? AppColors.neutral
             : isActive
-                ? AppColors.primary
-                : AppColors.textSecondary;
+            ? AppColors.primary
+            : AppColors.textSecondary;
 
         return Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              isActive ? icon : outlinedIcon,
-              color: color,
-              size: 24,
-            ),
+            Icon(isActive ? icon : outlinedIcon, color: color, size: 24),
             const SizedBox(height: 4),
             Text(
               label,

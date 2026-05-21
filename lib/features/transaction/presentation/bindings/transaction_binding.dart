@@ -8,7 +8,9 @@ import '../../domain/repositories/category_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../domain/usecases/add_transaction_usecase.dart';
 import '../../domain/usecases/delete_transaction_usecase.dart';
+import '../../domain/usecases/get_all_system_categories_usecase.dart';
 import '../../domain/usecases/get_categories_usecase.dart';
+import '../../domain/usecases/get_category_tree_usecase.dart';
 import '../../domain/usecases/get_transaction_summary_usecase.dart';
 import '../../domain/usecases/get_transactions_usecase.dart';
 import '../../domain/usecases/update_transaction_usecase.dart';
@@ -30,6 +32,8 @@ class TransactionBinding extends Bindings {
     );
 
     Get.lazyPut(() => GetCategoriesUseCase(repository: Get.find()));
+    Get.lazyPut(() => GetCategoryTreeUseCase(repository: Get.find()));
+    Get.lazyPut(() => GetAllSystemCategoriesUseCase(repository: Get.find()));
     Get.lazyPut(() => AddTransactionUseCase(repository: Get.find()));
     Get.lazyPut(() => GetTransactionsUseCase(repository: Get.find()));
     Get.lazyPut(() => DeleteTransactionUseCase(repository: Get.find()));
@@ -44,6 +48,8 @@ class TransactionBinding extends Bindings {
         updateTransactionUseCase: Get.find(),
         getTransactionSummaryUseCase: Get.find(),
         getCategoriesUseCase: Get.find(),
+        getCategoryTreeUseCase: Get.find(),
+        getAllSystemCategoriesUseCase: Get.find(),
       ),
     );
   }

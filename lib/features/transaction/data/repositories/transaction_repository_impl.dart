@@ -46,7 +46,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
-  Future<Either<Failure, List<TransactionEntity>>> getTransactions(GetTransactionsParams params) async {
+  Future<Either<Failure, List<TransactionEntity>>> getTransactions(
+    GetTransactionsParams params,
+  ) async {
     try {
       final models = await remoteDataSource.getTransactions(params);
       return Right(models.map((model) => model.toEntity()).toList());

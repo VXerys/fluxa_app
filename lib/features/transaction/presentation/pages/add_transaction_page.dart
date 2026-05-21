@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/utils/category_color_parser.dart';
+import '../../../../core/utils/category_icon_mapper.dart';
+import '../../domain/entities/category_entity.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../controllers/transaction_controller.dart';
 
@@ -14,22 +19,39 @@ class AddTransactionPage extends GetView<TransactionController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: AppColors.surface,
+      appBar: AppBar(
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.textPrimary,
+            size: 20,
+          ),
+          onPressed: () => Get.back(),
+        ),
+        title: Text(
+          transactionToEdit != null ? 'Edit Transaction' : 'Add Transaction',
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: AppSpacing.s12),
-            // Fake drag handle for bottom sheet look
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.neutral.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(2),
+            Expanded(
+              child: _AddTransactionForm(
+                controller: controller,
+                transactionToEdit: transactionToEdit,
               ),
             ),
-            const SizedBox(height: AppSpacing.s24),
-            Expanded(child: _AddTransactionForm(controller: controller, transactionToEdit: transactionToEdit)),
           ],
         ),
       ),
@@ -52,14 +74,14 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  
+
   @override
   void initState() {
     super.initState();
     if (widget.transactionToEdit != null) {
       final t = widget.transactionToEdit!;
       _amountStr = t.amount.toInt().toString();
-      
+
       // Parse note into title and note if separated by " - "
       if (t.note != null && t.note!.contains(' - ')) {
         final parts = t.note!.split(' - ');
@@ -68,21 +90,16 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
       } else {
         _titleController.text = t.note ?? '';
       }
-      
+
       _selectedDate = t.date;
-      
-      // We must set the selected type and wait for categories to load, 
+
+      // We must set the selected type and wait for categories to load,
       // then set the selected category.
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        widget.controller.changeType(t.type);
-        // Delay to allow categories to load from changeType
-        await Future.delayed(const Duration(milliseconds: 300));
-        if (t.category != null) {
-          final cat = widget.controller.categories.firstWhereOrNull((c) => c.id == t.category!.id);
-          if (cat != null) {
-            widget.controller.selectCategory(cat);
-          }
-        }
+        await widget.controller.changeType(t.type);
+        await widget.controller.selectCategoryById(
+          t.categoryId ?? t.category?.id,
+        );
       });
     }
   }
@@ -92,6 +109,150 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
     _titleController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  void _showDetailsPopup() {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppSpacing.s24),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.edit_note,
+                            color: AppColors.textPrimary,
+                            size: 28,
+                          ),
+                          const SizedBox(width: AppSpacing.s12),
+                          const Text(
+                            'Transaction Details',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.close,
+                          color: AppColors.textSecondary,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.s24),
+                  const Text(
+                    'Title',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s8),
+                  TextField(
+                    controller: _titleController,
+                    autofocus: true,
+                    textInputAction: TextInputAction.next,
+                    decoration: InputDecoration(
+                      hintText: 'e.g., Grocery Shopping',
+                      hintStyle: TextStyle(
+                        color: AppColors.textSecondary.withValues(alpha: 0.5),
+                        fontSize: 16,
+                      ),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s16,
+                        vertical: AppSpacing.s16,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s16),
+                  const Text(
+                    'Note',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s8),
+                  TextField(
+                    controller: _noteController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: 'Add a note...',
+                      hintStyle: TextStyle(
+                        color: AppColors.textSecondary.withValues(alpha: 0.5),
+                        fontSize: 16,
+                      ),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.s16,
+                        vertical: AppSpacing.s16,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s24),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      setState(() {});
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.textPrimary,
+                      foregroundColor: AppColors.surface,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text(
+                      'Confirm',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _onNumpadTap(String value) {
@@ -126,7 +287,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
       Get.snackbar('Error', 'Nominal harus lebih dari 0');
       return;
     }
-    if (widget.controller.selectedCategory == null) {
+    if (widget.controller.resolvedSelectedCategoryId == null) {
       Get.snackbar('Error', 'Pilih kategori terlebih dahulu');
       return;
     }
@@ -141,7 +302,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
         id: widget.transactionToEdit!.id,
         type: widget.controller.selectedType,
         amount: amount,
-        categoryId: widget.controller.selectedCategory?.id,
+        categoryId: widget.controller.resolvedSelectedCategoryId,
         note: finalNote.isEmpty ? null : finalNote,
         date: _selectedDate,
       );
@@ -149,7 +310,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
       success = await widget.controller.addTransaction(
         type: widget.controller.selectedType,
         amount: amount,
-        categoryId: widget.controller.selectedCategory?.id,
+        categoryId: widget.controller.resolvedSelectedCategoryId,
         note: finalNote.isEmpty ? null : finalNote,
         date: _selectedDate,
       );
@@ -157,21 +318,25 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
 
     if (success) {
       Get.back();
+      if (widget.transactionToEdit != null) {
+        Get.back(); // close detail page as well to avoid showing old data
+      }
     }
   }
 
   Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
+    await Get.bottomSheet(
+      CustomDateTimePickerSheet(
+        initialDate: _selectedDate,
+        onDateSelected: (date) {
+          setState(() {
+            _selectedDate = date;
+          });
+        },
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
     );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
   }
 
   @override
@@ -236,8 +401,9 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
   Widget _buildToggleBtn(String type, String label, {bool disabled = false}) {
     return Obx(() {
       final isSelected = widget.controller.selectedType == type;
+      final isDisabled = disabled || widget.controller.isCategoryLoading;
       return GestureDetector(
-        onTap: disabled ? null : () => widget.controller.changeType(type),
+        onTap: isDisabled ? null : () => widget.controller.changeType(type),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
@@ -260,101 +426,74 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
 
   Widget _buildCategories() {
     return Obx(() {
-      if (widget.controller.isLoading) return const SizedBox(height: 70);
-      final categories = widget.controller.categories;
-      return SizedBox(
-        height: 75,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
+      if (widget.controller.isLoading || widget.controller.isCategoryLoading) {
+        return const SizedBox(height: 118);
+      }
+
+      final parentCategories = widget.controller.parentCategories;
+      final childCategories = widget.controller.childCategories;
+
+      if (parentCategories.isEmpty) {
+        return Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
-          itemCount: categories.length,
-          itemBuilder: (context, index) {
-            final cat = categories[index];
-            final isSelected = widget.controller.selectedCategory?.id == cat.id;
+          child: Text(
+            'Kategori belum tersedia',
+            style: AppTextStyles.roboto14w400.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        );
+      }
 
-            // Assign a unique color based on index for variety
-            final colors = [
-              AppColors.categoryFood,
-              AppColors.categoryTransport,
-              AppColors.categoryShopping,
-              AppColors.categoryHousing,
-            ];
-            final color = colors[index % colors.length];
-
-            // Map category name to icon
-            IconData catIcon = Icons.category_outlined;
-            final nameLower = cat.name.toLowerCase();
-            if (nameLower.contains('makan') || nameLower.contains('minum')) {
-              catIcon = Icons.restaurant_outlined;
-            } else if (nameLower.contains('transport')) {
-              catIcon = Icons.directions_bus_outlined;
-            } else if (nameLower.contains('belanja')) {
-              catIcon = Icons.shopping_bag_outlined;
-            } else if (nameLower.contains('rumah') ||
-                nameLower.contains('tagihan')) {
-              catIcon = Icons.home_outlined;
-            } else if (nameLower.contains('hiburan')) {
-              catIcon = Icons.movie_outlined;
-            } else if (nameLower.contains('kesehatan')) {
-              catIcon = Icons.medical_services_outlined;
-            } else if (nameLower.contains('pendidikan')) {
-              catIcon = Icons.school_outlined;
-            }
-
-            return GestureDetector(
-              onTap: () => widget.controller.selectCategory(cat),
-              child: Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isSelected ? color : AppColors.surface,
-                        border: isSelected
-                            ? null
-                            : Border.all(
-                                color: AppColors.neutral.withOpacity(0.2),
-                              ),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: color.withOpacity(0.3),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ]
-                            : [],
-                      ),
-                      child: Center(
-                        child: Icon(
-                          catIcon,
-                          size: 24,
-                          color: isSelected ? AppColors.surface : color,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      cat.name,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: isSelected
-                            ? AppColors.textPrimary
-                            : AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 82,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
+              itemCount: parentCategories.length,
+              itemBuilder: (context, index) {
+                final category = parentCategories[index];
+                final isSelected =
+                    widget.controller.selectedParentCategory?.id == category.id;
+                return _ParentCategoryItem(
+                  category: category,
+                  isSelected: isSelected,
+                  onTap: () => widget.controller.selectParentCategory(category),
+                );
+              },
+            ),
+          ),
+          if (childCategories.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.s12),
+            SizedBox(
+              height: 48,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
+                itemCount: childCategories.length,
+                itemBuilder: (context, index) {
+                  final category = childCategories[index];
+                  final parentCategory =
+                      widget.controller.selectedParentCategory;
+                  final isSelected =
+                      widget.controller.selectedChildCategory?.id ==
+                      category.id;
+                  return _ChildCategoryChip(
+                    key: ValueKey(category.id),
+                    category: category,
+                    parentCategory: parentCategory,
+                    isSelected: isSelected,
+                    onTap: () =>
+                        widget.controller.selectChildCategory(category),
+                  );
+                },
               ),
-            );
-          },
-        ),
+            ),
+          ],
+        ],
       );
     });
   }
@@ -401,72 +540,86 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
       child: Column(
         children: [
-          TextField(
-            controller: _titleController,
-            decoration: InputDecoration(
-              hintText: 'Title',
-              hintStyle: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
+          GestureDetector(
+            onTap: _showDetailsPopup,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s16,
+                vertical: AppSpacing.s16,
               ),
-              prefixIcon: const Icon(
-                Icons.description_outlined,
-                color: AppColors.textSecondary,
-                size: 20,
-              ),
-              filled: true,
-              fillColor: AppColors.surface,
-              contentPadding: const EdgeInsets.symmetric(vertical: 14),
-              border: OutlineInputBorder(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: AppColors.neutral.withOpacity(0.2),
+                border: Border.all(
+                  color: AppColors.neutral.withValues(alpha: 0.2),
                 ),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: AppColors.neutral.withOpacity(0.2),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.primary),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.description_outlined,
+                    color: AppColors.textSecondary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: AppSpacing.s12),
+                  Expanded(
+                    child: Text(
+                      _titleController.text.isNotEmpty
+                          ? _titleController.text
+                          : 'Title',
+                      style: TextStyle(
+                        color: _titleController.text.isNotEmpty
+                            ? AppColors.textPrimary
+                            : AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _noteController,
-            decoration: InputDecoration(
-              hintText: 'Add a note...',
-              hintStyle: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
+          GestureDetector(
+            onTap: _showDetailsPopup,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s16,
+                vertical: AppSpacing.s16,
               ),
-              prefixIcon: const Icon(
-                Icons.notes,
-                color: AppColors.textSecondary,
-                size: 20,
-              ),
-              filled: true,
-              fillColor: AppColors.surface,
-              contentPadding: const EdgeInsets.symmetric(vertical: 14),
-              border: OutlineInputBorder(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: AppColors.neutral.withOpacity(0.2),
+                border: Border.all(
+                  color: AppColors.neutral.withValues(alpha: 0.2),
                 ),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: AppColors.neutral.withOpacity(0.2),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.primary),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.notes,
+                    color: AppColors.textSecondary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: AppSpacing.s12),
+                  Expanded(
+                    child: Text(
+                      _noteController.text.isNotEmpty
+                          ? _noteController.text
+                          : 'Add a note...',
+                      style: TextStyle(
+                        color: _noteController.text.isNotEmpty
+                            ? AppColors.textPrimary
+                            : AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -632,6 +785,416 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                     )),
         ),
       ),
+    );
+  }
+}
+
+class _ParentCategoryItem extends StatelessWidget {
+  final CategoryEntity category;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ParentCategoryItem({
+    required this.category,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = CategoryColorParser.parse(category.color);
+    final icon = CategoryIconMapper.fromKey(category.icon);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 76,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected
+                    ? color
+                    : Color.alphaBlend(
+                        color.withValues(alpha: 0.08),
+                        AppColors.surface,
+                      ),
+                border: isSelected
+                    ? null
+                    : Border.all(color: color.withValues(alpha: 0.18)),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: color.withValues(alpha: 0.28),
+                          blurRadius: 12,
+                          offset: const Offset(0, 5),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Icon(
+                icon,
+                size: 24,
+                color: isSelected ? AppColors.surface : color,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.s6),
+            Text(
+              category.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.roboto12w400.copyWith(
+                color: isSelected
+                    ? AppColors.textPrimary
+                    : AppColors.textSecondary,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ChildCategoryChip extends StatelessWidget {
+  final CategoryEntity category;
+  final CategoryEntity? parentCategory;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ChildCategoryChip({
+    super.key,
+    required this.category,
+    this.parentCategory,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final parentColor = CategoryColorParser.parse(
+      parentCategory?.color,
+    );
+    final colorSource = category.color ?? parentCategory?.color;
+
+    final chipColor = CategoryColorParser.parse(
+      colorSource,
+      fallback: parentColor,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(right: AppSpacing.s8),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          height: 44,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s16,
+            vertical: AppSpacing.s8,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected ? chipColor : AppColors.surface,
+            borderRadius: BorderRadius.circular(AppSpacing.s24),
+            border: Border.all(
+              color: isSelected ? chipColor : AppColors.neutral,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                CategoryIconMapper.fromKey(category.icon),
+                size: 18,
+                color: isSelected ? AppColors.surface : chipColor,
+              ),
+              const SizedBox(width: AppSpacing.s8),
+              Text(
+                category.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.roboto14w400.copyWith(
+                  color: isSelected
+                      ? AppColors.surface
+                      : AppColors.textPrimary,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomDateTimePickerSheet extends StatefulWidget {
+  final DateTime initialDate;
+  final ValueChanged<DateTime> onDateSelected;
+
+  const CustomDateTimePickerSheet({
+    super.key,
+    required this.initialDate,
+    required this.onDateSelected,
+  });
+
+  @override
+  State<CustomDateTimePickerSheet> createState() =>
+      _CustomDateTimePickerSheetState();
+}
+
+class _CustomDateTimePickerSheetState extends State<CustomDateTimePickerSheet> {
+  late FixedExtentScrollController _dateController;
+  late FixedExtentScrollController _hourController;
+  late FixedExtentScrollController _minuteController;
+
+  late List<DateTime> _dates;
+  late int _selectedDateIndex;
+  late int _selectedHour;
+  late int _selectedMinute;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedHour = widget.initialDate.hour;
+    _selectedMinute = widget.initialDate.minute;
+
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+    final startDay = today.subtract(
+      const Duration(days: 365 * 10),
+    ); // 10 years back
+    _dates = List.generate(
+      365 * 20 + 1,
+      (index) => startDay.add(Duration(days: index)),
+    );
+
+    _selectedDateIndex = _dates.indexWhere(
+      (d) =>
+          d.year == widget.initialDate.year &&
+          d.month == widget.initialDate.month &&
+          d.day == widget.initialDate.day,
+    );
+
+    if (_selectedDateIndex == -1) {
+      _selectedDateIndex = 365 * 10; // fallback to today
+    }
+
+    _dateController = FixedExtentScrollController(
+      initialItem: _selectedDateIndex,
+    );
+    _hourController = FixedExtentScrollController(initialItem: _selectedHour);
+    _minuteController = FixedExtentScrollController(
+      initialItem: _selectedMinute,
+    );
+  }
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    _hourController.dispose();
+    _minuteController.dispose();
+    super.dispose();
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedDate = _dates[_selectedDateIndex];
+    final today = DateTime.now();
+
+    return Container(
+      height: 320,
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.s24,
+              vertical: AppSpacing.s16,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Color(0xFF1B496B), // Match image
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${selectedDate.year}',
+                  style: const TextStyle(
+                    color: Color(0xFF1B496B),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    final finalDate = DateTime(
+                      selectedDate.year,
+                      selectedDate.month,
+                      selectedDate.day,
+                      _selectedHour,
+                      _selectedMinute,
+                    );
+                    widget.onDateSelected(finalDate);
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Done',
+                    style: TextStyle(
+                      color: Color(0xFF1B496B),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Pickers
+          Expanded(
+            child: Row(
+              children: [
+                const SizedBox(width: AppSpacing.s16),
+                // Date Picker
+                Expanded(
+                  flex: 4,
+                  child: _buildPicker(
+                    controller: _dateController,
+                    itemCount: _dates.length,
+                    onSelectedItemChanged: (index) {
+                      setState(() {
+                        _selectedDateIndex = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      final date = _dates[index];
+                      final isToday = _isSameDay(date, today);
+                      String text;
+                      if (isToday) {
+                        text = 'Today';
+                      } else {
+                        text = DateFormat('EEE MMM dd').format(date);
+                      }
+                      return Center(
+                        child: Text(
+                          text,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                // Hour Picker
+                Expanded(
+                  flex: 2,
+                  child: _buildPicker(
+                    controller: _hourController,
+                    itemCount: 24,
+                    onSelectedItemChanged: (index) {
+                      setState(() {
+                        _selectedHour = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      return Center(
+                        child: Text(
+                          index.toString().padLeft(2, '0'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                // Minute Picker
+                Expanded(
+                  flex: 2,
+                  child: _buildPicker(
+                    controller: _minuteController,
+                    itemCount: 60,
+                    onSelectedItemChanged: (index) {
+                      setState(() {
+                        _selectedMinute = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      return Center(
+                        child: Text(
+                          index.toString().padLeft(2, '0'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.s16),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPicker({
+    required FixedExtentScrollController controller,
+    required int itemCount,
+    required Widget Function(BuildContext, int) itemBuilder,
+    required ValueChanged<int> onSelectedItemChanged,
+  }) {
+    return CupertinoPicker.builder(
+      scrollController: controller,
+      itemExtent: 40,
+      useMagnifier: false,
+      selectionOverlay: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          color: AppColors.neutral.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      onSelectedItemChanged: onSelectedItemChanged,
+      childCount: itemCount,
+      itemBuilder: itemBuilder,
     );
   }
 }

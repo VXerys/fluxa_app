@@ -27,56 +27,81 @@ class TransactionFilterWidget extends GetView<TransactionController> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s16,
+        vertical: AppSpacing.s8,
+      ),
       child: Column(
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Obx(() => Row(
-              children: [
-                _buildFilterDropdown(controller.filterDateRange, onTap: onOpenDateFilter),
-                const SizedBox(width: AppSpacing.s8),
-                _buildFilterDropdown(
-                  controller.filterType,
-                  isActive: controller.filterType != 'All',
-                  onTap: onOpenTypeFilter,
-                ),
-                const SizedBox(width: AppSpacing.s8),
-                _buildFilterDropdown(
-                  controller.filterCategory?.name ?? 'All Categories',
-                  isActive: controller.filterCategory != null,
-                  onTap: onOpenCategoryFilter,
-                ),
-              ],
-            )),
+            child: Obx(
+              () => Row(
+                children: [
+                  _buildFilterDropdown(
+                    controller.filterDateRange,
+                    onTap: onOpenDateFilter,
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  _buildFilterDropdown(
+                    controller.filterType,
+                    isActive: controller.filterType != 'All',
+                    onTap: onOpenTypeFilter,
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  _buildFilterDropdown(
+                    controller.filterCategory?.name ?? 'All Categories',
+                    isActive: controller.filterCategory != null,
+                    onTap: onOpenCategoryFilter,
+                  ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: AppSpacing.s8),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Obx(() => Row(
-              children: [
-                _buildFilterDropdown(controller.filterSortBy, onTap: onOpenSortFilter),
-                const SizedBox(width: AppSpacing.s8),
-                _buildFilterDropdown('Semua Dompet', onTap: onOpenWalletFilter), // Static UI
-                const SizedBox(width: AppSpacing.s8),
-                _buildFilterDropdown(
-                  controller.filterNominal,
-                  isActive: controller.filterNominal != 'Rentang Nominal' && controller.filterNominal != 'Semua',
-                  onTap: onOpenNominalFilter,
-                ),
-              ],
-            )),
+            child: Obx(
+              () => Row(
+                children: [
+                  _buildFilterDropdown(
+                    controller.filterSortBy,
+                    onTap: onOpenSortFilter,
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  _buildFilterDropdown(
+                    'Semua Dompet',
+                    onTap: onOpenWalletFilter,
+                  ), // Static UI
+                  const SizedBox(width: AppSpacing.s8),
+                  _buildFilterDropdown(
+                    controller.filterNominal,
+                    isActive:
+                        controller.filterNominal != 'Rentang Nominal' &&
+                        controller.filterNominal != 'Semua',
+                    onTap: onOpenNominalFilter,
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFilterDropdown(String label, {bool isActive = false, VoidCallback? onTap}) {
+  Widget _buildFilterDropdown(
+    String label, {
+    bool isActive = false,
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: AppSpacing.s6),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s12,
+          vertical: AppSpacing.s6,
+        ),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),

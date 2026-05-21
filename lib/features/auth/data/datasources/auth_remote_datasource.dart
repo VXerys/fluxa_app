@@ -17,6 +17,8 @@ abstract class AuthRemoteDataSource {
   Future<void> signOut();
 
   Future<UserModel?> getCurrentUser();
+
+  Future<UserModel> updateUser({required String displayName});
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -39,7 +41,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       final trimmedName = displayName.trim();
-      
+
       await _client.from('profiles').upsert({
         'id': user.id,
         if (trimmedName.isNotEmpty) 'display_name': trimmedName,
@@ -107,6 +109,32 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     try {
+      final profile = await _fetchProfile(user.id);
+      return UserModel.fromSupabaseUser(user, profile: profile);
+    } on AuthException {
+      rethrow;
+    } on supabase.AuthException catch (e) {
+      throw AuthException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<UserModel> updateUser({required String displayName}) async {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw AuthException('Not authenticated');
+    }
+
+    try {
+      final trimmedName = displayName.trim();
+
+      await _client
+          .from('profiles')
+          .update({if (trimmedName.isNotEmpty) 'display_name': trimmedName})
+          .eq('id', user.id);
+
       final profile = await _fetchProfile(user.id);
       return UserModel.fromSupabaseUser(user, profile: profile);
     } on AuthException {

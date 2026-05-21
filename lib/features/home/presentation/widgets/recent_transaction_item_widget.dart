@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/utils/category_color_parser.dart';
+import '../../../../core/utils/category_icon_mapper.dart';
 import '../../../transaction/domain/entities/transaction_entity.dart';
 
 class RecentTransactionItemWidget extends StatelessWidget {
@@ -15,7 +17,12 @@ class RecentTransactionItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isIncome = transaction.type == 'income';
     final Color accentColor = isIncome ? AppColors.success : AppColors.error;
-    final String icon = transaction.category?.icon ?? (isIncome ? '💰' : '💸');
+    final Color categoryColor = CategoryColorParser.parse(
+      transaction.category?.color,
+      fallback: accentColor,
+    );
+    final IconData categoryIcon =
+        CategoryIconMapper.fromKey(transaction.category?.icon);
 
     final String? note = transaction.note?.trim();
     final bool hasNote = note != null && note.isNotEmpty;
@@ -23,8 +30,6 @@ class RecentTransactionItemWidget extends StatelessWidget {
         ? note
         : (transaction.category?.name ?? 'Transaksi');
     final String? subtitle = hasNote ? transaction.category?.name : null;
-    final String dateText = DateFormat('dd MMM yyyy').format(transaction.date);
-
     final String formattedAmount = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp',
@@ -33,6 +38,10 @@ class RecentTransactionItemWidget extends StatelessWidget {
     final String amountText = isIncome
         ? '+$formattedAmount'
         : '-$formattedAmount';
+    final String timeText =
+        (transaction.time != null && transaction.time!.isNotEmpty)
+            ? transaction.time!
+            : DateFormat('HH:mm').format(transaction.date);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
@@ -55,13 +64,14 @@ class RecentTransactionItemWidget extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: const Color(0xFFFFF3E0),
+              color: categoryColor.withOpacity(0.16),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
-              child: Text(
-                icon,
-                style: const TextStyle(fontSize: 24),
+              child: Icon(
+                categoryIcon,
+                size: 24,
+                color: categoryColor,
               ),
             ),
           ),
@@ -108,7 +118,7 @@ class RecentTransactionItemWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                DateFormat('HH:mm').format(transaction.date),
+                timeText,
                 style: AppTextStyles.roboto12w400.copyWith(
                   color: AppColors.textSecondary,
                 ),

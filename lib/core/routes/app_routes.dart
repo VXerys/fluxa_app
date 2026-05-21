@@ -5,4 +5,5 @@ abstract class Routes {
   static const String register = '/register';
   static const String addTransaction = '/transactions/add';
   static const String transactionList = '/transactions/list';
+  static const String editProfile = '/profile/edit';
 }
