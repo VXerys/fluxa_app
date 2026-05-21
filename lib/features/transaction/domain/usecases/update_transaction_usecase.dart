@@ -15,6 +15,9 @@ class UpdateTransactionUseCase
   Future<Either<Failure, TransactionEntity>> call(
     UpdateTransactionParams params,
   ) async {
+    if (params.walletId.trim().isEmpty) {
+      return const Left(ServerFailure('Wallet is required'));
+    }
     return await repository.updateTransaction(params);
   }
 }

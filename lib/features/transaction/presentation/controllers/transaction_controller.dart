@@ -368,6 +368,7 @@ class TransactionController extends GetxController {
   Future<bool> addTransaction({
     required String type,
     required double amount,
+    required String walletId,
     String? categoryId,
     String? note,
     required DateTime date,
@@ -387,6 +388,11 @@ class TransactionController extends GetxController {
       Get.snackbar('Error', _errorMessage.value);
       return false;
     }
+    if (walletId.trim().isEmpty) {
+      _errorMessage.value = 'Pilih dompet terlebih dahulu';
+      Get.snackbar('Error', _errorMessage.value);
+      return false;
+    }
 
     _isSubmitting.value = true;
     try {
@@ -394,6 +400,7 @@ class TransactionController extends GetxController {
         type: type,
         amount: amount,
         categoryId: resolvedCategoryId,
+        walletId: walletId,
         note: note,
         date: date,
         time: time,
@@ -449,6 +456,7 @@ class TransactionController extends GetxController {
     required String id,
     required String type,
     required double amount,
+    required String walletId,
     String? categoryId,
     String? note,
     required DateTime date,
@@ -468,6 +476,11 @@ class TransactionController extends GetxController {
       Get.snackbar('Error', _errorMessage.value);
       return false;
     }
+    if (walletId.trim().isEmpty) {
+      _errorMessage.value = 'Pilih dompet terlebih dahulu';
+      Get.snackbar('Error', _errorMessage.value);
+      return false;
+    }
 
     _isSubmitting.value = true;
     try {
@@ -476,6 +489,7 @@ class TransactionController extends GetxController {
         type: type,
         amount: amount,
         categoryId: resolvedCategoryId,
+        walletId: walletId,
         note: note,
         date: date,
         time: time,

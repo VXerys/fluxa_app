@@ -107,7 +107,10 @@ class RecentTransactionItemWidget extends StatelessWidget {
     final String title = hasNote
         ? note
         : (transaction.category?.name ?? 'Transaksi');
-    final String? subtitle = hasNote ? transaction.category?.name : null;
+    final String walletLabel =
+        transaction.walletName?.trim().isNotEmpty == true
+        ? transaction.walletName!
+        : 'Dompet';
     final String formattedAmount = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp',
@@ -166,7 +169,7 @@ class RecentTransactionItemWidget extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          subtitle ?? 'Cash',
+                          walletLabel,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.roboto12w400.copyWith(

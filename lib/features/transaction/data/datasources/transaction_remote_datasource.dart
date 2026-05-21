@@ -26,7 +26,9 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
       final response = await _client
           .from('transactions')
           .insert(payload)
-          .select('*, category:categories(*)')
+          .select(
+            '*, category:categories(*), wallet:wallets(id,name,type,currency)',
+          )
           .single();
 
       return TransactionModel.fromJson(response as Map<String, dynamic>);
@@ -43,7 +45,9 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
     try {
       var filterQuery = _client
           .from('transactions')
-          .select('*, category:categories(*)')
+          .select(
+            '*, category:categories(*), wallet:wallets(id,name,type,currency)',
+          )
           .eq('user_id', userId)
           .eq('is_deleted', false);
 
@@ -126,7 +130,9 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
           .update(payload)
           .eq('id', model.id)
           .eq('user_id', userId)
-          .select('*, category:categories(*)')
+          .select(
+            '*, category:categories(*), wallet:wallets(id,name,type,currency)',
+          )
           .single();
 
       return TransactionModel.fromJson(response as Map<String, dynamic>);

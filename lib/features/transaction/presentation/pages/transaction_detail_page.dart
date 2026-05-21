@@ -105,7 +105,7 @@ class TransactionDetailPage extends GetView<TransactionController> {
                       'Kategori',
                       transaction.category?.name ?? '-',
                     ),
-                    _buildDetailRow('Dompet', 'Tunai'),
+                    _buildDetailRow('Dompet', transaction.walletName ?? '-'),
                     _buildDetailRow(
                       'Tanggal',
                       DateFormat(

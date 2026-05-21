@@ -4,6 +4,10 @@ class TransactionEntity {
   final String id;
   final String userId;
   final String? categoryId;
+  final String? walletId;
+  final String? walletName;
+  final String? walletType;
+  final String? walletCurrency;
   final String type;
   final double amount;
   final String currency;
@@ -19,6 +23,10 @@ class TransactionEntity {
     required this.id,
     required this.userId,
     this.categoryId,
+    this.walletId,
+    this.walletName,
+    this.walletType,
+    this.walletCurrency,
     required this.type,
     required this.amount,
     required this.currency,

@@ -8,6 +8,7 @@ class AddTransactionParams {
   final String type;
   final double amount;
   final String? categoryId;
+  final String walletId;
   final String? note;
   final DateTime date;
   final String? time;
@@ -16,6 +17,7 @@ class AddTransactionParams {
     required this.type,
     required this.amount,
     this.categoryId,
+    required this.walletId,
     this.note,
     required this.date,
     this.time,
@@ -27,6 +29,7 @@ class UpdateTransactionParams {
   final String type;
   final double amount;
   final String? categoryId;
+  final String walletId;
   final String? note;
   final DateTime date;
   final String? time;
@@ -36,6 +39,7 @@ class UpdateTransactionParams {
     required this.type,
     required this.amount,
     this.categoryId,
+    required this.walletId,
     this.note,
     required this.date,
     this.time,

@@ -96,7 +96,7 @@ class ProfilePage extends GetView<ProfileController> {
               _buildCard([
                 _buildCardItem(
                   icon: Icons.delete_outline,
-                  title: 'Reset Data Lokal',
+                  title: 'Reset Data Aplikasi',
                   iconColor: AppColors.error,
                   trailing: Obx(
                     () => controller.isResetting
@@ -273,10 +273,10 @@ class ProfilePage extends GetView<ProfileController> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Reset Data Lokal?'),
+          title: const Text('Reset Data Aplikasi?'),
           content: const Text(
-            'Cache dan data lokal di perangkat ini akan dihapus.\n'
-            'Transaksi di cloud tidak dihapus.',
+            'Semua data aplikasi Anda akan dihapus dari cloud dan lokal.\n'
+            'Akun login dan profil tetap aman.',
           ),
           actions: [
             TextButton(

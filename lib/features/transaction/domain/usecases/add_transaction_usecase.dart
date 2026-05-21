@@ -21,6 +21,9 @@ class AddTransactionUseCase
     if (!_isValidType(params.type)) {
       return Left(ServerFailure('Invalid transaction type'));
     }
+    if (params.walletId.trim().isEmpty) {
+      return Left(ServerFailure('Wallet is required'));
+    }
     return repository.addTransaction(params);
   }
 

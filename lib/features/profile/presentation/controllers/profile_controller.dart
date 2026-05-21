@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import 'package:fluxa_app/core/constants/app_colors.dart';
 import 'package:fluxa_app/core/database/local_database_service.dart';
 import 'package:fluxa_app/core/storage/storage_service.dart';
+import 'package:fluxa_app/features/home/presentation/controllers/home_controller.dart';
+import 'package:fluxa_app/features/transaction/presentation/controllers/transaction_controller.dart';
+import 'package:fluxa_app/features/wallet/presentation/controllers/wallet_controller.dart';
 
 class ProfileController extends GetxController {
   final RxBool _isResetting = false.obs;
@@ -41,18 +45,73 @@ class ProfileController extends GetxController {
   }
 
   Future<void> resetData() async {
+    if (_isResetting.value) return;
     _isResetting.value = true;
-    await StorageService.clear();
-    await LocalDatabaseService.clearAll();
-    // Re-initialize default card theme on clear
-    selectedThemeIndex.value = 0;
-    _isResetting.value = false;
+    try {
+      final client = supabase.Supabase.instance.client;
+      final userId = client.auth.currentUser?.id;
+      if (userId == null) {
+        Get.snackbar(
+          'Error',
+          'Sesi login tidak ditemukan',
+          backgroundColor: AppColors.error,
+          colorText: Colors.white,
+        );
+        return;
+      }
 
-    Get.snackbar(
-      'Berhasil',
-      'Data lokal/cache telah dihapus',
-      backgroundColor: AppColors.success,
-      colorText: Colors.white,
-    );
+      // Cloud reset: keep profile + auth account, wipe app data.
+      await client.from('transactions').delete().eq('user_id', userId);
+      await client.from('wallets').delete().eq('user_id', userId);
+      await client
+          .from('categories')
+          .delete()
+          .eq('user_id', userId)
+          .eq('is_system', false);
+
+      await LocalDatabaseService.clearAll();
+
+      await StorageService.clearExcept(<String>{
+        'access_token',
+        'refresh_token',
+        'user_id',
+        'is_logged_in',
+      });
+
+      selectedThemeIndex.value = 0;
+
+      if (Get.isRegistered<HomeController>()) {
+        await Get.find<HomeController>().loadSummary();
+      }
+      if (Get.isRegistered<TransactionController>()) {
+        await Get.find<TransactionController>().loadInitialData();
+      }
+      if (Get.isRegistered<WalletController>()) {
+        await Get.find<WalletController>().loadWallets();
+      }
+
+      Get.snackbar(
+        'Berhasil',
+        'Seluruh data aplikasi berhasil dihapus. Akun dan profil tetap aman.',
+        backgroundColor: AppColors.success,
+        colorText: Colors.white,
+      );
+    } on supabase.PostgrestException catch (e) {
+      Get.snackbar(
+        'Error',
+        e.message,
+        backgroundColor: AppColors.error,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        backgroundColor: AppColors.error,
+        colorText: Colors.white,
+      );
+    } finally {
+      _isResetting.value = false;
+    }
   }
 }

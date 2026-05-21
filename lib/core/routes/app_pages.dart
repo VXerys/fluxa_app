@@ -13,6 +13,8 @@ import '../../features/profile/presentation/pages/profile_detail_placeholder_pag
 import '../../features/transaction/presentation/bindings/transaction_binding.dart';
 import '../../features/transaction/presentation/pages/add_transaction_page.dart';
 import '../../features/transaction/presentation/pages/transaction_list_page.dart';
+import '../../features/wallet/presentation/bindings/wallet_binding.dart';
+import '../widgets/placeholder_page.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -56,6 +58,14 @@ class AppPages {
       name: Routes.transactionList,
       page: () => const TransactionListPage(),
       binding: TransactionBinding(),
+    ),
+    GetPage(
+      name: Routes.walletDetail,
+      page: () => const PlaceholderPage(
+        title: 'Detail Dompet',
+        message: 'Halaman detail dompet segera hadir',
+      ),
+      binding: WalletBinding(),
     ),
     GetPage(
       name: Routes.editProfile,

@@ -22,6 +22,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
         id: '',
         userId: '',
         categoryId: params.categoryId,
+        walletId: params.walletId,
         type: params.type,
         amount: params.amount,
         currency: 'IDR',
@@ -74,6 +75,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
         id: params.id,
         userId: '', // Will be injected by remote data source
         categoryId: params.categoryId,
+        walletId: params.walletId,
         type: params.type,
         amount: params.amount,
         currency: 'IDR',

@@ -24,4 +24,15 @@ class StorageService {
   static Future<void> clear() async {
     await _box.erase();
   }
+
+  static Future<void> clearExcept(Set<String> preservedKeys) async {
+    final keys = _box.getKeys().toList();
+    for (final key in keys) {
+      final asString = key.toString();
+      if (preservedKeys.contains(asString)) {
+        continue;
+      }
+      await _box.remove(asString);
+    }
+  }
 }

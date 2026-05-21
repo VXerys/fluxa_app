@@ -11,6 +11,8 @@ import '../../../../core/utils/category_icon_mapper.dart';
 import '../../domain/entities/category_entity.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../controllers/transaction_controller.dart';
+import '../../../wallet/domain/entities/wallet_entity.dart';
+import '../../../wallet/presentation/controllers/wallet_controller.dart';
 
 class AddTransactionPage extends StatefulWidget {
   final TransactionEntity? transactionToEdit;
@@ -27,11 +29,16 @@ class _AddTransactionPageState extends State<AddTransactionPage>
   late Animation<Offset> _slideAnimation;
   bool _isClosing = false;
   late final TransactionController controller;
+  late final WalletController walletController;
 
   @override
   void initState() {
     super.initState();
     controller = Get.find<TransactionController>();
+    walletController = Get.find<WalletController>();
+    if (walletController.wallets.isEmpty && !walletController.isLoading) {
+      walletController.loadWallets();
+    }
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -159,11 +166,13 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  String _selectedWallet = 'Cash';
+  String? _selectedWalletId;
+  String _selectedWallet = 'Pilih dompet';
 
   @override
   void initState() {
     super.initState();
+    final walletController = Get.find<WalletController>();
     if (widget.transactionToEdit != null) {
       final t = widget.transactionToEdit!;
       _amountStr = t.amount.toInt().toString();
@@ -194,6 +203,8 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
         }
       }
       _selectedDate = baseDate;
+      _selectedWalletId = t.walletId;
+      _selectedWallet = t.walletName ?? 'Pilih dompet';
 
       // We must set the selected type and wait for categories to load,
       // then set the selected category.
@@ -202,8 +213,47 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
         await widget.controller.selectCategoryById(
           t.categoryId ?? t.category?.id,
         );
+        await _syncWalletSelection(walletController);
+      });
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await _syncWalletSelection(walletController);
       });
     }
+  }
+
+  Future<void> _syncWalletSelection(WalletController walletController) async {
+    if (walletController.wallets.isEmpty && !walletController.isLoading) {
+      await walletController.loadWallets();
+    }
+
+    if (!mounted) return;
+
+    final wallets = walletController.wallets;
+    if (wallets.isEmpty) return;
+
+    if (_selectedWalletId != null) {
+      WalletEntity? matched;
+      for (final wallet in wallets) {
+        if (wallet.id == _selectedWalletId) {
+          matched = wallet;
+          break;
+        }
+      }
+      if (matched != null) {
+        final walletName = matched.name;
+        setState(() {
+          _selectedWallet = walletName;
+        });
+        return;
+      }
+    }
+
+    final fallbackWallet = wallets.first;
+    setState(() {
+      _selectedWalletId = fallbackWallet.id;
+      _selectedWallet = fallbackWallet.name;
+    });
   }
 
   @override
@@ -393,6 +443,10 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
       Get.snackbar('Error', 'Pilih kategori terlebih dahulu');
       return;
     }
+    if (_selectedWalletId == null || _selectedWalletId!.isEmpty) {
+      Get.snackbar('Error', 'Pilih dompet terlebih dahulu');
+      return;
+    }
 
     final note = _noteController.text.trim();
     final title = _titleController.text.trim();
@@ -409,6 +463,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
         id: widget.transactionToEdit!.id,
         type: widget.controller.selectedType,
         amount: amount,
+        walletId: _selectedWalletId!,
         categoryId: widget.controller.resolvedSelectedCategoryId,
         note: finalNote.isEmpty ? null : finalNote,
         date: _selectedDate,
@@ -418,6 +473,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
       success = await widget.controller.addTransaction(
         type: widget.controller.selectedType,
         amount: amount,
+        walletId: _selectedWalletId!,
         categoryId: widget.controller.resolvedSelectedCategoryId,
         note: finalNote.isEmpty ? null : finalNote,
         date: _selectedDate,
@@ -446,50 +502,66 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
   }
 
   void _showWalletSelector() {
+    final walletController = Get.find<WalletController>();
     Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(AppSpacing.s24),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Pilih Dompet',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+      Obx(
+        () => Container(
+          padding: const EdgeInsets.all(AppSpacing.s24),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Pilih Dompet',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            _buildWalletItem('Cash', Icons.account_balance_wallet_outlined),
-            _buildWalletItem('Bank Mandiri', Icons.credit_card_outlined),
-            _buildWalletItem('Gopay', Icons.phone_android_outlined),
-            _buildWalletItem('OVO', Icons.stars_outlined),
-            const SizedBox(height: 16),
-          ],
+              const SizedBox(height: 16),
+              if (walletController.wallets.isEmpty)
+                Text(
+                  walletController.isLoading
+                      ? 'Memuat dompet...'
+                      : 'Belum ada dompet aktif',
+                  style: AppTextStyles.roboto14w400.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                )
+              else
+                ...walletController.wallets.map(_buildWalletItem),
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
       backgroundColor: Colors.transparent,
     );
   }
 
-  Widget _buildWalletItem(String name, IconData icon) {
-    final isSelected = _selectedWallet == name;
+  Widget _buildWalletItem(WalletEntity wallet) {
+    final isSelected = _selectedWalletId == wallet.id;
     return ListTile(
       leading: Icon(
-        icon,
+        _walletIconByType(wallet.type),
         color: isSelected ? AppColors.primary : AppColors.textSecondary,
       ),
       title: Text(
-        name,
+        wallet.name,
         style: TextStyle(
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           color: isSelected ? AppColors.primary : AppColors.textPrimary,
+        ),
+      ),
+      subtitle: Text(
+        '${wallet.type.toUpperCase()} • ${wallet.currency}',
+        style: AppTextStyles.roboto12w400.copyWith(
+          color: AppColors.textSecondary,
         ),
       ),
       trailing: isSelected
@@ -497,11 +569,30 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
           : null,
       onTap: () {
         setState(() {
-          _selectedWallet = name;
+          _selectedWalletId = wallet.id;
+          _selectedWallet = wallet.name;
         });
         Get.back();
       },
     );
+  }
+
+  IconData _walletIconByType(String type) {
+    switch (type) {
+      case 'bank':
+        return Icons.account_balance_outlined;
+      case 'ewallet':
+        return Icons.phone_android_outlined;
+      case 'credit':
+        return Icons.credit_card_outlined;
+      case 'savings':
+        return Icons.savings_outlined;
+      case 'investment':
+        return Icons.show_chart_outlined;
+      case 'cash':
+      default:
+        return Icons.account_balance_wallet_outlined;
+    }
   }
 
   @override

@@ -7,6 +7,10 @@ class TransactionModel extends TransactionEntity {
     required super.id,
     required super.userId,
     super.categoryId,
+    super.walletId,
+    super.walletName,
+    super.walletType,
+    super.walletCurrency,
     required super.type,
     required super.amount,
     required super.currency,
@@ -30,6 +34,10 @@ class TransactionModel extends TransactionEntity {
       id: json['id'] as String,
       userId: json['user_id'] as String? ?? '',
       categoryId: json['category_id'] as String?,
+      walletId: json['wallet_id'] as String?,
+      walletName: _parseWalletField(json['wallet'], 'name'),
+      walletType: _parseWalletField(json['wallet'], 'type'),
+      walletCurrency: _parseWalletField(json['wallet'], 'currency'),
       type: json['type'] as String? ?? 'expense',
       amount: _parseAmount(json['amount']),
       currency: json['currency'] as String? ?? 'IDR',
@@ -47,6 +55,7 @@ class TransactionModel extends TransactionEntity {
     final payload = <String, dynamic>{
       'user_id': userId,
       'category_id': categoryId,
+      'wallet_id': walletId,
       'type': type,
       'amount': amount,
       'currency': currency,
@@ -72,6 +81,10 @@ class TransactionModel extends TransactionEntity {
       id: id,
       userId: userId,
       categoryId: categoryId,
+      walletId: walletId,
+      walletName: walletName,
+      walletType: walletType,
+      walletCurrency: walletCurrency,
       type: type,
       amount: amount,
       currency: currency,
@@ -114,5 +127,13 @@ class TransactionModel extends TransactionEntity {
     final month = value.month.toString().padLeft(2, '0');
     final day = value.day.toString().padLeft(2, '0');
     return '$year-$month-$day';
+  }
+
+  static String? _parseWalletField(dynamic wallet, String key) {
+    if (wallet is Map) {
+      final value = wallet[key];
+      if (value is String) return value;
+    }
+    return null;
   }
 }

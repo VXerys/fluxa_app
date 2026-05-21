@@ -15,11 +15,14 @@ import '../../domain/usecases/get_parent_categories_usecase.dart';
 import '../../domain/usecases/get_transaction_summary_usecase.dart';
 import '../../domain/usecases/get_transactions_usecase.dart';
 import '../../domain/usecases/update_transaction_usecase.dart';
+import '../../../wallet/presentation/bindings/wallet_binding.dart';
 import '../controllers/transaction_controller.dart';
 
 class TransactionBinding extends Bindings {
   @override
   void dependencies() {
+    WalletBinding().dependencies();
+
     Get.lazyPut<CategoryRemoteDataSource>(() => CategoryRemoteDataSourceImpl());
     Get.lazyPut<TransactionRemoteDataSource>(
       () => TransactionRemoteDataSourceImpl(),
