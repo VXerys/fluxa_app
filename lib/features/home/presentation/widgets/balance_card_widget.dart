@@ -27,7 +27,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
     return NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp',
-      decimalDigits: 0,
+      decimalDigits: 2,
     ).format(value);
   }
 
@@ -50,7 +50,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
       final theme = ProfileController.cardThemes[selectedThemeIndex];
       final colors = theme['colors'] as List<Color>;
       return Container(
-        padding: const EdgeInsets.all(AppSpacing.s24),
+        padding: const EdgeInsets.all(AppSpacing.s16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           gradient: LinearGradient(
@@ -99,7 +99,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
               style: AppTextStyles.lora36w400.copyWith(
                 color: AppColors.surface,
                 fontWeight: FontWeight.bold,
-                fontSize: 32,
+                fontSize: 36,
               ),
             ),
             const SizedBox(height: AppSpacing.s12),
@@ -119,7 +119,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
                     },
                   ),
                 ),
-                const SizedBox(width: AppSpacing.s16),
+                const SizedBox(width: AppSpacing.s8),
                 Expanded(
                   child: _SummaryBox(
                     label: 'Pengeluaran',
@@ -163,13 +163,16 @@ class _SummaryBox extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s16,
+          horizontal: AppSpacing.s12,
           vertical: AppSpacing.s12,
         ),
         decoration: BoxDecoration(
           color: AppColors.surface.withOpacity(0.1),
-          border: Border.all(color: AppColors.surface.withOpacity(0.2), width: 1),
-          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.surface.withOpacity(0.2),
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,16 +202,16 @@ class _SummaryBox extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.s12),
+            const SizedBox(height: AppSpacing.s8),
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
                 amountText,
-                style: AppTextStyles.roboto14w400.copyWith(
+                style: AppTextStyles.roboto16w400.copyWith(
                   color: AppColors.surface,
                   fontWeight: FontWeight.w600,
-                  fontSize: 15,
+                  fontSize: 16,
                 ),
               ),
             ),

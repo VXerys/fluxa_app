@@ -45,7 +45,7 @@ class GetHomeSummaryUseCase implements UseCase<HomeSummaryEntity, NoParams> {
         return bCreatedAt.compareTo(aCreatedAt);
       });
 
-      final recentTransactions = activeTransactions.take(5).toList();
+      final recentTransactions = activeTransactions.toList();
 
       return Right(
         HomeSummaryEntity(

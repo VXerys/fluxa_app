@@ -626,11 +626,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
           top: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildInputs(),
-              const SizedBox(height: 12),
-              _buildNumpad(),
-            ],
+            children: [_buildInputs(), _buildNumpad()],
           ),
         ),
       ],
@@ -890,12 +886,6 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                   fontSize: 16,
                 ),
               ),
-              SizedBox(width: 4),
-              Icon(
-                Icons.arrow_drop_down,
-                color: AppColors.textSecondary,
-                size: 20,
-              ),
             ],
           ),
         ),
@@ -924,7 +914,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
 
   Widget _buildInputs() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
       child: Column(
         children: [
           // Judul Field

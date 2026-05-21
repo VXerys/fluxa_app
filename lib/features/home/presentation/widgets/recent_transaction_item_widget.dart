@@ -114,7 +114,7 @@ class RecentTransactionItemWidget extends StatelessWidget {
     final String formattedAmount = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp',
-      decimalDigits: 0,
+      decimalDigits: 2,
     ).format(transaction.amount);
     final String amountText = isIncome
         ? '+$formattedAmount'
@@ -208,7 +208,7 @@ class RecentTransactionItemWidget extends StatelessWidget {
     );
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
+      margin: const EdgeInsets.only(bottom: AppSpacing.s6),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),

@@ -102,7 +102,7 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (widget.controller.isLoading) {
+      if (widget.controller.isLoading && widget.controller.transactions.isEmpty) {
         return _buildShimmerList();
       }
 

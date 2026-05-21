@@ -11,6 +11,7 @@ import '../../../../core/utils/category_color_parser.dart';
 import '../../domain/entities/wallet_entity.dart';
 import '../controllers/wallet_controller.dart';
 import '../widgets/add_wallet_bottom_sheet.dart';
+import '../../../profile/presentation/controllers/profile_controller.dart';
 
 class WalletPage extends GetView<WalletController> {
   const WalletPage({super.key});
@@ -23,6 +24,7 @@ class WalletPage extends GetView<WalletController> {
 
   @override
   Widget build(BuildContext context) {
+    final double bottomPadding = MediaQuery.of(context).padding.bottom + 80;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -50,10 +52,7 @@ class WalletPage extends GetView<WalletController> {
                 builder: (_) => const AddWalletBottomSheet(),
               );
             },
-            icon: const Icon(
-              Icons.add,
-              color: AppColors.textPrimary,
-            ),
+            icon: const Icon(Icons.add, color: AppColors.textPrimary),
           ),
         ],
       ),
@@ -81,7 +80,9 @@ class WalletPage extends GetView<WalletController> {
               _buildSectionTitle('E-Wallet'),
               const SizedBox(height: AppSpacing.s8),
               _buildEwalletSection(),
-              const SizedBox(height: AppSpacing.s24),
+              SizedBox(
+                height: bottomPadding,
+              ), // Spacing to avoid being hidden behind bottom navigation bar
             ],
           ),
         ),
@@ -90,50 +91,60 @@ class WalletPage extends GetView<WalletController> {
   }
 
   Widget _buildSummaryCard() {
+    final profileController = Get.find<ProfileController>();
     return Obx(() {
-      if (controller.isLoading) {
+      if (controller.isLoading && controller.wallets.isEmpty) {
         return _buildSummaryShimmer();
       }
+
+      final selectedThemeIndex = profileController.selectedThemeIndex.value;
+      final theme = ProfileController.cardThemes[selectedThemeIndex];
+      final colors = theme['colors'] as List<Color>;
 
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(AppSpacing.s16),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF4FACFE), Color(0xFF00F2FE)],
+          borderRadius: BorderRadius.circular(24),
+          gradient: LinearGradient(
+            colors: colors,
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(AppSpacing.s16),
+          boxShadow: [
+            BoxShadow(
+              color: colors[0].withValues(alpha: 0.3),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Total Saldo (IDR)',
+                  'Dapat Dibelanjakan (IDR)',
                   style: AppTextStyles.roboto14w400.copyWith(
-                    color: AppColors.surface,
+                    color: AppColors.surface.withValues(alpha: 0.9),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.s8),
-                const Icon(
-                  Icons.swap_horiz,
-                  color: AppColors.surface,
-                  size: AppSpacing.s20,
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.s8),
-            Text(
-              _currencyFormatter.format(controller.totalBalance),
-              style: AppTextStyles.lora36w400.copyWith(
-                color: AppColors.surface,
-                fontWeight: FontWeight.w700,
+            const SizedBox(height: 5),
+            Center(
+              child: Text(
+                _currencyFormatter.format(controller.totalBalance),
+                style: AppTextStyles.lora36w400.copyWith(
+                  color: AppColors.surface,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 36,
+                ),
               ),
             ),
-            const SizedBox(height: AppSpacing.s12),
+            const SizedBox(height: 10),
             Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
               spacing: AppSpacing.s8,
@@ -164,30 +175,45 @@ class WalletPage extends GetView<WalletController> {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.s16),
-            GridView.count(
-              crossAxisCount: 2,
-              crossAxisSpacing: AppSpacing.s8,
-              mainAxisSpacing: AppSpacing.s8,
-              childAspectRatio: 2.2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
+            const SizedBox(height: 15),
+            Column(
               children: [
-                _buildSubInfoBox(
-                  title: 'Saldo Bersih',
-                  value: _currencyFormatter.format(controller.totalBalance),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSubInfoBox(
+                        title: 'Saldo Bersih',
+                        value: _currencyFormatter.format(
+                          controller.totalBalance,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.s8),
+                    Expanded(
+                      child: _buildSubInfoBox(
+                        title: 'Hutang Aktif',
+                        value: _currencyFormatter.format(0),
+                      ),
+                    ),
+                  ],
                 ),
-                _buildSubInfoBox(
-                  title: 'Hutang Aktif',
-                  value: _currencyFormatter.format(0),
-                ),
-                _buildSubInfoBox(
-                  title: 'Tabungan Aktif',
-                  value: _currencyFormatter.format(0),
-                ),
-                _buildSubInfoBox(
-                  title: 'Pembayaran Mend...',
-                  value: _currencyFormatter.format(0),
+                const SizedBox(height: AppSpacing.s8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSubInfoBox(
+                        title: 'Tabungan Aktif',
+                        value: _currencyFormatter.format(0),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.s8),
+                    Expanded(
+                      child: _buildSubInfoBox(
+                        title: 'Pembayaran Mendatang',
+                        value: _currencyFormatter.format(0),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -197,33 +223,45 @@ class WalletPage extends GetView<WalletController> {
     });
   }
 
-  Widget _buildSubInfoBox({
-    required String title,
-    required String value,
-  }) {
+  Widget _buildSubInfoBox({required String title, required String value}) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.s12),
+      height: 65,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s10,
+        vertical: AppSpacing.s6,
+      ),
       decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppSpacing.s12),
+        color: AppColors.surface.withValues(alpha: 0.1),
+        border: Border.all(
+          color: AppColors.surface.withValues(alpha: 0.2),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.roboto12w400.copyWith(
-              color: AppColors.surface,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title,
+              style: AppTextStyles.roboto12w400.copyWith(
+                color: AppColors.surface.withValues(alpha: 0.9),
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.s4),
-          Text(
-            value,
-            style: AppTextStyles.roboto14w500.copyWith(
-              color: AppColors.surface,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: AppTextStyles.roboto14w500.copyWith(
+                color: AppColors.surface,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -233,14 +271,14 @@ class WalletPage extends GetView<WalletController> {
 
   Widget _buildCashSection() {
     return Obx(() {
-      if (controller.isLoading) {
+      if (controller.isLoading && controller.wallets.isEmpty) {
         return _buildWalletListShimmer();
       }
       if (controller.cashWallets.isEmpty) {
         return _buildEmptyState(
           icon: Icons.account_balance_wallet_outlined,
           title: 'Belum ada dompet Tunai',
-          subtitle: 'Ketuk + di pojok kanan atas',
+          subtitle: 'Ketuk + di pojok kanan atas untuk menambahkan',
         );
       }
       return _buildWalletList(controller.cashWallets);
@@ -249,14 +287,14 @@ class WalletPage extends GetView<WalletController> {
 
   Widget _buildBankSection() {
     return Obx(() {
-      if (controller.isLoading) {
+      if (controller.isLoading && controller.wallets.isEmpty) {
         return _buildWalletListShimmer();
       }
       if (controller.bankWallets.isEmpty) {
         return _buildEmptyState(
           icon: Icons.account_balance_outlined,
           title: 'Belum ada dompet Akun Bank',
-          subtitle: 'Ketuk + di pojok kanan atas',
+          subtitle: 'Ketuk + di pojok kanan atas untuk menambahkan',
         );
       }
       return _buildWalletList(controller.bankWallets);
@@ -265,14 +303,14 @@ class WalletPage extends GetView<WalletController> {
 
   Widget _buildEwalletSection() {
     return Obx(() {
-      if (controller.isLoading) {
+      if (controller.isLoading && controller.wallets.isEmpty) {
         return _buildWalletListShimmer();
       }
       if (controller.ewalletWallets.isEmpty) {
         return _buildEmptyState(
           icon: Icons.credit_card_outlined,
           title: 'Belum ada dompet E-Wallet',
-          subtitle: 'Ketuk + di pojok kanan atas',
+          subtitle: 'Ketuk + di pojok kanan atas untuk menambahkan',
         );
       }
       return _buildWalletList(controller.ewalletWallets);
@@ -293,9 +331,19 @@ class WalletPage extends GetView<WalletController> {
     );
   }
 
+  IconData _walletIconByType(String type) {
+    switch (type) {
+      case 'bank':
+        return Icons.account_balance_outlined;
+      case 'ewallet':
+        return Icons.credit_card_outlined;
+      case 'cash':
+      default:
+        return Icons.account_balance_wallet_outlined;
+    }
+  }
+
   Widget _buildWalletItem(WalletEntity wallet) {
-    final bool hasCustomColor =
-        wallet.color != null && wallet.color!.trim().isNotEmpty;
     final Color walletColor = CategoryColorParser.parse(
       wallet.color,
       fallback: AppColors.primary,
@@ -315,9 +363,9 @@ class WalletPage extends GetView<WalletController> {
             borderRadius: BorderRadius.circular(AppSpacing.s16),
             boxShadow: [
               BoxShadow(
-                color: AppColors.neutral.withValues(alpha: 0.15),
-                blurRadius: AppSpacing.s8,
-                offset: const Offset(0, AppSpacing.s4),
+                color: AppColors.neutral.withValues(alpha: 0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -328,21 +376,11 @@ class WalletPage extends GetView<WalletController> {
                 height: AppSpacing.s48,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: hasCustomColor ? walletColor : null,
-                  gradient: hasCustomColor
-                      ? null
-                      : const LinearGradient(
-                          colors: [
-                            AppColors.cardGradient1Start,
-                            AppColors.cardGradient1End,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                  color: walletColor.withValues(alpha: 0.1),
                 ),
-                child: const Icon(
-                  Icons.account_balance_wallet_outlined,
-                  color: AppColors.surface,
+                child: Icon(
+                  _walletIconByType(wallet.type),
+                  color: walletColor,
                   size: AppSpacing.s24,
                 ),
               ),
@@ -355,7 +393,9 @@ class WalletPage extends GetView<WalletController> {
                       wallet.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.roboto16w600,
+                      style: AppTextStyles.roboto16w600.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.s4),
                     Text(
@@ -380,7 +420,7 @@ class WalletPage extends GetView<WalletController> {
                   const SizedBox(height: AppSpacing.s4),
                   Text(
                     _currencyFormatter.format(wallet.balance),
-                    style: AppTextStyles.roboto14w500.copyWith(
+                    style: AppTextStyles.roboto16w600.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -396,10 +436,7 @@ class WalletPage extends GetView<WalletController> {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
-      child: Text(
-        title,
-        style: AppTextStyles.roboto16w600,
-      ),
+      child: Text(title, style: AppTextStyles.roboto16w600),
     );
   }
 
@@ -415,27 +452,46 @@ class WalletPage extends GetView<WalletController> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.s16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.neutral.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Column(
+      child: Row(
         children: [
-          Icon(
-            icon,
-            color: AppColors.neutral,
-            size: AppSpacing.s32,
-          ),
-          const SizedBox(height: AppSpacing.s8),
-          Text(
-            title,
-            style: AppTextStyles.roboto14w500,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.s4),
-          Text(
-            subtitle,
-            style: AppTextStyles.roboto12w400.copyWith(
-              color: AppColors.textSecondary,
+          Container(
+            width: AppSpacing.s48,
+            height: AppSpacing.s48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.neutral.withValues(alpha: 0.08),
             ),
-            textAlign: TextAlign.center,
+            child: Icon(icon, color: AppColors.neutral, size: AppSpacing.s24),
+          ),
+          const SizedBox(width: AppSpacing.s12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  style: AppTextStyles.roboto14w500.copyWith(
+                    color: AppColors.textSecondary.withValues(alpha: 0.8),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s4),
+                Text(
+                  subtitle,
+                  style: AppTextStyles.roboto12w400.copyWith(
+                    color: AppColors.textSecondary.withValues(alpha: 0.5),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

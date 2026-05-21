@@ -77,4 +77,11 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
   );
+
+  static const TextStyle lora40w400 = TextStyle(
+    fontFamily: 'Lora',
+    fontSize: 40,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textPrimary,
+  );
 }

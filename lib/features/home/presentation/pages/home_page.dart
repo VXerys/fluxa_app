@@ -73,6 +73,7 @@ class HomePage extends GetView<HomeController> {
                         ),
                         const SizedBox(height: AppSpacing.s8),
                         Obx(() => _buildRecentTransactions(controller)),
+                        const SizedBox(height: AppSpacing.s32),
                       ],
                     ),
                   ),
@@ -86,7 +87,7 @@ class HomePage extends GetView<HomeController> {
   }
 
   Widget _buildRecentTransactions(HomeController controller) {
-    if (controller.isLoading) {
+    if (controller.isLoading && controller.summary == null) {
       return _buildRecentShimmer();
     }
 
@@ -103,83 +104,153 @@ class HomePage extends GetView<HomeController> {
       );
     }
 
-    final List<TransactionEntity> items = recentTransactions.take(5).toList();
-
-    String dateHeader = '';
-    String totalStr = '';
-
-    if (items.isNotEmpty) {
-      final firstDate = items.first.date;
-      const days = [
-        'Senin',
-        'Selasa',
-        'Rabu',
-        'Kamis',
-        'Jumat',
-        'Sabtu',
-        'Minggu',
-      ];
-      const months = [
-        'Januari',
-        'Februari',
-        'Maret',
-        'April',
-        'Mei',
-        'Juni',
-        'Juli',
-        'Agustus',
-        'September',
-        'Oktober',
-        'November',
-        'Desember',
-      ];
-      final dayName = days[firstDate.weekday - 1];
-      final monthName = months[firstDate.month - 1];
-      dateHeader = '$dayName, ${firstDate.day} $monthName ${firstDate.year}';
-
-      double total = 0;
-      for (var item in items) {
-        if (item.type == 'income') {
-          total += item.amount;
-        } else {
-          total -= item.amount;
-        }
-      }
-      totalStr = NumberFormat.currency(
-        locale: 'id_ID',
-        symbol: total < 0 ? '-Rp' : '+Rp',
-        decimalDigits: 0,
-      ).format(total.abs());
+    // 1. Group transactions by date (ignoring time)
+    final Map<DateTime, List<TransactionEntity>> grouped = {};
+    for (var tx in recentTransactions) {
+      final dateOnly = DateTime(tx.date.year, tx.date.month, tx.date.day);
+      grouped.putIfAbsent(dateOnly, () => []).add(tx);
     }
 
+    // 2. Sort the dates descending
+    final List<DateTime> sortedDates = grouped.keys.toList()
+      ..sort((a, b) => b.compareTo(a));
+
+    // 3. Limit to max 3 dates and total 6 cards
+    int totalCardsCount = 0;
+    final List<DateTime> datesToShow = [];
+    final Map<DateTime, List<TransactionEntity>> visibleGrouped = {};
+
+    for (var date in sortedDates) {
+      if (datesToShow.length >= 3) break;
+      if (totalCardsCount >= 6) break;
+
+      final txsForDate = grouped[date]!;
+      final List<TransactionEntity> visibleTxs = [];
+      for (var tx in txsForDate) {
+        if (totalCardsCount < 6) {
+          visibleTxs.add(tx);
+          totalCardsCount++;
+        } else {
+          break;
+        }
+      }
+
+      if (visibleTxs.isNotEmpty) {
+        datesToShow.add(date);
+        visibleGrouped[date] = visibleTxs;
+      }
+    }
+
+    final bool showMoreLink = recentTransactions.length > totalCardsCount;
+
+    // Indonesian Day and Month names
+    const days = [
+      'Senin',
+      'Selasa',
+      'Rabu',
+      'Kamis',
+      'Jumat',
+      'Sabtu',
+      'Minggu',
+    ];
+    const months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (items.isNotEmpty) ...[
+        for (var date in datesToShow) ...[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                dateHeader,
+                '${days[date.weekday - 1]}, ${date.day} ${months[date.month - 1]} ${date.year}',
                 style: AppTextStyles.roboto14w400.copyWith(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              Text(
-                totalStr,
-                style: AppTextStyles.roboto14w400.copyWith(
-                  color: totalStr.startsWith('-')
-                      ? AppColors.error
-                      : AppColors.success,
-                  fontWeight: FontWeight.w600,
-                ),
+              Builder(
+                builder: (context) {
+                  double total = 0;
+                  // Sum up all transactions of this date
+                  for (var tx in grouped[date]!) {
+                    if (tx.type == 'income') {
+                      total += tx.amount;
+                    } else {
+                      total -= tx.amount;
+                    }
+                  }
+                  final String totalStr = NumberFormat.currency(
+                    locale: 'id_ID',
+                    symbol: total < 0 ? '-Rp' : '+Rp',
+                    decimalDigits: 2,
+                  ).format(total.abs());
+                  return Text(
+                    totalStr,
+                    style: AppTextStyles.roboto14w400.copyWith(
+                      color: totalStr.startsWith('-')
+                          ? AppColors.error
+                          : AppColors.success,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  );
+                },
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.s8),
+          ...visibleGrouped[date]!.map((tx) {
+            return RecentTransactionItemWidget(transaction: tx);
+          }),
+          const SizedBox(height: AppSpacing.s12),
         ],
-        for (int i = 0; i < items.length; i++) ...[
-          RecentTransactionItemWidget(transaction: items[i]),
+        if (showMoreLink) ...[
+          Center(
+            child: TextButton(
+              onPressed: () => Get.toNamed(Routes.transactionList),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s16,
+                  vertical: AppSpacing.s8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Transaksi lainnya',
+                    style: AppTextStyles.roboto14w400.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s4),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: AppColors.primary,
+                    size: 16,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ],
     );
