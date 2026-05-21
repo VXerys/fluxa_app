@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import '../../../../core/errors/exceptions.dart';
@@ -58,13 +59,25 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
 
   @override
   Future<List<CategoryModel>> getParentCategoriesByType(String type) async {
-    final categories = await getCategoriesByType(type);
-    return categories
-        .where(
-          (category) =>
-              category.parentId == null && _isHierarchyReadyParent(category),
-        )
-        .toList();
+    if (!_isValidType(type)) {
+      throw ServerException('Invalid category type');
+    }
+    try {
+      final response = await _client
+          .from('categories')
+          .select()
+          .eq('is_system', true)
+          .eq('type', type)
+          .filter('parent_id', 'is', null)
+          .order('sort_order', ascending: true);
+      final result = _mapList(response);
+      debugPrint(
+        '[CategoryDS] Loaded ${result.length} $type parent categories',
+      );
+      return result;
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
   }
 
   @override

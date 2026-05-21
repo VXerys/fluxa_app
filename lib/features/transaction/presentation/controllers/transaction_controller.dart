@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/usecases/usecase.dart';
@@ -10,6 +11,7 @@ import '../../domain/usecases/delete_transaction_usecase.dart';
 import '../../domain/usecases/get_all_system_categories_usecase.dart';
 import '../../domain/usecases/get_categories_usecase.dart';
 import '../../domain/usecases/get_category_tree_usecase.dart';
+import '../../domain/usecases/get_parent_categories_usecase.dart';
 import '../../domain/usecases/get_transaction_summary_usecase.dart';
 import '../../domain/usecases/get_transactions_usecase.dart';
 import '../../domain/usecases/update_transaction_usecase.dart';
@@ -23,6 +25,7 @@ class TransactionController extends GetxController {
   final GetTransactionSummaryUseCase getTransactionSummaryUseCase;
   final GetCategoriesUseCase getCategoriesUseCase;
   final GetCategoryTreeUseCase getCategoryTreeUseCase;
+  final GetParentCategoriesUseCase getParentCategoriesUseCase;
   final GetAllSystemCategoriesUseCase getAllSystemCategoriesUseCase;
 
   TransactionController({
@@ -33,6 +36,7 @@ class TransactionController extends GetxController {
     required this.getTransactionSummaryUseCase,
     required this.getCategoriesUseCase,
     required this.getCategoryTreeUseCase,
+    required this.getParentCategoriesUseCase,
     required this.getAllSystemCategoriesUseCase,
   });
 
@@ -44,6 +48,12 @@ class TransactionController extends GetxController {
 
   final RxBool _isCategoryLoading = false.obs;
   bool get isCategoryLoading => _isCategoryLoading.value;
+
+  // True only when user has explicitly tapped a category.
+  // Auto-select on load does NOT set this — prevents submitting
+  // with a category the user never consciously chose.
+  final RxBool _categoryConfirmedByUser = false.obs;
+  bool get categoryConfirmedByUser => _categoryConfirmedByUser.value;
 
   final RxList<TransactionEntity> _transactions = <TransactionEntity>[].obs;
   List<TransactionEntity> get transactions => _transactions;
@@ -75,10 +85,13 @@ class TransactionController extends GetxController {
   final RxString _selectedType = 'expense'.obs;
   String get selectedType => _selectedType.value;
 
-  CategoryEntity? get selectedCategory =>
-      _selectedChildCategory.value ?? _selectedParentCategory.value;
+  CategoryEntity? get selectedCategory {
+    if (!_categoryConfirmedByUser.value) return null;
+    return _selectedChildCategory.value ?? _selectedParentCategory.value;
+  }
 
   String? get resolvedSelectedCategoryId {
+    if (!_categoryConfirmedByUser.value) return null;
     return _selectedChildCategory.value?.id ??
         _selectedParentCategory.value?.id;
   }
@@ -194,6 +207,43 @@ class TransactionController extends GetxController {
     await loadCategoryTree(type: type ?? _selectedType.value);
   }
 
+  /// Loads only parent system categories (parent_id IS NULL) for the given type.
+  /// Does NOT auto-select any category — user must explicitly choose.
+  Future<void> loadParentCategories({required String type}) async {
+    _isCategoryLoading.value = true;
+    try {
+      final result = await getParentCategoriesUseCase(
+        GetParentCategoriesParams(type: type),
+      );
+
+      result.fold(
+        (failure) {
+          _errorMessage.value = failure.message;
+          _parentCategories.clear();
+          _categories.clear();
+          _childCategories.clear();
+          _selectedParentCategory.value = null;
+          _selectedChildCategory.value = null;
+          debugPrint(
+            '[CategoryCtrl] Error loading $type categories: ${failure.message}',
+          );
+        },
+        (categories) {
+          _parentCategories.value = categories;
+          _categories.value = categories;
+          _childCategories.clear();
+          _selectedParentCategory.value = null;
+          _selectedChildCategory.value = null;
+          debugPrint(
+            '[CategoryCtrl] Loaded ${categories.length} $type parent categories',
+          );
+        },
+      );
+    } finally {
+      _isCategoryLoading.value = false;
+    }
+  }
+
   Future<void> loadCategoryTree({required String type}) async {
     _isCategoryLoading.value = true;
     try {
@@ -209,18 +259,23 @@ class TransactionController extends GetxController {
           _childCategories.clear();
           _selectedParentCategory.value = null;
           _selectedChildCategory.value = null;
+          debugPrint(
+            '[CategoryCtrl] Error loading $type category tree: ${failure.message}',
+          );
           Get.snackbar('Error', failure.message);
         },
         (categories) {
           _categories.value = categories;
           _parentCategories.value = categories;
-          if (categories.isEmpty) {
-            _childCategories.clear();
-            _selectedParentCategory.value = null;
-            _selectedChildCategory.value = null;
-            return;
+          _categoryConfirmedByUser.value = false;
+          debugPrint(
+            '[CategoryCtrl] Loaded ${categories.length} $type parent categories (with children)',
+          );
+          if (categories.isNotEmpty) {
+            // Auto-select first parent VISUALLY so subcategory chips show
+            // immediately — does NOT mark category as confirmed for submit.
+            _autoSelectFirstParent(categories.first);
           }
-          selectParentCategory(categories.first);
         },
       );
     } finally {
@@ -461,6 +516,7 @@ class TransactionController extends GetxController {
     _selectedType.value = type;
     _selectedParentCategory.value = null;
     _selectedChildCategory.value = null;
+    _categoryConfirmedByUser.value = false;
     _categories.clear();
     _parentCategories.clear();
     _childCategories.clear();
@@ -475,14 +531,26 @@ class TransactionController extends GetxController {
     selectChildCategory(category);
   }
 
-  void selectParentCategory(CategoryEntity category) {
+  /// Auto-select parent for visual purposes only (shows subcategory chips).
+  /// Does NOT set [_categoryConfirmedByUser] — submit validation stays blocked.
+  void _autoSelectFirstParent(CategoryEntity category) {
     _selectedParentCategory.value = category;
     _selectedChildCategory.value = null;
     _childCategories.value = category.children;
   }
 
+  /// Called when user explicitly taps a parent category.
+  void selectParentCategory(CategoryEntity category) {
+    _selectedParentCategory.value = category;
+    _selectedChildCategory.value = null;
+    _childCategories.value = category.children;
+    _categoryConfirmedByUser.value = true;
+  }
+
+  /// Called when user explicitly taps a subcategory chip.
   void selectChildCategory(CategoryEntity category) {
     _selectedChildCategory.value = category;
+    _categoryConfirmedByUser.value = true;
   }
 
   Future<void> selectCategoryById(String? categoryId) async {

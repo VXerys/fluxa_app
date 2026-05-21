@@ -48,6 +48,9 @@ class AppPages {
       name: Routes.addTransaction,
       page: () => const AddTransactionPage(),
       binding: TransactionBinding(),
+      transition: Transition.noTransition,
+      opaque: false,
+      fullscreenDialog: true,
     ),
     GetPage(
       name: Routes.transactionList,

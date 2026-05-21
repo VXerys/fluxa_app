@@ -69,7 +69,8 @@ class RecentTransactionItemWidget extends StatelessWidget {
   void _openEdit() {
     Get.to(
       () => AddTransactionPage(transactionToEdit: transaction),
-      transition: Transition.rightToLeft,
+      transition: Transition.noTransition,
+      opaque: false,
     )?.then((_) {
       // Refresh home summary after returning from edit
       if (Get.isRegistered<HomeController>()) {

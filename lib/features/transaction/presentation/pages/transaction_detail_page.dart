@@ -230,7 +230,8 @@ class TransactionDetailPage extends GetView<TransactionController> {
       onTap: () {
         Get.to(
           () => AddTransactionPage(transactionToEdit: transaction),
-          transition: Transition.rightToLeft,
+          transition: Transition.noTransition,
+          opaque: false,
         )?.then((_) {
           // After editing, pop the detail page so home data is fresh
           Get.back();
