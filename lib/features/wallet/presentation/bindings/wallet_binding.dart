@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../../core/sync/finance_sync_service.dart';
 import '../../data/datasources/wallet_remote_datasource.dart';
 import '../../data/repositories/wallet_repository_impl.dart';
 import '../../domain/repositories/wallet_repository.dart';
@@ -13,26 +14,43 @@ import '../controllers/wallet_controller.dart';
 class WalletBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<WalletRemoteDataSource>(() => WalletRemoteDataSourceImpl());
+    if (!Get.isRegistered<WalletRemoteDataSource>()) {
+      Get.lazyPut<WalletRemoteDataSource>(() => WalletRemoteDataSourceImpl());
+    }
 
-    Get.lazyPut<WalletRepository>(
-      () => WalletRepositoryImpl(remoteDataSource: Get.find()),
-    );
+    if (!Get.isRegistered<WalletRepository>()) {
+      Get.lazyPut<WalletRepository>(
+        () => WalletRepositoryImpl(remoteDataSource: Get.find()),
+      );
+    }
 
-    Get.lazyPut(() => GetWalletsUseCase(repository: Get.find()));
-    Get.lazyPut(() => CreateWalletUseCase(repository: Get.find()));
-    Get.lazyPut(() => UpdateWalletUseCase(repository: Get.find()));
-    Get.lazyPut(() => ArchiveWalletUseCase(repository: Get.find()));
-    Get.lazyPut(() => GetTotalBalanceUseCase(repository: Get.find()));
+    if (!Get.isRegistered<GetWalletsUseCase>()) {
+      Get.lazyPut(() => GetWalletsUseCase(repository: Get.find()));
+    }
+    if (!Get.isRegistered<CreateWalletUseCase>()) {
+      Get.lazyPut(() => CreateWalletUseCase(repository: Get.find()));
+    }
+    if (!Get.isRegistered<UpdateWalletUseCase>()) {
+      Get.lazyPut(() => UpdateWalletUseCase(repository: Get.find()));
+    }
+    if (!Get.isRegistered<ArchiveWalletUseCase>()) {
+      Get.lazyPut(() => ArchiveWalletUseCase(repository: Get.find()));
+    }
+    if (!Get.isRegistered<GetTotalBalanceUseCase>()) {
+      Get.lazyPut(() => GetTotalBalanceUseCase(repository: Get.find()));
+    }
 
-    Get.lazyPut(
-      () => WalletController(
-        getWalletsUseCase: Get.find(),
-        createWalletUseCase: Get.find(),
-        updateWalletUseCase: Get.find(),
-        archiveWalletUseCase: Get.find(),
-        getTotalBalanceUseCase: Get.find(),
-      ),
-    );
+    if (!Get.isRegistered<WalletController>()) {
+      Get.lazyPut(
+        () => WalletController(
+          getWalletsUseCase: Get.find(),
+          createWalletUseCase: Get.find(),
+          updateWalletUseCase: Get.find(),
+          archiveWalletUseCase: Get.find(),
+          getTotalBalanceUseCase: Get.find(),
+          financeSyncService: Get.find<FinanceSyncService>(),
+        ),
+      );
+    }
   }
 }

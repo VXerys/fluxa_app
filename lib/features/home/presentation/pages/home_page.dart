@@ -7,7 +7,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../navigation/presentation/controllers/main_navigation_controller.dart';
-import '../../../transaction/domain/entities/transaction_entity.dart';
+import '../../domain/entities/home_summary_entity.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/balance_card_widget.dart';
 import '../widgets/recent_transaction_item_widget.dart';
@@ -15,6 +15,12 @@ import 'package:intl/intl.dart';
 
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
+
+  static final NumberFormat _currencyFormatter = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp',
+    decimalDigits: 2,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -92,10 +98,10 @@ class HomePage extends GetView<HomeController> {
     }
 
     final summary = controller.summary;
-    final List<TransactionEntity> recentTransactions =
-        summary?.recentTransactions ?? <TransactionEntity>[];
+    final List<HomeTransactionGroupEntity> recentGroups =
+        summary?.recentTransactionGroups ?? const <HomeTransactionGroupEntity>[];
 
-    if (summary == null || recentTransactions.isEmpty) {
+    if (summary == null || recentGroups.isEmpty) {
       return Text(
         'Belum ada transaksi',
         style: AppTextStyles.roboto14w400.copyWith(
@@ -103,45 +109,7 @@ class HomePage extends GetView<HomeController> {
         ),
       );
     }
-
-    // 1. Group transactions by date (ignoring time)
-    final Map<DateTime, List<TransactionEntity>> grouped = {};
-    for (var tx in recentTransactions) {
-      final dateOnly = DateTime(tx.date.year, tx.date.month, tx.date.day);
-      grouped.putIfAbsent(dateOnly, () => []).add(tx);
-    }
-
-    // 2. Sort the dates descending
-    final List<DateTime> sortedDates = grouped.keys.toList()
-      ..sort((a, b) => b.compareTo(a));
-
-    // 3. Limit to max 3 dates and total 6 cards
-    int totalCardsCount = 0;
-    final List<DateTime> datesToShow = [];
-    final Map<DateTime, List<TransactionEntity>> visibleGrouped = {};
-
-    for (var date in sortedDates) {
-      if (datesToShow.length >= 3) break;
-      if (totalCardsCount >= 6) break;
-
-      final txsForDate = grouped[date]!;
-      final List<TransactionEntity> visibleTxs = [];
-      for (var tx in txsForDate) {
-        if (totalCardsCount < 6) {
-          visibleTxs.add(tx);
-          totalCardsCount++;
-        } else {
-          break;
-        }
-      }
-
-      if (visibleTxs.isNotEmpty) {
-        datesToShow.add(date);
-        visibleGrouped[date] = visibleTxs;
-      }
-    }
-
-    final bool showMoreLink = recentTransactions.length > totalCardsCount;
+    final bool showMoreLink = summary.hasMoreRecentTransactions;
 
     // Indonesian Day and Month names
     const days = [
@@ -171,48 +139,30 @@ class HomePage extends GetView<HomeController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (var date in datesToShow) ...[
+        for (final group in recentGroups) ...[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${days[date.weekday - 1]}, ${date.day} ${months[date.month - 1]} ${date.year}',
+                '${days[group.date.weekday - 1]}, ${group.date.day} ${months[group.date.month - 1]} ${group.date.year}',
                 style: AppTextStyles.roboto14w400.copyWith(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              Builder(
-                builder: (context) {
-                  double total = 0;
-                  // Sum up all transactions of this date
-                  for (var tx in grouped[date]!) {
-                    if (tx.type == 'income') {
-                      total += tx.amount;
-                    } else {
-                      total -= tx.amount;
-                    }
-                  }
-                  final String totalStr = NumberFormat.currency(
-                    locale: 'id_ID',
-                    symbol: total < 0 ? '-Rp' : '+Rp',
-                    decimalDigits: 2,
-                  ).format(total.abs());
-                  return Text(
-                    totalStr,
-                    style: AppTextStyles.roboto14w400.copyWith(
-                      color: totalStr.startsWith('-')
-                          ? AppColors.error
-                          : AppColors.success,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  );
-                },
+              Text(
+                '${group.netAmount < 0 ? '-' : '+'}${_currencyFormatter.format(group.netAmount.abs())}',
+                style: AppTextStyles.roboto14w400.copyWith(
+                  color: group.netAmount < 0
+                      ? AppColors.error
+                      : AppColors.success,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.s8),
-          ...visibleGrouped[date]!.map((tx) {
+          ...group.transactions.map((tx) {
             return RecentTransactionItemWidget(transaction: tx);
           }),
           const SizedBox(height: AppSpacing.s12),

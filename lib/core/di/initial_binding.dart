@@ -8,10 +8,13 @@ import 'package:fluxa_app/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:fluxa_app/features/auth/domain/usecases/sign_up_usecase.dart';
 import 'package:fluxa_app/features/auth/domain/usecases/update_user_usecase.dart';
 import 'package:fluxa_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:fluxa_app/core/sync/finance_sync_service.dart';
 
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
+    Get.put(FinanceSyncService(), permanent: true);
+
     // Global singletons for Auth
     Get.put<AuthRemoteDataSource>(AuthRemoteDataSourceImpl(), permanent: true);
     Get.put<AuthRepository>(

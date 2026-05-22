@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/sync/finance_sync_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/category_entity.dart';
 import '../../domain/entities/transaction_entity.dart';
@@ -15,7 +16,6 @@ import '../../domain/usecases/get_parent_categories_usecase.dart';
 import '../../domain/usecases/get_transaction_summary_usecase.dart';
 import '../../domain/usecases/get_transactions_usecase.dart';
 import '../../domain/usecases/update_transaction_usecase.dart';
-import '../../../home/presentation/controllers/home_controller.dart';
 
 class TransactionController extends GetxController {
   final AddTransactionUseCase addTransactionUseCase;
@@ -27,6 +27,7 @@ class TransactionController extends GetxController {
   final GetCategoryTreeUseCase getCategoryTreeUseCase;
   final GetParentCategoriesUseCase getParentCategoriesUseCase;
   final GetAllSystemCategoriesUseCase getAllSystemCategoriesUseCase;
+  final FinanceSyncService financeSyncService;
 
   TransactionController({
     required this.addTransactionUseCase,
@@ -38,6 +39,7 @@ class TransactionController extends GetxController {
     required this.getCategoryTreeUseCase,
     required this.getParentCategoriesUseCase,
     required this.getAllSystemCategoriesUseCase,
+    required this.financeSyncService,
   });
 
   final RxBool _isLoading = false.obs;
@@ -416,10 +418,10 @@ class TransactionController extends GetxController {
         (_) async {
           await loadTransactions();
           await loadSummary();
-
-          if (Get.isRegistered<HomeController>()) {
-            await Get.find<HomeController>().loadSummary();
-          }
+          financeSyncService.emit(
+            FinanceSyncEventType.transactionMutated,
+            source: 'transaction.add',
+          );
 
           _errorMessage.value = '';
           Get.snackbar('Success', 'Transaction added');
@@ -444,9 +446,10 @@ class TransactionController extends GetxController {
       (_) async {
         await loadTransactions();
         await loadSummary();
-        if (Get.isRegistered<HomeController>()) {
-          await Get.find<HomeController>().loadSummary();
-        }
+        financeSyncService.emit(
+          FinanceSyncEventType.transactionMutated,
+          source: 'transaction.delete',
+        );
         Get.snackbar('Success', 'Transaction deleted');
       },
     );
@@ -505,10 +508,10 @@ class TransactionController extends GetxController {
         (_) async {
           await loadTransactions();
           await loadSummary();
-
-          if (Get.isRegistered<HomeController>()) {
-            await Get.find<HomeController>().loadSummary();
-          }
+          financeSyncService.emit(
+            FinanceSyncEventType.transactionMutated,
+            source: 'transaction.update',
+          );
 
           _errorMessage.value = '';
           Get.snackbar('Success', 'Transaction updated');

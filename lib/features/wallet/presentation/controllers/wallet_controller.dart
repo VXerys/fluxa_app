@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 
+import '../../../../core/sync/finance_sync_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/wallet_entity.dart';
 import '../../domain/repositories/wallet_repository.dart';
@@ -15,6 +18,7 @@ class WalletController extends GetxController {
   final UpdateWalletUseCase updateWalletUseCase;
   final ArchiveWalletUseCase archiveWalletUseCase;
   final GetTotalBalanceUseCase getTotalBalanceUseCase;
+  final FinanceSyncService financeSyncService;
 
   WalletController({
     required this.getWalletsUseCase,
@@ -22,6 +26,7 @@ class WalletController extends GetxController {
     required this.updateWalletUseCase,
     required this.archiveWalletUseCase,
     required this.getTotalBalanceUseCase,
+    required this.financeSyncService,
   });
 
   final RxBool _isLoading = false.obs;
@@ -39,6 +44,9 @@ class WalletController extends GetxController {
   final RxString _errorMessage = ''.obs;
   String get errorMessage => _errorMessage.value;
 
+  StreamSubscription<FinanceSyncEvent>? _syncSubscription;
+  int _loadRequestId = 0;
+
   List<WalletEntity> get cashWallets => getWalletsByType('cash');
   List<WalletEntity> get bankWallets => getWalletsByType('bank');
   List<WalletEntity> get ewalletWallets => getWalletsByType('ewallet');
@@ -46,33 +54,44 @@ class WalletController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _syncSubscription = financeSyncService.stream.listen(_handleSyncEvent);
     loadWallets();
   }
 
   Future<void> loadWallets() async {
+    final requestId = ++_loadRequestId;
     _isLoading.value = true;
     try {
-      await Future.wait([_loadWalletList(), _loadTotalBalance()]);
+      await Future.wait([
+        _loadWalletList(requestId),
+        _loadTotalBalance(requestId),
+      ]);
     } finally {
+      if (_isStale(requestId)) return;
       _isLoading.value = false;
     }
   }
 
-  Future<void> _loadWalletList() async {
+  Future<void> _loadWalletList(int requestId) async {
     final result = await getWalletsUseCase(const NoParams());
+    if (_isStale(requestId)) return;
+
     result.fold(
       (failure) {
         _errorMessage.value = failure.message;
         _wallets.clear();
       },
       (data) {
+        _errorMessage.value = '';
         _wallets.value = data;
       },
     );
   }
 
-  Future<void> _loadTotalBalance() async {
+  Future<void> _loadTotalBalance(int requestId) async {
     final result = await getTotalBalanceUseCase(const NoParams());
+    if (_isStale(requestId)) return;
+
     result.fold(
       (failure) {
         _errorMessage.value = failure.message;
@@ -127,6 +146,10 @@ class WalletController extends GetxController {
         (_) async {
           _errorMessage.value = '';
           await loadWallets();
+          financeSyncService.emit(
+            FinanceSyncEventType.walletMutated,
+            source: 'wallet.create',
+          );
           Get.snackbar('Sukses', 'Dompet berhasil ditambahkan');
           return true;
         },
@@ -165,6 +188,10 @@ class WalletController extends GetxController {
         (_) async {
           _errorMessage.value = '';
           await loadWallets();
+          financeSyncService.emit(
+            FinanceSyncEventType.walletMutated,
+            source: 'wallet.update',
+          );
           Get.snackbar('Sukses', 'Dompet berhasil diperbarui');
           return true;
         },
@@ -187,6 +214,10 @@ class WalletController extends GetxController {
       (_) async {
         _errorMessage.value = '';
         await loadWallets();
+        financeSyncService.emit(
+          FinanceSyncEventType.walletMutated,
+          source: 'wallet.archive',
+        );
         Get.snackbar('Sukses', 'Dompet berhasil diarsipkan');
       },
     );
@@ -194,5 +225,28 @@ class WalletController extends GetxController {
 
   List<WalletEntity> getWalletsByType(String type) {
     return _wallets.where((wallet) => wallet.type == type).toList();
+  }
+
+  void _handleSyncEvent(FinanceSyncEvent event) {
+    if (event.type == FinanceSyncEventType.walletMutated &&
+        (event.source?.startsWith('wallet.') ?? false)) {
+      return;
+    }
+
+    if (event.type == FinanceSyncEventType.transactionMutated ||
+        event.type == FinanceSyncEventType.walletMutated ||
+        event.type == FinanceSyncEventType.dataReset) {
+      loadWallets();
+    }
+  }
+
+  bool _isStale(int requestId) {
+    return requestId != _loadRequestId || isClosed;
+  }
+
+  @override
+  void onClose() {
+    _syncSubscription?.cancel();
+    super.onClose();
   }
 }

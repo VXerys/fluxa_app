@@ -10,6 +10,8 @@ import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/tampilan_kartu_page.dart';
 import '../../features/profile/presentation/pages/tampilan_menu_page.dart';
 import '../../features/profile/presentation/pages/profile_detail_placeholder_page.dart';
+import '../../features/statistics/presentation/bindings/statistics_binding.dart';
+import '../../features/statistics/presentation/pages/statistics_page.dart';
 import '../../features/transaction/presentation/bindings/transaction_binding.dart';
 import '../../features/transaction/presentation/pages/add_transaction_page.dart';
 import '../../features/transaction/presentation/pages/transaction_list_page.dart';
@@ -49,7 +51,10 @@ class AppPages {
     GetPage(
       name: Routes.addTransaction,
       page: () => const AddTransactionPage(),
-      binding: TransactionBinding(),
+      binding: BindingsBuilder(() {
+        WalletBinding().dependencies();
+        TransactionBinding().dependencies();
+      }),
       transition: Transition.noTransition,
       opaque: false,
       fullscreenDialog: true,
@@ -57,7 +62,19 @@ class AppPages {
     GetPage(
       name: Routes.transactionList,
       page: () => const TransactionListPage(),
-      binding: TransactionBinding(),
+      binding: BindingsBuilder(() {
+        WalletBinding().dependencies();
+        TransactionBinding().dependencies();
+      }),
+    ),
+    GetPage(
+      name: Routes.statistics,
+      page: () => const StatisticsPage(),
+      binding: BindingsBuilder(() {
+        WalletBinding().dependencies();
+        TransactionBinding().dependencies();
+        StatisticsBinding().dependencies();
+      }),
     ),
     GetPage(
       name: Routes.walletDetail,

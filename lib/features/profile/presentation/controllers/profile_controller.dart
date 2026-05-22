@@ -4,12 +4,14 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import 'package:fluxa_app/core/constants/app_colors.dart';
 import 'package:fluxa_app/core/database/local_database_service.dart';
+import 'package:fluxa_app/core/sync/finance_sync_service.dart';
 import 'package:fluxa_app/core/storage/storage_service.dart';
-import 'package:fluxa_app/features/home/presentation/controllers/home_controller.dart';
-import 'package:fluxa_app/features/transaction/presentation/controllers/transaction_controller.dart';
-import 'package:fluxa_app/features/wallet/presentation/controllers/wallet_controller.dart';
 
 class ProfileController extends GetxController {
+  final FinanceSyncService financeSyncService;
+
+  ProfileController({required this.financeSyncService});
+
   final RxBool _isResetting = false.obs;
   bool get isResetting => _isResetting.value;
 
@@ -79,16 +81,10 @@ class ProfileController extends GetxController {
       });
 
       selectedThemeIndex.value = 0;
-
-      if (Get.isRegistered<HomeController>()) {
-        await Get.find<HomeController>().loadSummary();
-      }
-      if (Get.isRegistered<TransactionController>()) {
-        await Get.find<TransactionController>().loadInitialData();
-      }
-      if (Get.isRegistered<WalletController>()) {
-        await Get.find<WalletController>().loadWallets();
-      }
+      financeSyncService.emit(
+        FinanceSyncEventType.dataReset,
+        source: 'profile.reset',
+      );
 
       Get.snackbar(
         'Berhasil',

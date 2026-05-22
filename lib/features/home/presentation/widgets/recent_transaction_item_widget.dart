@@ -12,7 +12,6 @@ import '../../../transaction/domain/entities/transaction_entity.dart';
 import '../../../transaction/presentation/controllers/transaction_controller.dart';
 import '../../../transaction/presentation/pages/add_transaction_page.dart';
 import '../../../transaction/presentation/pages/transaction_detail_page.dart';
-import '../controllers/home_controller.dart';
 
 class RecentTransactionItemWidget extends StatelessWidget {
   final TransactionEntity transaction;
@@ -59,10 +58,6 @@ class RecentTransactionItemWidget extends StatelessWidget {
     if (confirmed == true) {
       final txController = Get.find<TransactionController>();
       await txController.deleteTransaction(transaction.id);
-      // Refresh home summary
-      if (Get.isRegistered<HomeController>()) {
-        await Get.find<HomeController>().loadSummary();
-      }
     }
   }
 
@@ -71,24 +66,14 @@ class RecentTransactionItemWidget extends StatelessWidget {
       () => AddTransactionPage(transactionToEdit: transaction),
       transition: Transition.noTransition,
       opaque: false,
-    )?.then((_) {
-      // Refresh home summary after returning from edit
-      if (Get.isRegistered<HomeController>()) {
-        Get.find<HomeController>().loadSummary();
-      }
-    });
+    );
   }
 
   void _openDetail() {
     Get.to(
       () => TransactionDetailPage(transaction: transaction),
       transition: Transition.rightToLeft,
-    )?.then((_) {
-      // Refresh home summary in case detail triggered a delete
-      if (Get.isRegistered<HomeController>()) {
-        Get.find<HomeController>().loadSummary();
-      }
-    });
+    );
   }
 
   @override
