@@ -200,7 +200,6 @@ class AppHugeIcons {
     'group_outlined',
     'groups_outlined',
     'handshake_outlined',
-    'history',
     'icecream_outlined',
     'info_outline',
     'keyboard_arrow_down',

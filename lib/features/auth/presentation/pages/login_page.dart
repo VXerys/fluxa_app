@@ -61,8 +61,8 @@ class _LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<_LoginForm> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController(text: 'sehanfrs9@gmail.com');
+  final TextEditingController _passwordController = TextEditingController(text: 'Sehan123');
   bool _obscurePassword = true;
 
   @override
