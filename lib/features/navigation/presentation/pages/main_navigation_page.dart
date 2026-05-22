@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -38,13 +40,15 @@ class MainNavigationPage extends GetView<MainNavigationController> {
         backgroundColor: AppColors.primary,
         elevation: 4,
         shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
+        child: const AppIcon(AppHugeIcons.add, color: Colors.white, size: 28),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         color: AppColors.surface, // Warna dasar yang kamu inginkan
-        surfaceTintColor: Colors.transparent, // <-- TAMBAHKAN INI UNTUK MENGHILANGKAN ABU-ABU MATERIAL 3
-        shadowColor: Colors.black26, // <-- (Opsional) Tambahkan ini agar bayangan elevation lebih natural, bukan abu-abu kusam
+        surfaceTintColor: Colors
+            .transparent, // <-- TAMBAHKAN INI UNTUK MENGHILANGKAN ABU-ABU MATERIAL 3
+        shadowColor: Colors
+            .black26, // <-- (Opsional) Tambahkan ini agar bayangan elevation lebih natural, bukan abu-abu kusam
         shape: const CircularNotchedRectangle(),
         clipBehavior: Clip.antiAlias,
         notchMargin: 8.0,
@@ -55,30 +59,30 @@ class MainNavigationPage extends GetView<MainNavigationController> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _NavItem(
-                icon: Icons.home_rounded,
-                outlinedIcon: Icons.home_outlined,
+                icon: AppHugeIcons.home_rounded,
+                activeIcon: AppHugeIcons.solid_home,
                 label: 'Home',
                 index: 0,
                 controller: controller,
               ),
               _NavItem(
-                icon: Icons.analytics_rounded,
-                outlinedIcon: Icons.bar_chart_outlined,
+                icon: AppHugeIcons.analytics_rounded,
+                activeIcon: AppHugeIcons.solid_analytics,
                 label: 'Statistics',
                 index: 1,
                 controller: controller,
               ),
               const SizedBox(width: 48), // Space for FAB
               _NavItem(
-                icon: Icons.account_balance_wallet_rounded,
-                outlinedIcon: Icons.account_balance_wallet_outlined,
+                icon: AppHugeIcons.account_balance_wallet_rounded,
+                activeIcon: AppHugeIcons.solid_wallet,
                 label: 'Wallet',
                 index: 2,
                 controller: controller,
               ),
               _NavItem(
-                icon: Icons.person_rounded,
-                outlinedIcon: Icons.person_outline_rounded,
+                icon: AppHugeIcons.person_rounded,
+                activeIcon: AppHugeIcons.solid_user,
                 label: 'Profile',
                 index: 3,
                 controller: controller,
@@ -94,8 +98,8 @@ class MainNavigationPage extends GetView<MainNavigationController> {
 // ... class _NavItem tetap sama ...
 
 class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final IconData outlinedIcon;
+  final AppIconData icon;
+  final AppIconData? activeIcon;
   final String label;
   final int index;
   final MainNavigationController controller;
@@ -103,7 +107,7 @@ class _NavItem extends StatelessWidget {
 
   const _NavItem({
     required this.icon,
-    required this.outlinedIcon,
+    this.activeIcon,
     required this.label,
     required this.index,
     required this.controller,
@@ -123,11 +127,15 @@ class _NavItem extends StatelessWidget {
             ? AppColors.primary
             : AppColors.textSecondary;
 
+        final displayIcon = (isActive && activeIcon != null)
+            ? activeIcon!
+            : icon;
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(isActive ? icon : outlinedIcon, color: color, size: 24),
+            AppIcon(displayIcon, color: color, size: 32),
             const SizedBox(height: 4),
             Text(
               label,

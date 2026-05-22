@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -288,8 +290,8 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                     children: [
                       Row(
                         children: [
-                          const Icon(
-                            Icons.edit_note,
+                          const AppIcon(
+                            AppHugeIcons.edit_note,
                             color: AppColors.textPrimary,
                             size: 28,
                           ),
@@ -305,8 +307,8 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                         ],
                       ),
                       IconButton(
-                        icon: const Icon(
-                          Icons.close,
+                        icon: const AppIcon(
+                          AppHugeIcons.close,
                           color: AppColors.textSecondary,
                         ),
                         onPressed: () => Navigator.of(context).pop(),
@@ -547,7 +549,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
   Widget _buildWalletItem(WalletEntity wallet) {
     final isSelected = _selectedWalletId == wallet.id;
     return ListTile(
-      leading: Icon(
+      leading: AppIcon(
         _walletIconByType(wallet.type),
         color: isSelected ? AppColors.primary : AppColors.textSecondary,
       ),
@@ -565,7 +567,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
         ),
       ),
       trailing: isSelected
-          ? const Icon(Icons.check, color: AppColors.primary)
+          ? const AppIcon(AppHugeIcons.check, color: AppColors.primary)
           : null,
       onTap: () {
         setState(() {
@@ -577,21 +579,21 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
     );
   }
 
-  IconData _walletIconByType(String type) {
+  AppIconData _walletIconByType(String type) {
     switch (type) {
       case 'bank':
-        return Icons.account_balance_outlined;
+        return AppHugeIcons.account_balance_outlined;
       case 'ewallet':
-        return Icons.phone_android_outlined;
+        return AppHugeIcons.phone_android_outlined;
       case 'credit':
-        return Icons.credit_card_outlined;
+        return AppHugeIcons.credit_card_outlined;
       case 'savings':
-        return Icons.savings_outlined;
+        return AppHugeIcons.savings_outlined;
       case 'investment':
-        return Icons.show_chart_outlined;
+        return AppHugeIcons.show_chart_outlined;
       case 'cash':
       default:
-        return Icons.account_balance_wallet_outlined;
+        return AppHugeIcons.account_balance_wallet_outlined;
     }
   }
 
@@ -675,8 +677,8 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                   color: AppColors.neutral.withValues(alpha: 0.15),
                 ),
               ),
-              child: const Icon(
-                Icons.camera_alt_outlined,
+              child: const AppIcon(
+                AppHugeIcons.camera_alt_outlined,
                 color: AppColors.textSecondary,
                 size: 20,
               ),
@@ -931,8 +933,8 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.description_outlined,
+                  const AppIcon(
+                    AppHugeIcons.description_outlined,
                     color: AppColors.textSecondary,
                     size: 20,
                   ),
@@ -979,8 +981,8 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.edit_note,
+                        const AppIcon(
+                          AppHugeIcons.edit_note,
                           color: AppColors.textSecondary,
                           size: 20,
                         ),
@@ -1038,8 +1040,8 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const Icon(
-                          Icons.keyboard_arrow_down,
+                        const AppIcon(
+                          AppHugeIcons.keyboard_arrow_down,
                           color: AppColors.textSecondary,
                           size: 20,
                         ),
@@ -1122,7 +1124,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                   'DEL',
                   isAction: true,
                   bgColor: AppColors.numpadDeleteBg,
-                  icon: Icons.backspace_outlined,
+                  icon: AppHugeIcons.backspace_outlined,
                   iconColor: AppColors.numpadDeleteIcon,
                 ),
                 const SizedBox(height: 8),
@@ -1169,8 +1171,8 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Icon(
-                            Icons.check,
+                        : const AppIcon(
+                            AppHugeIcons.check,
                             color: AppColors.surface,
                             size: 24,
                           ),
@@ -1190,7 +1192,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
     bool isAction = false,
     double height = 54,
     Color? bgColor,
-    IconData? icon,
+    AppIconData? icon,
     Color? iconColor,
     Widget? customWidget,
     VoidCallback? onTap,
@@ -1215,7 +1217,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
           child:
               customWidget ??
               (icon != null
-                  ? Icon(
+                  ? AppIcon(
                       icon,
                       color: iconColor ?? AppColors.textPrimary,
                       size: 20,
@@ -1298,7 +1300,7 @@ class _ParentCategoryItem extends StatelessWidget {
                       ]
                     : null,
               ),
-              child: Icon(
+              child: AppIcon(
                 icon,
                 size: 24,
                 color: isSelectedAsActive ? AppColors.surface : color,
@@ -1374,7 +1376,7 @@ class _ChildCategoryChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              AppIcon(
                 CategoryIconMapper.fromKey(category.icon),
                 size: 18,
                 color: isSelected ? AppColors.surface : chipColor,
@@ -1707,3 +1709,8 @@ class _ShimmerPlaceholderState extends State<_ShimmerPlaceholder>
     );
   }
 }
+
+
+
+
+

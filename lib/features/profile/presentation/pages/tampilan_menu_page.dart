@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 
 import 'package:fluxa_app/core/constants/app_colors.dart';
@@ -124,7 +126,7 @@ class TampilanMenuPage extends GetView<ProfileController> {
 }
 
 class _PreviewMenuItem extends StatelessWidget {
-  final IconData icon;
+  final AppIconData icon;
   final String label;
   final Color iconColor;
   final Color bgColor;
@@ -148,7 +150,7 @@ class _PreviewMenuItem extends StatelessWidget {
             color: bgColor,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Icon(icon, color: iconColor, size: 28),
+          child: AppIcon(icon, color: iconColor, size: 28),
         ),
         const SizedBox(height: AppSpacing.s8),
         Text(
@@ -221,8 +223,8 @@ class _PaletteCard extends StatelessWidget {
                 ),
               ),
               if (isSelected)
-                const Icon(
-                  Icons.check_circle,
+                const AppIcon(
+                  AppHugeIcons.check_circle,
                   color: AppColors.primary,
                   size: 26,
                 ),
@@ -233,3 +235,8 @@ class _PaletteCard extends StatelessWidget {
     );
   }
 }
+
+
+
+
+

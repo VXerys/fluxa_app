@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -84,7 +86,7 @@ class RecentTransactionItemWidget extends StatelessWidget {
       transaction.category?.color,
       fallback: accentColor,
     );
-    final IconData categoryIcon =
+    final AppIconData categoryIcon =
         CategoryIconMapper.fromKey(transaction.category?.icon);
 
     final String? note = transaction.note?.trim();
@@ -122,7 +124,7 @@ class RecentTransactionItemWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Center(
-                child: Icon(
+                child: AppIcon(
                   categoryIcon,
                   size: 24,
                   color: categoryColor,
@@ -146,8 +148,8 @@ class RecentTransactionItemWidget extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(
-                        Icons.account_balance_wallet_outlined,
+                      AppIcon(
+                        AppHugeIcons.account_balance_wallet_outlined,
                         size: 14,
                         color: AppColors.textSecondary,
                       ),
@@ -219,7 +221,7 @@ class RecentTransactionItemWidget extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.delete_outline, color: AppColors.error, size: 24),
+                    const AppIcon(AppHugeIcons.delete_outline, color: AppColors.error, size: 24),
                     const SizedBox(height: 4),
                     Text(
                       'Hapus',
@@ -244,7 +246,7 @@ class RecentTransactionItemWidget extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.edit_outlined, color: AppColors.primary, size: 24),
+                    const AppIcon(AppHugeIcons.edit_outlined, color: AppColors.primary, size: 24),
                     const SizedBox(height: 4),
                     Text(
                       'Edit',
@@ -265,3 +267,8 @@ class RecentTransactionItemWidget extends StatelessWidget {
     );
   }
 }
+
+
+
+
+

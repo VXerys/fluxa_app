@@ -1,5 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -133,8 +135,8 @@ class StatisticsPage extends GetView<StatisticsController> {
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
             child: Row(
               children: [
-                const Icon(
-                  Icons.calendar_today_rounded,
+                const AppIcon(
+                  AppHugeIcons.calendar_today_rounded,
                   size: 18,
                   color: AppColors.textSecondary,
                 ),
@@ -155,7 +157,7 @@ class StatisticsPage extends GetView<StatisticsController> {
         children: [
           IconButton(
             onPressed: () => controller.navigatePeriod(-1),
-            icon: const Icon(Icons.chevron_left_rounded),
+            icon: const AppIcon(AppHugeIcons.chevron_left_rounded),
             color: AppColors.textPrimary,
           ),
           Expanded(
@@ -168,7 +170,7 @@ class StatisticsPage extends GetView<StatisticsController> {
           ),
           IconButton(
             onPressed: () => controller.navigatePeriod(1),
-            icon: const Icon(Icons.chevron_right_rounded),
+            icon: const AppIcon(AppHugeIcons.chevron_right_rounded),
             color: AppColors.textPrimary,
           ),
         ],
@@ -528,10 +530,10 @@ class _CategoryBreakdownCard extends StatelessWidget {
               color: categoryColor.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: AppIcon(
               CategoryIconMapper.fromKey(item.categoryIcon),
               color: categoryColor,
-              size: 22,
+              size: 24,
             ),
           ),
           const SizedBox(width: AppSpacing.s12),
@@ -621,7 +623,7 @@ class _StaticChoiceChip extends StatelessWidget {
         children: [
           Text(label),
           const SizedBox(width: 4),
-          const Icon(Icons.keyboard_arrow_down_rounded, size: 14),
+          const AppIcon(AppHugeIcons.keyboard_arrow_down_rounded, size: 14),
         ],
       ),
       selected: true,
@@ -679,3 +681,7 @@ class _TypeToggleItem extends StatelessWidget {
     );
   }
 }
+
+
+
+

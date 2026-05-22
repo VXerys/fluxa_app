@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -117,8 +119,8 @@ class TransactionFilterWidget extends GetView<TransactionController> {
               ),
             ),
             const SizedBox(width: AppSpacing.s4),
-            Icon(
-              Icons.keyboard_arrow_down,
+            AppIcon(
+              AppHugeIcons.keyboard_arrow_down,
               size: 16,
               color: AppColors.textPrimary,
             ),
@@ -128,3 +130,7 @@ class TransactionFilterWidget extends GetView<TransactionController> {
     );
   }
 }
+
+
+
+

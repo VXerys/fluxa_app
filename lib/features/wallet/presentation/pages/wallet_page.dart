@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
@@ -50,7 +52,7 @@ class WalletPage extends GetView<WalletController> {
                 duration: const Duration(milliseconds: 260),
               );
             },
-            icon: const Icon(Icons.add, color: AppColors.textPrimary, size: 28),
+            icon: const AppIcon(AppHugeIcons.add, color: AppColors.textPrimary, size: 28),
           ),
         ],
       ),
@@ -277,7 +279,7 @@ class WalletPage extends GetView<WalletController> {
       }
       if (controller.cashWallets.isEmpty) {
         return _buildEmptyState(
-          icon: Icons.account_balance_wallet_outlined,
+          icon: AppHugeIcons.account_balance_wallet_outlined,
           title: 'Belum ada dompet Tunai',
           subtitle: 'Ketuk + di pojok kanan atas untuk menambahkan',
         );
@@ -293,7 +295,7 @@ class WalletPage extends GetView<WalletController> {
       }
       if (controller.bankWallets.isEmpty) {
         return _buildEmptyState(
-          icon: Icons.account_balance_outlined,
+          icon: AppHugeIcons.account_balance_outlined,
           title: 'Belum ada dompet Akun Bank',
           subtitle: 'Ketuk + di pojok kanan atas untuk menambahkan',
         );
@@ -309,7 +311,7 @@ class WalletPage extends GetView<WalletController> {
       }
       if (controller.ewalletWallets.isEmpty) {
         return _buildEmptyState(
-          icon: Icons.credit_card_outlined,
+          icon: AppHugeIcons.credit_card_outlined,
           title: 'Belum ada dompet E-Wallet',
           subtitle: 'Ketuk + di pojok kanan atas untuk menambahkan',
         );
@@ -332,15 +334,15 @@ class WalletPage extends GetView<WalletController> {
     );
   }
 
-  IconData _walletIconByType(String type) {
+  AppIconData _walletIconByType(String type) {
     switch (type) {
       case 'bank':
-        return Icons.account_balance_outlined;
+        return AppHugeIcons.account_balance_outlined;
       case 'ewallet':
-        return Icons.credit_card_outlined;
+        return AppHugeIcons.credit_card_outlined;
       case 'cash':
       default:
-        return Icons.account_balance_wallet_outlined;
+        return AppHugeIcons.account_balance_wallet_outlined;
     }
   }
 
@@ -379,7 +381,7 @@ class WalletPage extends GetView<WalletController> {
                   shape: BoxShape.circle,
                   color: walletColor.withValues(alpha: 0.1),
                 ),
-                child: Icon(
+                child: AppIcon(
                   _walletIconByType(wallet.type),
                   color: walletColor,
                   size: AppSpacing.s24,
@@ -442,7 +444,7 @@ class WalletPage extends GetView<WalletController> {
   }
 
   Widget _buildEmptyState({
-    required IconData icon,
+    required AppIconData icon,
     required String title,
     required String subtitle,
   }) {
@@ -470,7 +472,7 @@ class WalletPage extends GetView<WalletController> {
               shape: BoxShape.circle,
               color: AppColors.neutral.withValues(alpha: 0.08),
             ),
-            child: Icon(icon, color: AppColors.neutral, size: AppSpacing.s24),
+            child: AppIcon(icon, color: AppColors.neutral, size: AppSpacing.s24),
           ),
           const SizedBox(width: AppSpacing.s12),
           Expanded(
@@ -548,3 +550,8 @@ class _AddWalletFlowPage extends StatelessWidget {
     );
   }
 }
+
+
+
+
+

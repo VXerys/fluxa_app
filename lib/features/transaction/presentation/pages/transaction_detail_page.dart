@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -24,7 +26,7 @@ class TransactionDetailPage extends GetView<TransactionController> {
       transaction.category?.color,
       fallback: accentColor,
     );
-    final IconData categoryIcon =
+    final AppIconData categoryIcon =
         CategoryIconMapper.fromKey(transaction.category?.icon);
     final String formattedAmount = NumberFormat.currency(
       locale: 'id_ID',
@@ -50,8 +52,8 @@ class TransactionDetailPage extends GetView<TransactionController> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
+          icon: const AppIcon(
+            AppHugeIcons.arrow_back_ios_new,
             color: AppColors.textPrimary,
             size: 20,
           ),
@@ -137,7 +139,7 @@ class TransactionDetailPage extends GetView<TransactionController> {
     );
   }
 
-  Widget _buildIcon(IconData icon, Color color) {
+  Widget _buildIcon(AppIconData icon, Color color) {
     return Container(
       width: 80,
       height: 80,
@@ -146,7 +148,7 @@ class TransactionDetailPage extends GetView<TransactionController> {
         shape: BoxShape.circle,
       ),
       child: Center(
-        child: Icon(
+        child: AppIcon(
           icon,
           color: color,
           size: 40,
@@ -220,7 +222,7 @@ class TransactionDetailPage extends GetView<TransactionController> {
           color: AppColors.error.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Icon(Icons.delete_outline, color: AppColors.error),
+        child: const AppIcon(AppHugeIcons.delete_outline, color: AppColors.error),
       ),
     );
   }
@@ -246,7 +248,7 @@ class TransactionDetailPage extends GetView<TransactionController> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.edit_outlined, color: AppColors.surface, size: 20),
+            const AppIcon(AppHugeIcons.edit_outlined, color: AppColors.surface, size: 20),
             const SizedBox(width: AppSpacing.s8),
             Text(
               'Edit',
@@ -294,3 +296,8 @@ class TransactionDetailPage extends GetView<TransactionController> {
     }
   }
 }
+
+
+
+
+

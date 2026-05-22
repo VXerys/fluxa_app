@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -31,8 +33,8 @@ class TransactionListPage extends GetView<TransactionController> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
+          icon: const AppIcon(
+            AppHugeIcons.arrow_back_ios_new,
             color: AppColors.textPrimary,
             size: 20,
           ),
@@ -128,8 +130,8 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
                 hintStyle: AppTextStyles.roboto14w400.copyWith(
                   color: AppColors.textSecondary,
                 ),
-                prefixIcon: const Icon(
-                  Icons.search,
+                prefixIcon: const AppIcon(
+                  AppHugeIcons.search,
                   color: AppColors.textSecondary,
                 ),
                 filled: true,
@@ -290,7 +292,7 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
               (option) => ListTile(
                 title: Text(option, style: AppTextStyles.roboto14w400),
                 trailing: selected == option
-                    ? const Icon(Icons.check, color: AppColors.textPrimary)
+                    ? const AppIcon(AppHugeIcons.check, color: AppColors.textPrimary)
                     : null,
                 onTap: () {
                   onSelect(option);
@@ -347,7 +349,7 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
                       style: AppTextStyles.roboto14w400,
                     ),
                     trailing: widget.controller.filterCategory == null
-                        ? const Icon(Icons.check, color: AppColors.textPrimary)
+                        ? const AppIcon(AppHugeIcons.check, color: AppColors.textPrimary)
                         : null,
                     onTap: () {
                       widget.controller.setFilterCategory(null);
@@ -360,7 +362,7 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
                         ? null
                         : parentNameById[category.parentId];
                     return ListTile(
-                      leading: Icon(
+                      leading: AppIcon(
                         CategoryIconMapper.fromKey(category.icon),
                         color: color,
                       ),
@@ -378,8 +380,8 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
                             ),
                       trailing:
                           widget.controller.filterCategory?.id == category.id
-                          ? const Icon(
-                              Icons.check,
+                          ? const AppIcon(
+                              AppHugeIcons.check,
                               color: AppColors.textPrimary,
                             )
                           : null,
@@ -421,3 +423,7 @@ class AppEmptyStateWidget extends StatelessWidget {
     );
   }
 }
+
+
+
+

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -10,7 +11,7 @@ import 'package:fluxa_app/core/storage/storage_service.dart';
 class HomeMenuDefinition {
   final String id;
   final String label;
-  final IconData icon;
+  final AppIconData icon;
   final String actionKey;
 
   const HomeMenuDefinition({
@@ -60,25 +61,25 @@ class ProfileController extends GetxController {
     HomeMenuDefinition(
       id: 'catat',
       label: 'Catat',
-      icon: Icons.add_circle_outline,
+      icon: AppHugeIcons.add_circle_outline,
       actionKey: 'add_transaction',
     ),
     HomeMenuDefinition(
       id: 'riwayat',
       label: 'Riwayat',
-      icon: Icons.history,
+      icon: AppHugeIcons.history,
       actionKey: 'transaction_list',
     ),
     HomeMenuDefinition(
       id: 'suara',
       label: 'Suara',
-      icon: Icons.mic_none,
+      icon: AppHugeIcons.mic_none,
       actionKey: 'voice_placeholder',
     ),
     HomeMenuDefinition(
       id: 'kartu',
       label: 'Kartu',
-      icon: Icons.credit_card_outlined,
+      icon: AppHugeIcons.credit_card_outlined,
       actionKey: 'card_placeholder',
     ),
   ];
@@ -352,3 +353,7 @@ class ProfileController extends GetxController {
     }
   }
 }
+
+
+
+

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -29,7 +31,7 @@ class TransactionItemWidget extends StatelessWidget {
       transaction.category?.color,
       fallback: accentColor,
     );
-    final IconData categoryIcon =
+    final AppIconData categoryIcon =
         CategoryIconMapper.fromKey(transaction.category?.icon);
 
     final String dateText = DateFormat(
@@ -77,7 +79,7 @@ class TransactionItemWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
-              child: Icon(
+              child: AppIcon(
                 categoryIcon,
                 color: categoryColor,
                 size: 24,
@@ -133,3 +135,7 @@ class TransactionItemWidget extends StatelessWidget {
     );
   }
 }
+
+
+
+

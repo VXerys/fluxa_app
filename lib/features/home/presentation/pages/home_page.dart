@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -195,8 +197,8 @@ class HomePage extends GetView<HomeController> {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.s4),
-                  const Icon(
-                    Icons.chevron_right,
+                  const AppIcon(
+                    AppHugeIcons.chevron_right,
                     color: AppColors.primary,
                     size: 16,
                   ),
@@ -248,7 +250,7 @@ class HomePage extends GetView<HomeController> {
             ),
             PopupMenuButton<String>(
               color: AppColors.surface,
-              icon: const Icon(Icons.more_vert, color: AppColors.textSecondary),
+              icon: const AppIcon(AppHugeIcons.more_vert, color: AppColors.textSecondary),
               onSelected: (String value) {
                 if (value == 'tampilan_menu') {
                   Get.toNamed(Routes.tampilanMenu);
@@ -264,8 +266,8 @@ class HomePage extends GetView<HomeController> {
                     value: 'tampilan_menu',
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.palette_outlined,
+                        const AppIcon(
+                          AppHugeIcons.palette_outlined,
                           size: 18,
                           color: AppColors.textPrimary,
                         ),
@@ -283,8 +285,8 @@ class HomePage extends GetView<HomeController> {
                     value: 'urutan_menu',
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.drag_indicator_rounded,
+                        const AppIcon(
+                          AppHugeIcons.drag_indicator_rounded,
                           size: 18,
                           color: AppColors.textPrimary,
                         ),
@@ -356,7 +358,7 @@ class HomePage extends GetView<HomeController> {
   }
 
   Widget _buildMenuItem(
-    IconData icon,
+    AppIconData icon,
     String label,
     Color bgColor,
     Color iconColor, {
@@ -375,7 +377,7 @@ class HomePage extends GetView<HomeController> {
                 color: bgColor,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(icon, color: iconColor, size: 26),
+              child: AppIcon(icon, color: iconColor, size: 28),
             ),
             const SizedBox(height: AppSpacing.s8),
             Text(
@@ -392,3 +394,8 @@ class HomePage extends GetView<HomeController> {
     );
   }
 }
+
+
+
+
+

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -96,8 +98,8 @@ class _TransactionTypeDetailPageState extends State<TransactionTypeDetailPage> {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
+          icon: const AppIcon(
+            AppHugeIcons.arrow_back,
             color: AppColors.textPrimary,
             size: 24,
           ),
@@ -222,8 +224,8 @@ class _TransactionTypeDetailPageState extends State<TransactionTypeDetailPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.attach_money,
+          AppIcon(
+            AppHugeIcons.attach_money,
             size: 64,
             color: AppColors.neutral.withOpacity(0.2),
           ),
@@ -242,3 +244,7 @@ class _TransactionTypeDetailPageState extends State<TransactionTypeDetailPage> {
     );
   }
 }
+
+
+
+

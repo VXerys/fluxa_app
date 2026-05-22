@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -88,8 +90,8 @@ class _RegisterFormState extends State<_RegisterForm> {
           decoration: _inputDecoration(
             'Password',
             suffixIcon: IconButton(
-              icon: Icon(
-                _obscurePassword ? Icons.visibility : Icons.visibility_off,
+              icon: AppIcon(
+                _obscurePassword ? AppHugeIcons.visibility : AppHugeIcons.visibility_off,
                 color: AppColors.textSecondary,
               ),
               onPressed: () {
@@ -181,3 +183,7 @@ class _RegisterFormState extends State<_RegisterForm> {
     );
   }
 }
+
+
+
+

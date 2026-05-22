@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 
 import 'package:fluxa_app/core/constants/app_colors.dart';
@@ -43,22 +45,22 @@ class ProfilePage extends GetView<ProfileController> {
               _buildSectionLabel('Aplikasi'),
               _buildCard([
                 _buildCardItem(
-                  icon: Icons.upload_file,
+                  icon: AppHugeIcons.upload_file,
                   title: 'Impor Data',
                   onTap: () => Get.toNamed(Routes.imporData),
                 ),
                 _buildCardItem(
-                  icon: Icons.date_range,
+                  icon: AppHugeIcons.date_range,
                   title: 'Periode Pencatatan',
                   onTap: () => Get.toNamed(Routes.periodePencatatan),
                 ),
                 _buildCardItem(
-                  icon: Icons.category,
+                  icon: AppHugeIcons.category,
                   title: 'Kategori',
                   onTap: () => Get.toNamed(Routes.kategori),
                 ),
                 _buildCardItem(
-                  icon: Icons.account_balance_wallet,
+                  icon: AppHugeIcons.account_balance_wallet,
                   title: 'Pengaturan Dompet',
                   onTap: () => Get.toNamed(Routes.pengaturanDompet),
                 ),
@@ -67,27 +69,27 @@ class ProfilePage extends GetView<ProfileController> {
               _buildSectionLabel('Preferensi'),
               _buildCard([
                 _buildCardItem(
-                  icon: Icons.dark_mode,
+                  icon: AppHugeIcons.dark_mode,
                   title: 'Tema',
                   onTap: () => Get.toNamed(Routes.tema),
                 ),
                 _buildCardItem(
-                  icon: Icons.credit_card,
+                  icon: AppHugeIcons.credit_card,
                   title: 'Tampilan Kartu',
                   onTap: () => Get.toNamed(Routes.tampilanKartu),
                 ),
                 _buildCardItem(
-                  icon: Icons.menu,
+                  icon: AppHugeIcons.menu,
                   title: 'Tampilan Menu',
                   onTap: () => Get.toNamed(Routes.tampilanMenu),
                 ),
                 _buildCardItem(
-                  icon: Icons.swap_vert,
+                  icon: AppHugeIcons.swap_vert,
                   title: 'Urutan Menu',
                   onTap: () => Get.toNamed(Routes.urutanMenu),
                 ),
                 _buildCardItem(
-                  icon: Icons.bar_chart,
+                  icon: AppHugeIcons.bar_chart,
                   title: 'Urutan Section Statistik',
                   onTap: () => Get.toNamed(Routes.urutanStatistik),
                 ),
@@ -96,7 +98,7 @@ class ProfilePage extends GetView<ProfileController> {
               _buildSectionLabel('Data & Akun'),
               _buildCard([
                 _buildCardItem(
-                  icon: Icons.delete_outline,
+                  icon: AppHugeIcons.delete_outline,
                   title: 'Reset Data Aplikasi',
                   iconColor: AppColors.error,
                   trailing: Obx(
@@ -106,15 +108,15 @@ class ProfilePage extends GetView<ProfileController> {
                             height: AppSpacing.s16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(
-                            Icons.chevron_right,
+                        : const AppIcon(
+                            AppHugeIcons.chevron_right,
                             color: AppColors.textSecondary,
                           ),
                   ),
                   onTap: () => _showResetConfirmDialog(context),
                 ),
                 _buildCardItem(
-                  icon: Icons.logout,
+                  icon: AppHugeIcons.logout,
                   title: 'Keluar',
                   iconColor: AppColors.error,
                   onTap: () =>
@@ -158,8 +160,8 @@ class ProfilePage extends GetView<ProfileController> {
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.person,
+                child: const AppIcon(
+                  AppHugeIcons.person,
                   size: 48,
                   color: AppColors.neutral,
                 ),
@@ -175,8 +177,8 @@ class ProfilePage extends GetView<ProfileController> {
                       color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.edit,
+                    child: const AppIcon(
+                      AppHugeIcons.edit,
                       size: 16,
                       color: AppColors.surface,
                     ),
@@ -227,7 +229,7 @@ class ProfilePage extends GetView<ProfileController> {
   }
 
   Widget _buildCardItem({
-    required IconData icon,
+    required AppIconData icon,
     required String title,
     Widget? trailing,
     Color iconColor = AppColors.primary,
@@ -250,7 +252,7 @@ class ProfilePage extends GetView<ProfileController> {
                 color: AppColors.background,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: iconColor, size: 24),
+              child: AppIcon(icon, color: iconColor, size: 24),
             ),
             const SizedBox(width: AppSpacing.s16),
             Expanded(
@@ -264,7 +266,7 @@ class ProfilePage extends GetView<ProfileController> {
             if (trailing != null)
               trailing
             else
-              const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+              const AppIcon(AppHugeIcons.chevron_right, color: AppColors.textSecondary),
           ],
         ),
       ),
@@ -335,3 +337,8 @@ class ProfilePage extends GetView<ProfileController> {
     );
   }
 }
+
+
+
+
+

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 
 import 'package:fluxa_app/core/constants/app_colors.dart';
@@ -136,7 +138,7 @@ class _UrutanMenuPageState extends State<UrutanMenuPage> {
                           color: accentColor.withOpacity(0.14),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(menu.icon, color: accentColor, size: 28),
+                        child: AppIcon(menu.icon, color: accentColor, size: 28),
                       ),
                       title: Text(
                         menu.label,
@@ -145,8 +147,8 @@ class _UrutanMenuPageState extends State<UrutanMenuPage> {
                           fontSize: 18,
                         ),
                       ),
-                      trailing: const Icon(
-                        Icons.drag_handle_rounded,
+                      trailing: const AppIcon(
+                        AppHugeIcons.drag_handle_rounded,
                         color: AppColors.textSecondary,
                         size: 30,
                       ),
@@ -161,3 +163,7 @@ class _UrutanMenuPageState extends State<UrutanMenuPage> {
     );
   }
 }
+
+
+
+

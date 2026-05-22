@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -45,7 +47,7 @@ class CategoryChipWidget extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               CategoryIconMapper.fromKey(category.icon),
               size: 18,
               color: textColor,
@@ -65,3 +67,6 @@ class CategoryChipWidget extends StatelessWidget {
     );
   }
 }
+
+
+

@@ -1,185 +1,189 @@
-import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
 
 class CategoryIconMapper {
   CategoryIconMapper._();
 
-  static IconData fromKey(String? key) {
+  static AppIconData fromKey(String? key) {
     switch (key) {
       case 'food':
       case 'breakfast':
       case 'lunch':
       case 'dinner':
       case 'restaurant':
-        return Icons.restaurant_outlined;
+        return AppHugeIcons.restaurant_outlined;
       case 'coffee':
-        return Icons.local_cafe_outlined;
+        return AppHugeIcons.local_cafe_outlined;
       case 'snack':
-        return Icons.fastfood_outlined;
+        return AppHugeIcons.fastfood_outlined;
       case 'groceries':
-        return Icons.local_grocery_store_outlined;
+        return AppHugeIcons.local_grocery_store_outlined;
       case 'transport':
       case 'bus':
-        return Icons.directions_bus_outlined;
+        return AppHugeIcons.directions_bus_outlined;
       case 'train':
-        return Icons.train_outlined;
+        return AppHugeIcons.train_outlined;
       case 'taxi':
-        return Icons.local_taxi_outlined;
+        return AppHugeIcons.local_taxi_outlined;
       case 'fuel':
-        return Icons.local_gas_station_outlined;
+        return AppHugeIcons.local_gas_station_outlined;
       case 'parking':
-        return Icons.local_parking_outlined;
+        return AppHugeIcons.local_parking_outlined;
       case 'online_ride':
-        return Icons.two_wheeler_outlined;
+        return AppHugeIcons.two_wheeler_outlined;
       case 'vehicle_service':
-        return Icons.car_repair_outlined;
+        return AppHugeIcons.car_repair_outlined;
       case 'shopping':
-        return Icons.shopping_bag_outlined;
+        return AppHugeIcons.shopping_bag_outlined;
       case 'clothes':
-        return Icons.checkroom_outlined;
+        return AppHugeIcons.checkroom_outlined;
       case 'shoes':
-        return Icons.shopping_bag_outlined;
+        return AppHugeIcons.shopping_bag_outlined;
       case 'accessories':
-        return Icons.watch_outlined;
+        return AppHugeIcons.watch_outlined;
       case 'electronics':
-        return Icons.devices_outlined;
+        return AppHugeIcons.devices_outlined;
       case 'marketplace':
-        return Icons.storefront_outlined;
+        return AppHugeIcons.storefront_outlined;
       case 'personal_care':
-        return Icons.spa_outlined;
+        return AppHugeIcons.spa_outlined;
       case 'housing':
-        return Icons.home_outlined;
+        return AppHugeIcons.home_outlined;
       case 'rent':
-        return Icons.key_outlined;
+        return AppHugeIcons.key_outlined;
       case 'electricity':
-        return Icons.bolt_outlined;
+        return AppHugeIcons.bolt_outlined;
       case 'water':
-        return Icons.water_drop_outlined;
+        return AppHugeIcons.water_drop_outlined;
       case 'internet':
-        return Icons.wifi_outlined;
+        return AppHugeIcons.wifi_outlined;
       case 'furniture':
-        return Icons.chair_outlined;
+        return AppHugeIcons.chair_outlined;
       case 'cleaning':
-        return Icons.cleaning_services_outlined;
+        return AppHugeIcons.cleaning_services_outlined;
       case 'home_repair':
-        return Icons.handyman_outlined;
+        return AppHugeIcons.handyman_outlined;
       case 'entertainment':
       case 'movie':
-        return Icons.movie_outlined;
+        return AppHugeIcons.movie_outlined;
       case 'music':
-        return Icons.music_note_outlined;
+        return AppHugeIcons.music_note_outlined;
       case 'game':
-        return Icons.sports_esports_outlined;
+        return AppHugeIcons.sports_esports_outlined;
       case 'concert':
-        return Icons.music_note_outlined;
+        return AppHugeIcons.music_note_outlined;
       case 'streaming':
-        return Icons.play_circle_outline;
+        return AppHugeIcons.play_circle_outline;
       case 'vacation':
-        return Icons.flight_takeoff_outlined;
+        return AppHugeIcons.flight_takeoff_outlined;
       case 'hobby':
-        return Icons.palette_outlined;
+        return AppHugeIcons.palette_outlined;
       case 'health':
-        return Icons.medical_services_outlined;
+        return AppHugeIcons.medical_services_outlined;
       case 'doctor':
-        return Icons.medical_services_outlined;
+        return AppHugeIcons.medical_services_outlined;
       case 'medicine':
-        return Icons.medication_outlined;
+        return AppHugeIcons.medication_outlined;
       case 'hospital':
-        return Icons.local_hospital_outlined;
+        return AppHugeIcons.local_hospital_outlined;
       case 'insurance':
-        return Icons.health_and_safety_outlined;
+        return AppHugeIcons.health_and_safety_outlined;
       case 'gym':
-        return Icons.fitness_center_outlined;
+        return AppHugeIcons.fitness_center_outlined;
       case 'vitamin':
-        return Icons.local_pharmacy_outlined;
+        return AppHugeIcons.local_pharmacy_outlined;
       case 'education':
-        return Icons.school_outlined;
+        return AppHugeIcons.school_outlined;
       case 'course':
-        return Icons.menu_book_outlined;
+        return AppHugeIcons.menu_book_outlined;
       case 'book':
-        return Icons.book_outlined;
+        return AppHugeIcons.book_outlined;
       case 'tuition':
-        return Icons.account_balance_outlined;
+        return AppHugeIcons.account_balance_outlined;
       case 'seminar':
-        return Icons.groups_outlined;
+        return AppHugeIcons.groups_outlined;
       case 'certification':
-        return Icons.workspace_premium_outlined;
+        return AppHugeIcons.workspace_premium_outlined;
       case 'stationery':
-        return Icons.edit_outlined;
+        return AppHugeIcons.edit_outlined;
       case 'bill':
-        return Icons.receipt_long_outlined;
+        return AppHugeIcons.receipt_long_outlined;
       case 'phone_credit':
-        return Icons.phone_android_outlined;
+        return AppHugeIcons.phone_android_outlined;
       case 'mobile_data':
-        return Icons.signal_cellular_alt_outlined;
+        return AppHugeIcons.signal_cellular_alt_outlined;
       case 'subscription':
-        return Icons.subscriptions_outlined;
+        return AppHugeIcons.subscriptions_outlined;
       case 'credit_card':
-        return Icons.credit_card_outlined;
+        return AppHugeIcons.credit_card_outlined;
       case 'loan':
-        return Icons.payments_outlined;
+        return AppHugeIcons.payments_outlined;
       case 'tax':
-        return Icons.request_quote_outlined;
+        return AppHugeIcons.request_quote_outlined;
       case 'salary':
       case 'monthly_salary':
       case 'salary_bonus':
-        return Icons.payments_outlined;
+        return AppHugeIcons.payments_outlined;
       case 'allowance':
       case 'overtime':
-        return Icons.account_balance_wallet_outlined;
+        return AppHugeIcons.account_balance_wallet_outlined;
       case 'freelance':
       case 'project':
-        return Icons.work_outline;
+        return AppHugeIcons.work_outline;
       case 'design':
-        return Icons.design_services_outlined;
+        return AppHugeIcons.design_services_outlined;
       case 'development':
-        return Icons.code_outlined;
+        return AppHugeIcons.code_outlined;
       case 'writing':
-        return Icons.article_outlined;
+        return AppHugeIcons.article_outlined;
       case 'consultation':
-        return Icons.support_agent_outlined;
+        return AppHugeIcons.support_agent_outlined;
       case 'business':
       case 'product_sales':
       case 'service_sales':
-        return Icons.storefront_outlined;
+        return AppHugeIcons.storefront_outlined;
       case 'profit':
       case 'commission':
-        return Icons.trending_up_outlined;
+        return AppHugeIcons.trending_up_outlined;
       case 'investment':
       case 'capital_gain':
       case 'stock':
-        return Icons.trending_up_outlined;
+        return AppHugeIcons.trending_up_outlined;
       case 'dividend':
       case 'interest':
-        return Icons.savings_outlined;
+        return AppHugeIcons.savings_outlined;
       case 'crypto':
-        return Icons.attach_money;
+        return AppHugeIcons.attach_money;
       case 'gift':
       case 'gift_out':
       case 'prize':
-        return Icons.card_giftcard_outlined;
+        return AppHugeIcons.card_giftcard_outlined;
       case 'family':
-        return Icons.group_outlined;
+        return AppHugeIcons.group_outlined;
       case 'friend':
-        return Icons.people_outline;
+        return AppHugeIcons.people_outline;
       case 'reward':
-        return Icons.emoji_events_outlined;
+        return AppHugeIcons.emoji_events_outlined;
       case 'refund':
       case 'cashback':
       case 'reimbursement':
-        return Icons.replay_outlined;
+        return AppHugeIcons.replay_outlined;
       case 'debt_paid':
-        return Icons.handshake_outlined;
+        return AppHugeIcons.handshake_outlined;
       case 'donation':
-        return Icons.volunteer_activism_outlined;
+        return AppHugeIcons.volunteer_activism_outlined;
       case 'admin_fee':
-        return Icons.admin_panel_settings_outlined;
+        return AppHugeIcons.admin_panel_settings_outlined;
       case 'unexpected':
-        return Icons.error_outline;
+        return AppHugeIcons.error_outline;
       case 'other':
       case 'other_expense':
       case 'other_income':
       default:
-        return Icons.category_outlined;
+        return AppHugeIcons.category_outlined;
     }
   }
 }
+
+
+
+

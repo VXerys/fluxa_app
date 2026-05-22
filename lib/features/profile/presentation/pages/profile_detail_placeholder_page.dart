@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 import 'package:fluxa_app/core/constants/app_colors.dart';
 import 'package:fluxa_app/core/constants/app_spacing.dart';
@@ -71,9 +73,9 @@ class _ImporDataPageState extends State<ImporDataPage> {
                         color: AppColors.background,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.cloud_upload_outlined,
-                        size: 40,
+                      child: const AppIcon(
+                        AppHugeIcons.cloud_upload_outlined,
+                        size: 30,
                         color: AppColors.primary,
                       ),
                     ),
@@ -211,7 +213,7 @@ class _PeriodePencatatanPageState extends State<PeriodePencatatanPage> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, color: AppColors.primary, size: 24),
+                  const AppIcon(AppHugeIcons.info_outline, color: AppColors.primary, size: 24),
                   const SizedBox(width: AppSpacing.s12),
                   Expanded(
                     child: Text(
@@ -337,23 +339,23 @@ class KategoriPage extends StatefulWidget {
 class _KategoriPageState extends State<KategoriPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final List<Map<String, dynamic>> _expenseCats = [
-    {'name': 'Makan & Minum', 'icon': Icons.fastfood, 'color': AppColors.categoryFood},
-    {'name': 'Transportasi', 'icon': Icons.directions_car, 'color': AppColors.categoryTransport},
-    {'name': 'Belanja', 'icon': Icons.shopping_bag, 'color': AppColors.categoryShopping},
-    {'name': 'Tagihan', 'icon': Icons.receipt, 'color': AppColors.categoryHousing},
-    {'name': 'Hiburan', 'icon': Icons.sports_esports, 'color': Colors.pink},
-    {'name': 'Kesehatan', 'icon': Icons.medical_services, 'color': Colors.red},
-    {'name': 'Pendidikan', 'icon': Icons.school, 'color': Colors.green},
-    {'name': 'Lainnya', 'icon': Icons.more_horiz, 'color': Colors.blueGrey},
+    {'name': 'Makan & Minum', 'icon': AppHugeIcons.fastfood, 'color': AppColors.categoryFood},
+    {'name': 'Transportasi', 'icon': AppHugeIcons.directions_car, 'color': AppColors.categoryTransport},
+    {'name': 'Belanja', 'icon': AppHugeIcons.shopping_bag, 'color': AppColors.categoryShopping},
+    {'name': 'Tagihan', 'icon': AppHugeIcons.receipt, 'color': AppColors.categoryHousing},
+    {'name': 'Hiburan', 'icon': AppHugeIcons.sports_esports, 'color': Colors.pink},
+    {'name': 'Kesehatan', 'icon': AppHugeIcons.medical_services, 'color': Colors.red},
+    {'name': 'Pendidikan', 'icon': AppHugeIcons.school, 'color': Colors.green},
+    {'name': 'Lainnya', 'icon': AppHugeIcons.more_horiz, 'color': Colors.blueGrey},
   ];
 
   final List<Map<String, dynamic>> _incomeCats = [
-    {'name': 'Gaji', 'icon': Icons.work, 'color': Colors.green},
-    {'name': 'Freelance', 'icon': Icons.computer, 'color': Colors.teal},
-    {'name': 'Bonus', 'icon': Icons.monetization_on, 'color': Colors.amber},
-    {'name': 'Hadiah', 'icon': Icons.card_giftcard, 'color': Colors.purple},
-    {'name': 'Jualan', 'icon': Icons.storefront, 'color': Colors.orange},
-    {'name': 'Lainnya', 'icon': Icons.more_horiz, 'color': Colors.blueGrey},
+    {'name': 'Gaji', 'icon': AppHugeIcons.work, 'color': Colors.green},
+    {'name': 'Freelance', 'icon': AppHugeIcons.computer, 'color': Colors.teal},
+    {'name': 'Bonus', 'icon': AppHugeIcons.monetization_on, 'color': Colors.amber},
+    {'name': 'Hadiah', 'icon': AppHugeIcons.card_giftcard, 'color': Colors.purple},
+    {'name': 'Jualan', 'icon': AppHugeIcons.storefront, 'color': Colors.orange},
+    {'name': 'Lainnya', 'icon': AppHugeIcons.more_horiz, 'color': Colors.blueGrey},
   ];
 
   @override
@@ -389,10 +391,10 @@ class _KategoriPageState extends State<KategoriPage> with SingleTickerProviderSt
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  CircleAvatar(backgroundColor: AppColors.primary, child: const Icon(Icons.star, color: Colors.white)),
-                  CircleAvatar(backgroundColor: Colors.red, child: const Icon(Icons.favorite, color: Colors.white)),
-                  CircleAvatar(backgroundColor: Colors.amber, child: const Icon(Icons.home, color: Colors.white)),
-                  CircleAvatar(backgroundColor: Colors.green, child: const Icon(Icons.shopping_cart, color: Colors.white)),
+                  CircleAvatar(backgroundColor: AppColors.primary, child: const AppIcon(AppHugeIcons.star, color: Colors.white)),
+                  CircleAvatar(backgroundColor: Colors.red, child: const AppIcon(AppHugeIcons.favorite, color: Colors.white)),
+                  CircleAvatar(backgroundColor: Colors.amber, child: const AppIcon(AppHugeIcons.home, color: Colors.white)),
+                  CircleAvatar(backgroundColor: Colors.green, child: const AppIcon(AppHugeIcons.shopping_cart, color: Colors.white)),
                 ],
               ),
             ],
@@ -450,7 +452,7 @@ class _KategoriPageState extends State<KategoriPage> with SingleTickerProviderSt
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddCategoryDialog,
         backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const AppIcon(AppHugeIcons.add, color: Colors.white),
       ),
     );
   }
@@ -468,14 +470,14 @@ class _KategoriPageState extends State<KategoriPage> with SingleTickerProviderSt
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: (cat['color'] as Color).withOpacity(0.15),
-              child: Icon(cat['icon'] as IconData, color: cat['color'] as Color),
+              child: AppIcon(cat['icon'] as AppIconData, color: cat['color'] as Color),
             ),
             title: Text(cat['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.edit_outlined, color: AppColors.textSecondary),
+                  icon: const AppIcon(AppHugeIcons.edit_outlined, color: AppColors.textSecondary),
                   onPressed: () {
                     Get.snackbar(
                       'Ubah Kategori',
@@ -486,7 +488,7 @@ class _KategoriPageState extends State<KategoriPage> with SingleTickerProviderSt
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                  icon: const AppIcon(AppHugeIcons.delete_outline, color: AppColors.error),
                   onPressed: () {
                     Get.snackbar(
                       'Hapus Kategori',
@@ -699,7 +701,7 @@ class _PengaturanDompetPageState extends State<PengaturanDompetPage> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
               onPressed: _showAddWalletSheet,
-              icon: const Icon(Icons.add, color: AppColors.primary),
+              icon: const AppIcon(AppHugeIcons.add, color: AppColors.primary),
               label: const Text('Hubungkan Dompet Baru', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
             ),
           ],
@@ -746,19 +748,19 @@ class _TemaPageState extends State<TemaPage> {
                 children: [
                   _buildThemeOption(
                     title: 'Mode Terang (Light Mode)',
-                    icon: Icons.light_mode_outlined,
+                    icon: AppHugeIcons.light_mode_outlined,
                     value: 'Terang',
                   ),
                   const Divider(height: 1),
                   _buildThemeOption(
                     title: 'Mode Gelap (Dark Mode)',
-                    icon: Icons.dark_mode_outlined,
+                    icon: AppHugeIcons.dark_mode_outlined,
                     value: 'Gelap',
                   ),
                   const Divider(height: 1),
                   _buildThemeOption(
                     title: 'Ikuti Sistem Default',
-                    icon: Icons.settings_brightness_outlined,
+                    icon: AppHugeIcons.settings_brightness_outlined,
                     value: 'Sistem',
                   ),
                 ],
@@ -778,14 +780,14 @@ class _TemaPageState extends State<TemaPage> {
 
   Widget _buildThemeOption({
     required String title,
-    required IconData icon,
+    required AppIconData icon,
     required String value,
   }) {
     final isSelected = _selectedTheme == value;
     return RadioListTile<String>(
       title: Row(
         children: [
-          Icon(icon, color: isSelected ? AppColors.primary : AppColors.textSecondary),
+          AppIcon(icon, color: isSelected ? AppColors.primary : AppColors.textSecondary),
           const SizedBox(width: AppSpacing.s16),
           Text(title, style: const TextStyle(fontSize: 16)),
         ],
@@ -822,10 +824,10 @@ class UrutanMenuPage extends StatefulWidget {
 
 class _UrutanMenuPageState extends State<UrutanMenuPage> {
   final List<Map<String, dynamic>> _menuItems = [
-    {'id': 'catat', 'name': 'Catat Transaksi', 'icon': Icons.add_circle_outline, 'color': Colors.green},
-    {'id': 'riwayat', 'name': 'Riwayat Keuangan', 'icon': Icons.history, 'color': Colors.blue},
-    {'id': 'profil', 'name': 'Profil Akun', 'icon': Icons.person_outline, 'color': Colors.purple},
-    {'id': 'lainnya', 'name': 'Fitur Lainnya', 'icon': Icons.more_horiz, 'color': Colors.grey},
+    {'id': 'catat', 'name': 'Catat Transaksi', 'icon': AppHugeIcons.add_circle_outline, 'color': Colors.green},
+    {'id': 'riwayat', 'name': 'Riwayat Keuangan', 'icon': AppHugeIcons.history, 'color': Colors.blue},
+    {'id': 'profil', 'name': 'Profil Akun', 'icon': AppHugeIcons.person_outline, 'color': Colors.purple},
+    {'id': 'lainnya', 'name': 'Fitur Lainnya', 'icon': AppHugeIcons.more_horiz, 'color': Colors.grey},
   ];
 
   @override
@@ -862,10 +864,10 @@ class _UrutanMenuPageState extends State<UrutanMenuPage> {
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: (item['color'] as Color).withOpacity(0.1),
-                      child: Icon(item['icon'] as IconData, color: item['color'] as Color),
+                      child: AppIcon(item['icon'] as AppIconData, color: item['color'] as Color),
                     ),
                     title: Text(item['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    trailing: const Icon(Icons.drag_handle, color: AppColors.textSecondary),
+                    trailing: const AppIcon(AppHugeIcons.drag_handle, color: AppColors.textSecondary),
                   ),
                 );
               },
@@ -958,7 +960,7 @@ class _UrutanSectionStatistikPageState extends State<UrutanSectionStatistikPage>
                   child: ListTile(
                     title: Text(sec['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(sec['desc'] as String, style: const TextStyle(fontSize: 12)),
-                    trailing: const Icon(Icons.drag_handle, color: AppColors.textSecondary),
+                    trailing: const AppIcon(AppHugeIcons.drag_handle, color: AppColors.textSecondary),
                   ),
                 );
               },
@@ -998,3 +1000,8 @@ class _UrutanSectionStatistikPageState extends State<UrutanSectionStatistikPage>
     );
   }
 }
+
+
+
+
+

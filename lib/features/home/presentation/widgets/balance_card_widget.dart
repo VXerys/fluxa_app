@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -85,8 +87,8 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
                       _isObscured = !_isObscured;
                     });
                   },
-                  child: Icon(
-                    _isObscured ? Icons.visibility_off : Icons.visibility,
+                  child: AppIcon(
+                    _isObscured ? AppHugeIcons.visibility_off : AppHugeIcons.visibility,
                     color: AppColors.surface.withOpacity(0.9),
                     size: 18,
                   ),
@@ -109,7 +111,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
                   child: _SummaryBox(
                     label: 'Pemasukan',
                     amountText: incomeText,
-                    icon: Icons.arrow_downward,
+                    icon: AppHugeIcons.arrow_downward,
                     onTap: () {
                       Get.to(
                         () => const TransactionTypeDetailPage(isIncome: true),
@@ -124,7 +126,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
                   child: _SummaryBox(
                     label: 'Pengeluaran',
                     amountText: expenseText,
-                    icon: Icons.arrow_upward,
+                    icon: AppHugeIcons.arrow_upward,
                     onTap: () {
                       Get.to(
                         () => const TransactionTypeDetailPage(isIncome: false),
@@ -146,7 +148,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
 class _SummaryBox extends StatelessWidget {
   final String label;
   final String amountText;
-  final IconData icon;
+  final AppIconData icon;
   final VoidCallback? onTap;
 
   const _SummaryBox({
@@ -185,7 +187,7 @@ class _SummaryBox extends StatelessWidget {
                     color: AppColors.surface.withOpacity(0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: AppColors.surface, size: 14),
+                  child: AppIcon(icon, color: AppColors.surface, size: 14),
                 ),
                 const SizedBox(width: AppSpacing.s8),
                 Expanded(
@@ -221,3 +223,8 @@ class _SummaryBox extends StatelessWidget {
     );
   }
 }
+
+
+
+
+

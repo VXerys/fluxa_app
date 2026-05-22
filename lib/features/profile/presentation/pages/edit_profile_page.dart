@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluxa_app/core/icons/app_huge_icons.dart';
+import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:get/get.dart';
 
 import 'package:fluxa_app/core/constants/app_colors.dart';
@@ -51,7 +53,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const AppIcon(AppHugeIcons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
       ),
@@ -78,9 +80,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.person,
-                        size: 48,
+                      child: const AppIcon(
+                        AppHugeIcons.person,
+                        size: 36,
                         color: AppColors.neutral,
                       ),
                     ),
@@ -159,3 +161,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 }
+
+
+
+
