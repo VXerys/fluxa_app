@@ -29,6 +29,7 @@ class ProfilePage extends GetView<ProfileController> {
         elevation: 0,
       ),
       body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.s16,
@@ -103,11 +104,12 @@ class ProfilePage extends GetView<ProfileController> {
                         ? const SizedBox(
                             width: AppSpacing.s16,
                             height: AppSpacing.s16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                        : const Icon(
+                            Icons.chevron_right,
+                            color: AppColors.textSecondary,
+                          ),
                   ),
                   onTap: () => _showResetConfirmDialog(context),
                 ),
@@ -115,7 +117,8 @@ class ProfilePage extends GetView<ProfileController> {
                   icon: Icons.logout,
                   title: 'Keluar',
                   iconColor: AppColors.error,
-                  onTap: () => _showLogoutConfirmDialog(context, authController),
+                  onTap: () =>
+                      _showLogoutConfirmDialog(context, authController),
                 ),
               ]),
               const SizedBox(height: AppSpacing.s32),
@@ -127,7 +130,7 @@ class ProfilePage extends GetView<ProfileController> {
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.s32),
+              const SizedBox(height: 150),
             ],
           ),
         ),

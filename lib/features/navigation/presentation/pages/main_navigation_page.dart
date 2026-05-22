@@ -10,6 +10,8 @@ import '../../../statistics/presentation/pages/statistics_page.dart';
 import '../../../wallet/presentation/pages/wallet_page.dart';
 import '../controllers/main_navigation_controller.dart';
 
+// ... import tetap sama ...
+
 class MainNavigationPage extends GetView<MainNavigationController> {
   const MainNavigationPage({super.key});
 
@@ -40,8 +42,11 @@ class MainNavigationPage extends GetView<MainNavigationController> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
-        color: AppColors.surface,
+        color: AppColors.surface, // Warna dasar yang kamu inginkan
+        surfaceTintColor: Colors.transparent, // <-- TAMBAHKAN INI UNTUK MENGHILANGKAN ABU-ABU MATERIAL 3
+        shadowColor: Colors.black26, // <-- (Opsional) Tambahkan ini agar bayangan elevation lebih natural, bukan abu-abu kusam
         shape: const CircularNotchedRectangle(),
+        clipBehavior: Clip.antiAlias,
         notchMargin: 8.0,
         elevation: 20,
         child: SizedBox(
@@ -85,6 +90,8 @@ class MainNavigationPage extends GetView<MainNavigationController> {
     );
   }
 }
+
+// ... class _NavItem tetap sama ...
 
 class _NavItem extends StatelessWidget {
   final IconData icon;

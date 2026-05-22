@@ -25,6 +25,7 @@ class StatisticsPage extends GetView<StatisticsController> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.s16),
           child: Column(
@@ -43,6 +44,7 @@ class StatisticsPage extends GetView<StatisticsController> {
               _buildCategoryBreakdownSection(_amountFormatter),
               const SizedBox(height: AppSpacing.s12),
               _buildTopCategorySection(_amountFormatter),
+              const SizedBox(height: 120),
             ],
           ),
         ),
@@ -108,7 +110,8 @@ class StatisticsPage extends GetView<StatisticsController> {
           onTap: () async {
             final now = DateTime.now();
             final initialStart =
-                controller.rangeStart ?? DateTime(now.year, now.month, now.day - 6);
+                controller.rangeStart ??
+                DateTime(now.year, now.month, now.day - 6);
             final initialEnd =
                 controller.rangeEnd ?? DateTime(now.year, now.month, now.day);
 
@@ -217,8 +220,8 @@ class StatisticsPage extends GetView<StatisticsController> {
           );
         }
 
-        final breakdown = controller.summary?.breakdown ??
-            <CategoryBreakdownEntity>[];
+        final breakdown =
+            controller.summary?.breakdown ?? <CategoryBreakdownEntity>[];
         if (controller.errorMessage.isNotEmpty && breakdown.isEmpty) {
           return SizedBox(
             height: 280,
@@ -364,7 +367,8 @@ class StatisticsPage extends GetView<StatisticsController> {
     return Obx(() {
       if (controller.isLoading) return const SizedBox.shrink();
 
-      final breakdown = controller.summary?.breakdown ?? <CategoryBreakdownEntity>[];
+      final breakdown =
+          controller.summary?.breakdown ?? <CategoryBreakdownEntity>[];
       if (breakdown.isEmpty) return const SizedBox.shrink();
 
       return Column(
@@ -394,13 +398,15 @@ class StatisticsPage extends GetView<StatisticsController> {
     return Obx(() {
       if (controller.isLoading) return const SizedBox.shrink();
 
-      final topItems = (controller.summary?.breakdown ?? <CategoryBreakdownEntity>[])
-          .take(5)
-          .toList();
+      final topItems =
+          (controller.summary?.breakdown ?? <CategoryBreakdownEntity>[])
+              .take(5)
+              .toList();
       if (topItems.isEmpty) return const SizedBox.shrink();
 
-      final String titlePrefix =
-          controller.selectedType == 'income' ? 'Pemasukan' : 'Pengeluaran';
+      final String titlePrefix = controller.selectedType == 'income'
+          ? 'Pemasukan'
+          : 'Pengeluaran';
 
       return Container(
         width: double.infinity,
@@ -431,7 +437,8 @@ class StatisticsPage extends GetView<StatisticsController> {
               itemCount: topItems.length,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s10),
+              separatorBuilder: (_, __) =>
+                  const SizedBox(height: AppSpacing.s10),
               itemBuilder: (_, index) {
                 final item = topItems[index];
                 return Row(

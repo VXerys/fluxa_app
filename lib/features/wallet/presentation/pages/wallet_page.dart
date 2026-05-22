@@ -44,50 +44,47 @@ class WalletPage extends GetView<WalletController> {
         actions: [
           IconButton(
             onPressed: () {
-              showModalBottomSheet<void>(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: AppColors.surface,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(AppSpacing.s24),
-                  ),
-                ),
-                builder: (_) => const AddWalletBottomSheet(),
+              Get.to<void>(
+                () => const _AddWalletFlowPage(),
+                transition: Transition.rightToLeft,
+                duration: const Duration(milliseconds: 260),
               );
             },
             icon: const Icon(Icons.add, color: AppColors.textPrimary, size: 28),
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: controller.loadWallets,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: AppSpacing.s8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
-                child: _buildSummaryCard(),
-              ),
-              const SizedBox(height: AppSpacing.s24),
-              _buildSectionTitle('Tunai'),
-              const SizedBox(height: AppSpacing.s8),
-              _buildCashSection(),
-              const SizedBox(height: AppSpacing.s24),
-              _buildSectionTitle('Akun Bank'),
-              const SizedBox(height: AppSpacing.s8),
-              _buildBankSection(),
-              const SizedBox(height: AppSpacing.s24),
-              _buildSectionTitle('E-Wallet'),
-              const SizedBox(height: AppSpacing.s8),
-              _buildEwalletSection(),
-              SizedBox(
-                height: bottomPadding,
-              ), // Spacing to avoid being hidden behind bottom navigation bar
-            ],
+      body: SafeArea(
+        bottom: false,
+        child: RefreshIndicator(
+          onRefresh: controller.loadWallets,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: AppSpacing.s8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+                  child: _buildSummaryCard(),
+                ),
+                const SizedBox(height: AppSpacing.s24),
+                _buildSectionTitle('Tunai'),
+                const SizedBox(height: AppSpacing.s8),
+                _buildCashSection(),
+                const SizedBox(height: AppSpacing.s24),
+                _buildSectionTitle('Akun Bank'),
+                const SizedBox(height: AppSpacing.s8),
+                _buildBankSection(),
+                const SizedBox(height: AppSpacing.s24),
+                _buildSectionTitle('E-Wallet'),
+                const SizedBox(height: AppSpacing.s8),
+                _buildEwalletSection(),
+                SizedBox(
+                  height: bottomPadding,
+                ), // Spacing to avoid being hidden behind bottom navigation bar
+              ],
+            ),
           ),
         ),
       ),
@@ -536,6 +533,18 @@ class WalletPage extends GetView<WalletController> {
           ),
         );
       },
+    );
+  }
+}
+
+class _AddWalletFlowPage extends StatelessWidget {
+  const _AddWalletFlowPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: AppColors.surface,
+      body: SafeArea(child: AddWalletBottomSheet()),
     );
   }
 }

@@ -28,6 +28,7 @@ class HomePage extends GetView<HomeController> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        bottom: false,
         child: RefreshIndicator(
           onRefresh: controller.loadSummary,
           child: LayoutBuilder(
@@ -80,7 +81,7 @@ class HomePage extends GetView<HomeController> {
                         ),
                         const SizedBox(height: AppSpacing.s4),
                         Obx(() => _buildRecentTransactions(controller)),
-                        const SizedBox(height: AppSpacing.s32),
+                        const SizedBox(height: 80),
                       ],
                     ),
                   ),
