@@ -30,11 +30,15 @@ class WalletPage extends GetView<WalletController> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: true,
+
         title: Text(
           'Dompet Saya',
-          style: AppTextStyles.roboto18w600.copyWith(
+          style: AppTextStyles.lora24w400.copyWith(
             color: AppColors.textPrimary,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
         actions: [
@@ -52,7 +56,7 @@ class WalletPage extends GetView<WalletController> {
                 builder: (_) => const AddWalletBottomSheet(),
               );
             },
-            icon: const Icon(Icons.add, color: AppColors.textPrimary),
+            icon: const Icon(Icons.add, color: AppColors.textPrimary, size: 28),
           ),
         ],
       ),

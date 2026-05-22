@@ -6,10 +6,13 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/navigation/presentation/bindings/main_navigation_binding.dart';
 import '../../features/navigation/presentation/pages/main_navigation_page.dart';
+import '../../features/profile/presentation/bindings/profile_binding.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/tampilan_kartu_page.dart';
 import '../../features/profile/presentation/pages/tampilan_menu_page.dart';
-import '../../features/profile/presentation/pages/profile_detail_placeholder_page.dart';
+import '../../features/profile/presentation/pages/profile_detail_placeholder_page.dart'
+    hide UrutanMenuPage;
+import '../../features/profile/presentation/pages/urutan_menu_page.dart';
 import '../../features/statistics/presentation/bindings/statistics_binding.dart';
 import '../../features/statistics/presentation/pages/statistics_page.dart';
 import '../../features/transaction/presentation/bindings/transaction_binding.dart';
@@ -92,12 +95,18 @@ class AppPages {
     GetPage(
       name: Routes.tampilanKartu,
       page: () => const TampilanKartuPage(),
-      binding: AuthBinding(),
+      binding: BindingsBuilder(() {
+        AuthBinding().dependencies();
+        ProfileBinding().dependencies();
+      }),
     ),
     GetPage(
       name: Routes.tampilanMenu,
       page: () => const TampilanMenuPage(),
-      binding: AuthBinding(),
+      binding: BindingsBuilder(() {
+        AuthBinding().dependencies();
+        ProfileBinding().dependencies();
+      }),
     ),
     GetPage(
       name: Routes.imporData,
@@ -127,7 +136,10 @@ class AppPages {
     GetPage(
       name: Routes.urutanMenu,
       page: () => const UrutanMenuPage(),
-      binding: AuthBinding(),
+      binding: BindingsBuilder(() {
+        AuthBinding().dependencies();
+        ProfileBinding().dependencies();
+      }),
     ),
     GetPage(
       name: Routes.urutanStatistik,

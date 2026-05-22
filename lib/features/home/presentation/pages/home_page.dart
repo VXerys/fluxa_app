@@ -6,9 +6,10 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routes/app_routes.dart';
-import '../../../navigation/presentation/controllers/main_navigation_controller.dart';
+import '../../../profile/presentation/controllers/profile_controller.dart';
 import '../../domain/entities/home_summary_entity.dart';
 import '../controllers/home_controller.dart';
+import '../../../../core/widgets/placeholder_page.dart';
 import '../widgets/balance_card_widget.dart';
 import '../widgets/recent_transaction_item_widget.dart';
 import 'package:intl/intl.dart';
@@ -45,9 +46,9 @@ class HomePage extends GetView<HomeController> {
                         Obx(
                           () => BalanceCardWidget(summary: controller.summary),
                         ),
-                        const SizedBox(height: AppSpacing.s24),
+                        const SizedBox(height: AppSpacing.s8),
                         _buildMenu(),
-                        const SizedBox(height: AppSpacing.s24),
+                        const SizedBox(height: AppSpacing.s16),
                         Row(
                           children: [
                             Expanded(
@@ -77,7 +78,7 @@ class HomePage extends GetView<HomeController> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppSpacing.s8),
+                        const SizedBox(height: AppSpacing.s4),
                         Obx(() => _buildRecentTransactions(controller)),
                         const SizedBox(height: AppSpacing.s32),
                       ],
@@ -99,7 +100,8 @@ class HomePage extends GetView<HomeController> {
 
     final summary = controller.summary;
     final List<HomeTransactionGroupEntity> recentGroups =
-        summary?.recentTransactionGroups ?? const <HomeTransactionGroupEntity>[];
+        summary?.recentTransactionGroups ??
+        const <HomeTransactionGroupEntity>[];
 
     if (summary == null || recentGroups.isEmpty) {
       return Text(
@@ -161,7 +163,7 @@ class HomePage extends GetView<HomeController> {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.s8),
+          const SizedBox(height: AppSpacing.s12),
           ...group.transactions.map((tx) {
             return RecentTransactionItemWidget(transaction: tx);
           }),
@@ -228,6 +230,8 @@ class HomePage extends GetView<HomeController> {
   }
 
   Widget _buildMenu() {
+    final ProfileController profileController = Get.find<ProfileController>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -241,51 +245,113 @@ class HomePage extends GetView<HomeController> {
                 fontSize: 18,
               ),
             ),
-            const Icon(Icons.more_vert, color: AppColors.textSecondary),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.s16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildMenuItem(
-              Icons.add_circle_outline,
-              'Catat',
-              const Color(0xFFE8F5E9),
-              const Color(0xFF4CAF50),
-              onTap: () => Get.toNamed(Routes.addTransaction),
-            ),
-            _buildMenuItem(
-              Icons.history,
-              'Riwayat',
-              const Color(0xFFE3F2FD),
-              const Color(0xFF2196F3),
-              onTap: () => Get.toNamed(Routes.transactionList),
-            ),
-            _buildMenuItem(
-              Icons.person_outline,
-              'Profil',
-              const Color(0xFFF3E5F5),
-              const Color(0xFF9C27B0),
-              onTap: () {
-                try {
-                  Get.find<MainNavigationController>().changeTab(3);
-                } catch (e) {
-                  Get.snackbar('Info', 'Navigasi profil belum tersedia');
+            PopupMenuButton<String>(
+              color: AppColors.surface,
+              icon: const Icon(Icons.more_vert, color: AppColors.textSecondary),
+              onSelected: (String value) {
+                if (value == 'tampilan_menu') {
+                  Get.toNamed(Routes.tampilanMenu);
+                  return;
+                }
+                if (value == 'urutan_menu') {
+                  Get.toNamed(Routes.urutanMenu);
                 }
               },
-            ),
-            _buildMenuItem(
-              Icons.more_horiz,
-              'Lainnya',
-              const Color(0xFFF5F5F5),
-              const Color(0xFF9E9E9E),
-              onTap: () => Get.snackbar('Info', 'Fitur belum tersedia'),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    value: 'tampilan_menu',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.palette_outlined,
+                          size: 18,
+                          color: AppColors.textPrimary,
+                        ),
+                        const SizedBox(width: AppSpacing.s8),
+                        Text(
+                          'Tampilan Menu',
+                          style: AppTextStyles.roboto14w400.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'urutan_menu',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.drag_indicator_rounded,
+                          size: 18,
+                          color: AppColors.textPrimary,
+                        ),
+                        const SizedBox(width: AppSpacing.s8),
+                        Text(
+                          'Urutan Menu',
+                          style: AppTextStyles.roboto14w400.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ];
+              },
             ),
           ],
         ),
+        const SizedBox(height: AppSpacing.s4),
+        Obx(() {
+          final List<HomeMenuDefinition> menus =
+              profileController.orderedHomeMenus;
+          return Row(
+            children: List<Widget>.generate(menus.length, (int index) {
+              final HomeMenuDefinition menu = menus[index];
+              return Expanded(
+                child: _buildMenuItem(
+                  menu.icon,
+                  menu.label,
+                  profileController.menuBgColorAt(index),
+                  profileController.menuAccentColorAt(index),
+                  onTap: () => _onMenuTap(menu.actionKey),
+                ),
+              );
+            }),
+          );
+        }),
       ],
     );
+  }
+
+  void _onMenuTap(String actionKey) {
+    switch (actionKey) {
+      case 'add_transaction':
+        Get.toNamed(Routes.addTransaction);
+        break;
+      case 'transaction_list':
+        Get.toNamed(Routes.transactionList);
+        break;
+      case 'voice_placeholder':
+        Get.to(
+          () => const PlaceholderPage(
+            title: 'Suara',
+            message: 'Fitur Suara masih dalam pengembangan',
+          ),
+        );
+        break;
+      case 'card_placeholder':
+        Get.to(
+          () => const PlaceholderPage(
+            title: 'Kartu',
+            message: 'Fitur Kartu masih dalam pengembangan',
+          ),
+        );
+        break;
+      default:
+        break;
+    }
   }
 
   Widget _buildMenuItem(
@@ -297,26 +363,30 @@ class HomePage extends GetView<HomeController> {
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s4),
+        child: Column(
+          children: [
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(icon, color: iconColor, size: 26),
             ),
-            child: Icon(icon, color: iconColor, size: 28),
-          ),
-          const SizedBox(height: AppSpacing.s8),
-          Text(
-            label,
-            style: AppTextStyles.roboto14w400.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
+            const SizedBox(height: AppSpacing.s8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.roboto14w400.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
