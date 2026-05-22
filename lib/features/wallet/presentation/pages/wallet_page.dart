@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluxa_app/core/icons/app_huge_icons.dart';
 import 'package:fluxa_app/core/widgets/app_icon.dart';
+import 'package:fluxa_app/core/widgets/placeholder_page.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
@@ -189,6 +190,10 @@ class WalletPage extends GetView<WalletController> {
                         value: _currencyFormatter.format(
                           controller.totalBalance,
                         ),
+                        onTap: () => Get.to(() => const PlaceholderPage(
+                              title: 'Saldo Bersih',
+                              message: 'Detail Halaman Saldo Bersih sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                            )),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.s8),
@@ -196,6 +201,10 @@ class WalletPage extends GetView<WalletController> {
                       child: _buildSubInfoBox(
                         title: 'Hutang Aktif',
                         value: _currencyFormatter.format(0),
+                        onTap: () => Get.to(() => const PlaceholderPage(
+                              title: 'Hutang Aktif',
+                              message: 'Detail Halaman Hutang Aktif sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                            )),
                       ),
                     ),
                   ],
@@ -207,6 +216,10 @@ class WalletPage extends GetView<WalletController> {
                       child: _buildSubInfoBox(
                         title: 'Tabungan Aktif',
                         value: _currencyFormatter.format(0),
+                        onTap: () => Get.to(() => const PlaceholderPage(
+                              title: 'Tabungan Aktif',
+                              message: 'Detail Halaman Tabungan Aktif sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                            )),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.s8),
@@ -214,6 +227,10 @@ class WalletPage extends GetView<WalletController> {
                       child: _buildSubInfoBox(
                         title: 'Pembayaran Mendatang',
                         value: _currencyFormatter.format(0),
+                        onTap: () => Get.to(() => const PlaceholderPage(
+                              title: 'Pembayaran Mendatang',
+                              message: 'Detail Halaman Pembayaran Mendatang sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                            )),
                       ),
                     ),
                   ],
@@ -226,48 +243,62 @@ class WalletPage extends GetView<WalletController> {
     });
   }
 
-  Widget _buildSubInfoBox({required String title, required String value}) {
-    return Container(
-      height: 65,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s10,
-        vertical: AppSpacing.s6,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.1),
-        border: Border.all(
-          color: AppColors.surface.withValues(alpha: 0.2),
-          width: 1,
+  Widget _buildSubInfoBox({
+    required String title,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        splashColor: AppColors.surface.withValues(alpha: 0.1),
+        highlightColor: AppColors.surface.withValues(alpha: 0.05),
+        child: Container(
+          height: 65,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s10,
+            vertical: AppSpacing.s6,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.surface.withValues(alpha: 0.1),
+            border: Border.all(
+              color: AppColors.surface.withValues(alpha: 0.2),
+              width: 1,
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  title,
+                  style: AppTextStyles.roboto12w400.copyWith(
+                    color: AppColors.surface.withValues(alpha: 0.9),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s4),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value,
+                  style: AppTextStyles.roboto14w500.copyWith(
+                    color: AppColors.surface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              title,
-              style: AppTextStyles.roboto12w400.copyWith(
-                color: AppColors.surface.withValues(alpha: 0.9),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.s4),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              style: AppTextStyles.roboto14w500.copyWith(
-                color: AppColors.surface,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -326,7 +357,7 @@ class WalletPage extends GetView<WalletController> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s12),
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.s12),
       itemBuilder: (_, index) {
         final wallet = wallets[index];
         return _buildWalletItem(wallet);
@@ -521,8 +552,8 @@ class WalletPage extends GetView<WalletController> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s12),
-      itemBuilder: (_, __) {
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.s12),
+      itemBuilder: (_, _) {
         return Shimmer.fromColors(
           baseColor: AppColors.background,
           highlightColor: AppColors.surface,

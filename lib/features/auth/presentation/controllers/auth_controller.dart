@@ -1,3 +1,5 @@
+import 'package:fluxa_app/core/database/local_database_service.dart';
+import 'package:fluxa_app/core/storage/storage_service.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/routes/app_routes.dart';
@@ -80,13 +82,13 @@ class AuthController extends GetxController {
       final result = await signInUseCase(
         SignInParams(email: normalizedEmail, password: password),
       );
-      result.fold(
-        (failure) {
+      await result.fold<Future<void>>(
+        (failure) async {
           _setError(failure.message);
         },
-        (user) {
+        (_) async {
+          await LocalDatabaseService.clearAll();
           _errorMessage.value = '';
-          _currentUser.value = user;
           Get.offAllNamed(Routes.main);
         },
       );
@@ -148,11 +150,13 @@ class AuthController extends GetxController {
     _isSubmitting.value = true;
     try {
       final result = await signOutUseCase(const NoParams());
-      result.fold(
-        (failure) {
+      await result.fold<Future<void>>(
+        (failure) async {
           _setError(failure.message);
         },
-        (_) {
+        (_) async {
+          await LocalDatabaseService.clearAll();
+          await StorageService.clear();
           _errorMessage.value = '';
           _currentUser.value = null;
           Get.offAllNamed(Routes.login);
@@ -195,5 +199,9 @@ class AuthController extends GetxController {
   void _setError(String message) {
     _errorMessage.value = message;
     Get.snackbar('Error', message);
+  }
+
+  void clearError() {
+    _errorMessage.value = '';
   }
 }

@@ -124,7 +124,7 @@ class _UrutanMenuPageState extends State<UrutanMenuPage> {
                     decoration: BoxDecoration(
                       color: AppColors.surface,
                       borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: Colors.black.withOpacity(0.06)),
+                      border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
                     ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(
@@ -135,10 +135,10 @@ class _UrutanMenuPageState extends State<UrutanMenuPage> {
                         width: 56,
                         height: 56,
                         decoration: BoxDecoration(
-                          color: accentColor.withOpacity(0.14),
+                          color: accentColor.withValues(alpha: 0.14),
                           shape: BoxShape.circle,
                         ),
-                        child: AppIcon(menu.icon, color: accentColor, size: 28),
+                        child: AppIcon(menu.icon, color: accentColor, size: 32),
                       ),
                       title: Text(
                         menu.label,

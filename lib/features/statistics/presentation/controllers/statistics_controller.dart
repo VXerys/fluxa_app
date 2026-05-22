@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/routes/app_routes.dart';
 import '../../../../core/sync/finance_sync_service.dart';
 import '../../domain/entities/statistics_summary_entity.dart';
+import '../../domain/entities/top_expense_transaction_entity.dart';
 import '../../domain/usecases/get_statistics_usecase.dart';
 import '../../domain/repositories/statistics_repository.dart';
 
@@ -32,8 +34,23 @@ class StatisticsController extends GetxController {
   final RxString _selectedType = 'expense'.obs;
   String get selectedType => _selectedType.value;
 
+  final RxString _selectedGroupType = 'Kategori'.obs;
+  String get selectedGroupType => _selectedGroupType.value;
+
   final RxBool _isLoading = false.obs;
   bool get isLoading => _isLoading.value;
+
+  void changeGroupType(String value) {
+    if (value != 'Kategori' &&
+        value != 'Subkategori' &&
+        value != 'Judul' &&
+        value != 'Dompet') {
+      return;
+    }
+    _selectedGroupType.value = value;
+  }
+
+  static const int maxTopTransactionsOnCard = 6;
 
   final Rx<StatisticsSummaryEntity?> _summary = Rx<StatisticsSummaryEntity?>(
     null,
@@ -105,6 +122,22 @@ class StatisticsController extends GetxController {
     }
   }
 
+  List<TopExpenseTransactionEntity> get topTransactionsAll {
+    final grouped = _summary.value?.topTransactionsByGroup;
+    if (grouped == null) return const <TopExpenseTransactionEntity>[];
+    return grouped[_selectedGroupType.value] ?? const <TopExpenseTransactionEntity>[];
+  }
+
+  List<TopExpenseTransactionEntity> get topTransactions {
+    final items = topTransactionsAll;
+    if (items.isEmpty) return const <TopExpenseTransactionEntity>[];
+    return items.take(maxTopTransactionsOnCard).toList();
+  }
+
+  bool get hasMoreTopTransactions {
+    return topTransactionsAll.length > maxTopTransactionsOnCard;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -126,6 +159,7 @@ class StatisticsController extends GetxController {
   void changeType(String type) {
     if (!_isValidType(type) || _selectedType.value == type) return;
     _selectedType.value = type;
+    _selectedGroupType.value = 'Kategori';
     loadStatistics();
   }
 
@@ -197,6 +231,18 @@ class StatisticsController extends GetxController {
   }
 
   DateTime get _queryEndExclusive => periodEnd.add(const Duration(days: 1));
+
+  void openMoreTransactions() {
+    Get.toNamed(
+      Routes.transactionList,
+      arguments: <String, dynamic>{
+        'source': 'statistics',
+        'type': _selectedType.value,
+        'startDate': periodStart.toIso8601String(),
+        'endDateExclusive': _queryEndExclusive.toIso8601String(),
+      },
+    );
+  }
 
   DateTime _normalizeDate(DateTime date) {
     return DateTime(date.year, date.month, date.day);

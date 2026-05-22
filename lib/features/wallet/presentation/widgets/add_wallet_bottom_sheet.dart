@@ -293,7 +293,7 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(AppSpacing.s16),
                         border: Border.all(
-                          color: AppColors.neutral.withOpacity(0.14),
+                          color: AppColors.neutral.withValues(alpha: 0.14),
                         ),
                       ),
                       child: Row(
@@ -302,7 +302,7 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
                             width: 42,
                             height: 42,
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.1),
+                              color: AppColors.primary.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
                             child: const AppIcon(
@@ -374,7 +374,7 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(22),
                         border: Border.all(
-                          color: AppColors.neutral.withOpacity(0.14),
+                          color: AppColors.neutral.withValues(alpha: 0.14),
                         ),
                       ),
                       child: GridView.builder(
@@ -432,7 +432,7 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
       hintText: hintText,
       prefixText: prefixText,
       hintStyle: AppTextStyles.roboto16w400.copyWith(
-        color: AppColors.textSecondary.withOpacity(0.72),
+        color: AppColors.textSecondary.withValues(alpha: 0.72),
         fontSize: 13,
       ),
       prefixStyle: AppTextStyles.roboto16w400.copyWith(
@@ -447,11 +447,11 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.s16),
-        borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.12)),
+        borderSide: BorderSide(color: AppColors.neutral.withValues(alpha: 0.12)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.s16),
-        borderSide: BorderSide(color: AppColors.neutral.withOpacity(0.12)),
+        borderSide: BorderSide(color: AppColors.neutral.withValues(alpha: 0.12)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.s16),
@@ -488,7 +488,7 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
           border: Border.all(
             color: isSelected
                 ? Colors.transparent
-                : AppColors.neutral.withOpacity(0.2),
+                : AppColors.neutral.withValues(alpha: 0.2),
           ),
         ),
         child: Row(

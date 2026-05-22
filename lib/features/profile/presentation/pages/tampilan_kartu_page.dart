@@ -42,7 +42,7 @@ class TampilanKartuPage extends GetView<ProfileController> {
                   'Tema ${theme['name']} berhasil diterapkan!',
                   backgroundColor: AppColors.success,
                   colorText: Colors.white,
-                  snackPosition: SnackPosition.BOTTOM,
+                  snackPosition: SnackPosition.TOP,
                   margin: const EdgeInsets.all(16),
                 );
               },
@@ -58,7 +58,7 @@ class TampilanKartuPage extends GetView<ProfileController> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: colors[0].withOpacity(0.3),
+                          color: colors[0].withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),

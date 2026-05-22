@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/sync/finance_sync_service.dart';
 import '../../../../core/usecases/usecase.dart';
@@ -111,6 +112,9 @@ class TransactionController extends GetxController {
   final RxString _filterDateRange = 'Semua Waktu'.obs;
   String get filterDateRange => _filterDateRange.value;
 
+  final Rx<DateTime?> _customRangeStart = Rx<DateTime?>(null);
+  final Rx<DateTime?> _customRangeEndExclusive = Rx<DateTime?>(null);
+
   final RxString _filterSortBy = 'Tanggal (Terbaru)'.obs;
   String get filterSortBy => _filterSortBy.value;
 
@@ -158,6 +162,8 @@ class TransactionController extends GetxController {
 
   void setFilterDateRange(String val) {
     _filterDateRange.value = val;
+    _customRangeStart.value = null;
+    _customRangeEndExclusive.value = null;
     loadTransactions();
   }
 
@@ -290,7 +296,10 @@ class TransactionController extends GetxController {
     DateTime? endDate;
     final now = DateTime.now();
 
-    if (_filterDateRange.value == 'Hari Ini') {
+    if (_customRangeStart.value != null && _customRangeEndExclusive.value != null) {
+      startDate = _customRangeStart.value;
+      endDate = _customRangeEndExclusive.value;
+    } else if (_filterDateRange.value == 'Hari Ini') {
       startDate = DateTime(now.year, now.month, now.day);
       endDate = startDate.add(const Duration(days: 1));
     } else if (_filterDateRange.value == 'Minggu Ini') {
@@ -350,6 +359,55 @@ class TransactionController extends GetxController {
         _transactions.value = transactions;
       },
     );
+  }
+
+  Future<void> applyStatisticsPrefilter(Map<String, dynamic> args) async {
+    final dynamic rawType = args['type'];
+    final dynamic rawStartDate = args['startDate'];
+    final dynamic rawEndDateExclusive = args['endDateExclusive'];
+
+    if (rawType is! String ||
+        rawStartDate is! String ||
+        rawEndDateExclusive is! String) {
+      return;
+    }
+
+    final DateTime? parsedStart = DateTime.tryParse(rawStartDate);
+    final DateTime? parsedEndExclusive = DateTime.tryParse(rawEndDateExclusive);
+    if (parsedStart == null || parsedEndExclusive == null) return;
+
+    final DateTime normalizedStart = DateTime(
+      parsedStart.year,
+      parsedStart.month,
+      parsedStart.day,
+    );
+    final DateTime normalizedEndExclusive = DateTime(
+      parsedEndExclusive.year,
+      parsedEndExclusive.month,
+      parsedEndExclusive.day,
+    );
+    if (!normalizedEndExclusive.isAfter(normalizedStart)) return;
+
+    _filterType.value = rawType == 'income' ? 'Pemasukan' : 'Pengeluaran';
+    _customRangeStart.value = normalizedStart;
+    _customRangeEndExclusive.value = normalizedEndExclusive;
+
+    final DateTime displayEnd = normalizedEndExclusive.subtract(
+      const Duration(days: 1),
+    );
+    _filterDateRange.value = _formatCustomRangeLabel(
+      normalizedStart,
+      displayEnd,
+    );
+
+    await loadTransactions();
+  }
+
+  String _formatCustomRangeLabel(DateTime start, DateTime end) {
+    if (start.year == end.year) {
+      return '${DateFormat('d MMM', 'id_ID').format(start)} - ${DateFormat('d MMM', 'id_ID').format(end)}, ${end.year}';
+    }
+    return '${DateFormat('d MMM yyyy', 'id_ID').format(start)} - ${DateFormat('d MMM yyyy', 'id_ID').format(end)}';
   }
 
   Future<void> loadSummary() async {

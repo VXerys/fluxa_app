@@ -259,7 +259,7 @@ class AppHugeIcons {
   static const AppIconData group_outlined = Icons.group_outlined;
   static const AppIconData groups_outlined = Icons.groups_outlined;
   static const AppIconData handshake_outlined = Icons.handshake_outlined;
-  static const AppIconData history = Icons.history;
+  static const AppIconData history = 'assets/icons/riwayat.svg';
   static const AppIconData icecream_outlined = Icons.icecream_outlined;
   static const AppIconData info_outline = Icons.info_outline;
   static const AppIconData keyboard_arrow_down = Icons.keyboard_arrow_down;

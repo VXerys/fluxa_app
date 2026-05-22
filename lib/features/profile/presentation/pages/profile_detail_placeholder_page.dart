@@ -43,13 +43,13 @@ class _ImporDataPageState extends State<ImporDataPage> {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: AppColors.primary.withOpacity(0.2),
+                  color: AppColors.primary.withValues(alpha: 0.2),
                   width: 2,
                   style: BorderStyle.none, // We'll simulate dashed with border styling or standard border
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
+                    color: Colors.black.withValues(alpha: 0.02),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -114,7 +114,7 @@ class _ImporDataPageState extends State<ImporDataPage> {
                     title: const Text('Ganti Kategori Duplikat'),
                     subtitle: const Text('Timpa kategori lokal jika terdapat nama yang sama'),
                     value: _overwriteDuplicates,
-                    activeColor: AppColors.primary,
+                    activeThumbColor: AppColors.primary,
                     onChanged: (val) {
                       setState(() {
                         _overwriteDuplicates = val;
@@ -126,7 +126,7 @@ class _ImporDataPageState extends State<ImporDataPage> {
                     title: const Text('Lewati Transaksi Ganda'),
                     subtitle: const Text('Jangan impor transaksi yang memiliki waktu & nominal persis'),
                     value: _skipDoubles,
-                    activeColor: AppColors.primary,
+                    activeThumbColor: AppColors.primary,
                     onChanged: (val) {
                       setState(() {
                         _skipDoubles = val;
@@ -138,7 +138,7 @@ class _ImporDataPageState extends State<ImporDataPage> {
                     title: const Text('Buat Dompet Otomatis'),
                     subtitle: const Text('Buat dompet baru jika nama dompet di file tidak terdaftar'),
                     value: _createWallets,
-                    activeColor: AppColors.primary,
+                    activeThumbColor: AppColors.primary,
                     onChanged: (val) {
                       setState(() {
                         _createWallets = val;
@@ -207,9 +207,9 @@ class _PeriodePencatatanPageState extends State<PeriodePencatatanPage> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.s16),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.05),
+                color: AppColors.primary.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
               ),
               child: Row(
                 children: [
@@ -469,7 +469,7 @@ class _KategoriPageState extends State<KategoriPage> with SingleTickerProviderSt
           elevation: 0,
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: (cat['color'] as Color).withOpacity(0.15),
+              backgroundColor: (cat['color'] as Color).withValues(alpha: 0.15),
               child: AppIcon(cat['icon'] as AppIconData, color: cat['color'] as Color),
             ),
             title: Text(cat['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -649,7 +649,7 @@ class _PengaturanDompetPageState extends State<PengaturanDompetPage> {
                                 Text(
                                   w['name'] as String,
                                   style: AppTextStyles.roboto14w400.copyWith(
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: Colors.white.withValues(alpha: 0.9),
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -671,7 +671,7 @@ class _PengaturanDompetPageState extends State<PengaturanDompetPage> {
                                 children: [
                                   Text(
                                     'Aktif',
-                                    style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
+                                    style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
                                   ),
                                   Switch(
                                     value: w['show'] as bool,
@@ -863,7 +863,7 @@ class _UrutanMenuPageState extends State<UrutanMenuPage> {
                   elevation: 0,
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: (item['color'] as Color).withOpacity(0.1),
+                      backgroundColor: (item['color'] as Color).withValues(alpha: 0.1),
                       child: AppIcon(item['icon'] as AppIconData, color: item['color'] as Color),
                     ),
                     title: Text(item['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),

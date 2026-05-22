@@ -31,21 +31,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String displayName,
   }) async {
     try {
-      final response = await _client.auth.signUp(
+      final response = await supabase.Supabase.instance.client.auth.signUp(
         email: email,
         password: password,
+        data: <String, dynamic>{'display_name': displayName},
       );
       final user = response.user;
       if (user == null) {
         throw AuthException('Sign up failed');
       }
 
-      final trimmedName = displayName.trim();
-
-      await _client.from('profiles').upsert({
-        'id': user.id,
-        if (trimmedName.isNotEmpty) 'display_name': trimmedName,
-      }, onConflict: 'id');
+      await Future.delayed(const Duration(milliseconds: 150));
 
       final profile = await _client
           .from('profiles')
@@ -136,7 +132,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           .eq('id', user.id);
 
       final profile = await _fetchProfile(user.id);
-      return UserModel.fromSupabaseUser(user, profile: profile);
+      return UserModel.fromSupabaseUser(user, profile: profile); // profile nullable, sudah handled
     } on AuthException {
       rethrow;
     } on supabase.AuthException catch (e) {
@@ -146,12 +142,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-  Future<Map<String, dynamic>> _fetchProfile(String userId) async {
+  Future<Map<String, dynamic>?> _fetchProfile(String userId) async {
     final response = await _client
         .from('profiles')
         .select('id, username, display_name, avatar_url, is_pro')
         .eq('id', userId)
-        .single();
-    return response as Map<String, dynamic>;
+        .maybeSingle(); // pakai maybeSingle agar tidak crash kalau 0 rows
+    return response;
   }
 }

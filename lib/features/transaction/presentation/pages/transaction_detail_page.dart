@@ -10,8 +10,10 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/utils/category_color_parser.dart';
 import '../../../../core/utils/category_icon_mapper.dart';
 import '../../domain/entities/transaction_entity.dart';
+import '../bindings/transaction_binding.dart';
 import '../controllers/transaction_controller.dart';
 import 'add_transaction_page.dart';
+import '../../../wallet/presentation/bindings/wallet_binding.dart';
 
 class TransactionDetailPage extends GetView<TransactionController> {
   final TransactionEntity transaction;
@@ -232,6 +234,10 @@ class TransactionDetailPage extends GetView<TransactionController> {
       onTap: () {
         Get.to(
           () => AddTransactionPage(transactionToEdit: transaction),
+          binding: BindingsBuilder(() {
+            WalletBinding().dependencies();
+            TransactionBinding().dependencies();
+          }),
           transition: Transition.noTransition,
           opaque: false,
         )?.then((_) {

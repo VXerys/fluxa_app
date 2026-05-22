@@ -186,7 +186,7 @@ class _TransactionTypeDetailPageState extends State<TransactionTypeDetailPage> {
                   vertical: AppSpacing.s16,
                 ),
                 itemCount: _transactions.length,
-                separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s16),
+                separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.s16),
                 itemBuilder: (context, index) {
                   final transaction = _transactions[index];
                   return GestureDetector(
@@ -199,7 +199,7 @@ class _TransactionTypeDetailPageState extends State<TransactionTypeDetailPage> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
+                            color: Colors.black.withValues(alpha: 0.03),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -227,7 +227,7 @@ class _TransactionTypeDetailPageState extends State<TransactionTypeDetailPage> {
           AppIcon(
             AppHugeIcons.attach_money,
             size: 64,
-            color: AppColors.neutral.withOpacity(0.2),
+            color: AppColors.neutral.withValues(alpha: 0.2),
           ),
           const SizedBox(height: AppSpacing.s16),
           Text(

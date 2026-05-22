@@ -9,6 +9,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../profile/presentation/controllers/profile_controller.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../domain/entities/home_summary_entity.dart';
 import '../controllers/home_controller.dart';
 import '../../../../core/widgets/placeholder_page.dart';
@@ -44,7 +45,11 @@ class HomePage extends GetView<HomeController> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('~ Hai!', style: AppTextStyles.lora24w400),
+                        Obx(() {
+                          final authController = Get.find<AuthController>();
+                          final name = authController.currentUser?.displayName ?? 'Pengguna Fluxa';
+                          return Text('~ Hai, $name!', style: AppTextStyles.lora24w400);
+                        }),
                         const SizedBox(height: AppSpacing.s16),
                         Obx(
                           () => BalanceCardWidget(summary: controller.summary),
@@ -107,10 +112,73 @@ class HomePage extends GetView<HomeController> {
         const <HomeTransactionGroupEntity>[];
 
     if (summary == null || recentGroups.isEmpty) {
-      return Text(
-        'Belum ada transaksi',
-        style: AppTextStyles.roboto14w400.copyWith(
-          color: AppColors.textSecondary,
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.s24, horizontal: AppSpacing.s16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: AppSpacing.s16),
+              Text(
+                'Belum ada transaksi',
+                style: AppTextStyles.roboto18w600.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+                child: Text(
+                  'Ayo mulai catat pengeluaran dan pemasukanmu agar keuangan lebih rapi!',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.roboto14w400.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s24),
+              OutlinedButton(
+                onPressed: () => Get.toNamed(Routes.addTransaction),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(
+                    color: AppColors.primary,
+                    width: 1.2,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  shape: const StadiumBorder(),
+                  foregroundColor: AppColors.primary,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.add,
+                      color: AppColors.primary,
+                      size: 18,
+                    ),
+                    const SizedBox(width: AppSpacing.s6),
+                    Text(
+                      'Tambah Transaksi',
+                      style: AppTextStyles.roboto16w600.copyWith(
+                        color: AppColors.primary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s16),
+            ],
+          ),
         ),
       );
     }
@@ -377,7 +445,7 @@ class HomePage extends GetView<HomeController> {
                 color: bgColor,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: AppIcon(icon, color: iconColor, size: 28),
+              child: AppIcon(icon, color: iconColor, size: 32),
             ),
             const SizedBox(height: AppSpacing.s8),
             Text(

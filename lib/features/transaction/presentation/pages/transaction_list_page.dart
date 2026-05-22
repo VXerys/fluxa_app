@@ -56,6 +56,22 @@ class _TransactionListBody extends StatefulWidget {
 }
 
 class _TransactionListBodyState extends State<_TransactionListBody> {
+  bool _didApplyRoutePrefilter = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didApplyRoutePrefilter) return;
+    _didApplyRoutePrefilter = true;
+
+    final dynamic args = Get.arguments;
+    if (args is Map<String, dynamic> && args['source'] == 'statistics') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.controller.applyStatisticsPrefilter(args);
+      });
+    }
+  }
+
   List<TransactionEntity> _applyLocalSearch(List<TransactionEntity> items) {
     final query = widget.controller.searchQuery.toLowerCase();
     if (query.isEmpty) return items;
@@ -160,8 +176,8 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.zero,
                 itemCount: filtered.length,
-                separatorBuilder: (_, __) => Divider(
-                  color: AppColors.neutral.withOpacity(0.1),
+                separatorBuilder: (_, _) => Divider(
+                  color: AppColors.neutral.withValues(alpha: 0.1),
                   height: 1,
                 ),
                 itemBuilder: (context, index) {
@@ -188,7 +204,7 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.s16),
       itemCount: 5,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s8),
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.s8),
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: AppColors.background,
@@ -281,7 +297,7 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.neutral.withOpacity(0.2),
+                color: AppColors.neutral.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -331,7 +347,7 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.neutral.withOpacity(0.2),
+                color: AppColors.neutral.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -423,7 +439,3 @@ class AppEmptyStateWidget extends StatelessWidget {
     );
   }
 }
-
-
-
-

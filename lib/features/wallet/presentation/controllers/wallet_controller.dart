@@ -67,8 +67,9 @@ class WalletController extends GetxController {
         _loadTotalBalance(requestId),
       ]);
     } finally {
-      if (_isStale(requestId)) return;
-      _isLoading.value = false;
+      if (!_isStale(requestId)) {
+        _isLoading.value = false;
+      }
     }
   }
 

@@ -11,9 +11,11 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/utils/category_color_parser.dart';
 import '../../../../core/utils/category_icon_mapper.dart';
 import '../../../transaction/domain/entities/transaction_entity.dart';
+import '../../../transaction/presentation/bindings/transaction_binding.dart';
 import '../../../transaction/presentation/controllers/transaction_controller.dart';
 import '../../../transaction/presentation/pages/add_transaction_page.dart';
 import '../../../transaction/presentation/pages/transaction_detail_page.dart';
+import '../../../wallet/presentation/bindings/wallet_binding.dart';
 
 class RecentTransactionItemWidget extends StatelessWidget {
   final TransactionEntity transaction;
@@ -66,6 +68,10 @@ class RecentTransactionItemWidget extends StatelessWidget {
   void _openEdit() {
     Get.to(
       () => AddTransactionPage(transactionToEdit: transaction),
+      binding: BindingsBuilder(() {
+        WalletBinding().dependencies();
+        TransactionBinding().dependencies();
+      }),
       transition: Transition.noTransition,
       opaque: false,
     );
@@ -74,6 +80,9 @@ class RecentTransactionItemWidget extends StatelessWidget {
   void _openDetail() {
     Get.to(
       () => TransactionDetailPage(transaction: transaction),
+      binding: BindingsBuilder(() {
+        TransactionBinding().dependencies();
+      }),
       transition: Transition.rightToLeft,
     );
   }
@@ -126,7 +135,7 @@ class RecentTransactionItemWidget extends StatelessWidget {
               child: Center(
                 child: AppIcon(
                   categoryIcon,
-                  size: 24,
+                  size: 28,
                   color: categoryColor,
                 ),
               ),

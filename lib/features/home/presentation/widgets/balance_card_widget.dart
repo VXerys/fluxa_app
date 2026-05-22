@@ -62,7 +62,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
           ),
           boxShadow: [
             BoxShadow(
-              color: colors[0].withOpacity(0.3),
+              color: colors[0].withValues(alpha: 0.3),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -77,7 +77,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
                 Text(
                   'Total Saldo (IDR)',
                   style: AppTextStyles.roboto14w400.copyWith(
-                    color: AppColors.surface.withOpacity(0.9),
+                    color: AppColors.surface.withValues(alpha: 0.9),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.s8),
@@ -89,7 +89,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
                   },
                   child: AppIcon(
                     _isObscured ? AppHugeIcons.visibility_off : AppHugeIcons.visibility,
-                    color: AppColors.surface.withOpacity(0.9),
+                    color: AppColors.surface.withValues(alpha: 0.9),
                     size: 18,
                   ),
                 ),
@@ -169,9 +169,9 @@ class _SummaryBox extends StatelessWidget {
           vertical: AppSpacing.s12,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surface.withOpacity(0.1),
+          color: AppColors.surface.withValues(alpha: 0.1),
           border: Border.all(
-            color: AppColors.surface.withOpacity(0.2),
+            color: AppColors.surface.withValues(alpha: 0.2),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(20),
@@ -184,7 +184,7 @@ class _SummaryBox extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.surface.withOpacity(0.2),
+                    color: AppColors.surface.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: AppIcon(icon, color: AppColors.surface, size: 14),
@@ -197,7 +197,7 @@ class _SummaryBox extends StatelessWidget {
                     child: Text(
                       label,
                       style: AppTextStyles.roboto12w400.copyWith(
-                        color: AppColors.surface.withOpacity(0.9),
+                        color: AppColors.surface.withValues(alpha: 0.9),
                       ),
                     ),
                   ),

@@ -31,7 +31,7 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
           )
           .single();
 
-      return TransactionModel.fromJson(response as Map<String, dynamic>);
+      return TransactionModel.fromJson(response);
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -135,7 +135,7 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
           )
           .single();
 
-      return TransactionModel.fromJson(response as Map<String, dynamic>);
+      return TransactionModel.fromJson(response);
     } catch (e) {
       throw ServerException(e.toString());
     }

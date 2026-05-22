@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluxa_app/core/icons/app_huge_icons.dart';
 import 'package:fluxa_app/core/widgets/app_icon.dart';
+import 'package:fluxa_app/core/widgets/placeholder_page.dart';
 import 'package:get/get.dart';
 
 import 'package:fluxa_app/core/constants/app_colors.dart';
@@ -27,8 +28,9 @@ class ProfilePage extends GetView<ProfileController> {
         ),
         centerTitle: true,
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.background,
         elevation: 0,
+        scrolledUnderElevation: 0,
       ),
       body: SafeArea(
         bottom: false,
@@ -40,29 +42,41 @@ class ProfilePage extends GetView<ProfileController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildAvatarSection(authController),
+              _buildAvatarSection(context, authController),
               const SizedBox(height: AppSpacing.s32),
               _buildSectionLabel('Aplikasi'),
               _buildCard([
                 _buildCardItem(
                   icon: AppHugeIcons.upload_file,
                   title: 'Impor Data',
-                  onTap: () => Get.toNamed(Routes.imporData),
+                  onTap: () => Get.to(() => const PlaceholderPage(
+                        title: 'Impor Data',
+                        message: 'Fitur Impor Data sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                      )),
                 ),
                 _buildCardItem(
                   icon: AppHugeIcons.date_range,
                   title: 'Periode Pencatatan',
-                  onTap: () => Get.toNamed(Routes.periodePencatatan),
+                  onTap: () => Get.to(() => const PlaceholderPage(
+                        title: 'Periode Pencatatan',
+                        message: 'Fitur Periode Pencatatan sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                      )),
                 ),
                 _buildCardItem(
                   icon: AppHugeIcons.category,
                   title: 'Kategori',
-                  onTap: () => Get.toNamed(Routes.kategori),
+                  onTap: () => Get.to(() => const PlaceholderPage(
+                        title: 'Kategori',
+                        message: 'Fitur Kategori sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                      )),
                 ),
                 _buildCardItem(
                   icon: AppHugeIcons.account_balance_wallet,
                   title: 'Pengaturan Dompet',
-                  onTap: () => Get.toNamed(Routes.pengaturanDompet),
+                  onTap: () => Get.to(() => const PlaceholderPage(
+                        title: 'Pengaturan Dompet',
+                        message: 'Fitur Pengaturan Dompet sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                      )),
                 ),
               ]),
               const SizedBox(height: AppSpacing.s16),
@@ -71,7 +85,10 @@ class ProfilePage extends GetView<ProfileController> {
                 _buildCardItem(
                   icon: AppHugeIcons.dark_mode,
                   title: 'Tema',
-                  onTap: () => Get.toNamed(Routes.tema),
+                  onTap: () => Get.to(() => const PlaceholderPage(
+                        title: 'Tema',
+                        message: 'Fitur Tema sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                      )),
                 ),
                 _buildCardItem(
                   icon: AppHugeIcons.credit_card,
@@ -91,7 +108,10 @@ class ProfilePage extends GetView<ProfileController> {
                 _buildCardItem(
                   icon: AppHugeIcons.bar_chart,
                   title: 'Urutan Section Statistik',
-                  onTap: () => Get.toNamed(Routes.urutanStatistik),
+                  onTap: () => Get.to(() => const PlaceholderPage(
+                        title: 'Urutan Statistik',
+                        message: 'Fitur Urutan Section Statistik sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                      )),
                 ),
               ]),
               const SizedBox(height: AppSpacing.s16),
@@ -140,7 +160,7 @@ class ProfilePage extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildAvatarSection(AuthController authController) {
+  Widget _buildAvatarSection(BuildContext context, AuthController authController) {
     return Center(
       child: Column(
         children: [
@@ -154,7 +174,7 @@ class ProfilePage extends GetView<ProfileController> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -170,7 +190,7 @@ class ProfilePage extends GetView<ProfileController> {
                 bottom: 0,
                 right: 0,
                 child: GestureDetector(
-                  onTap: () => Get.toNamed(Routes.editProfile),
+                  onTap: () => _showEditNameDialog(context, authController),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: const BoxDecoration(
@@ -334,6 +354,158 @@ class ProfilePage extends GetView<ProfileController> {
           ],
         );
       },
+    );
+  }
+
+  void _showEditNameDialog(BuildContext context, AuthController authController) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return _EditNameDialog(authController: authController);
+      },
+    );
+  }
+}
+
+class _EditNameDialog extends StatefulWidget {
+  final AuthController authController;
+
+  const _EditNameDialog({required this.authController});
+
+  @override
+  State<_EditNameDialog> createState() => _EditNameDialogState();
+}
+
+class _EditNameDialogState extends State<_EditNameDialog> {
+  late final TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(
+      text: widget.authController.currentUser?.displayName ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppColors.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: Text(
+        'Ubah Nama',
+        style: AppTextStyles.roboto18w500.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Nama Lengkap',
+            style: AppTextStyles.roboto12w400.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s8),
+          TextField(
+            controller: _nameController,
+            autofocus: true,
+            style: AppTextStyles.roboto16w400,
+            decoration: InputDecoration(
+              hintText: 'Masukkan nama Anda',
+              hintStyle: AppTextStyles.roboto14w400.copyWith(
+                color: AppColors.textSecondary.withValues(alpha: 0.5),
+              ),
+              filled: true,
+              fillColor: AppColors.background,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s16,
+                vertical: AppSpacing.s12,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.s12),
+                borderSide: const BorderSide(color: AppColors.primaryLight),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.s12),
+                borderSide: const BorderSide(color: AppColors.primary),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(
+            'Batal',
+            style: AppTextStyles.roboto14w400.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Obx(() {
+          final isSubmitting = widget.authController.isSubmitting;
+          return ElevatedButton(
+            onPressed: isSubmitting
+                ? null
+                : () async {
+                    final newName = _nameController.text.trim();
+                    if (newName.isEmpty) {
+                      Get.snackbar('Error', 'Nama tidak boleh kosong');
+                      return;
+                    }
+                    final navigator = Navigator.of(context);
+                    await widget.authController.updateProfile(displayName: newName);
+                    if (widget.authController.currentUser?.displayName == newName) {
+                      navigator.pop();
+                    }
+                  },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.surface,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s16,
+                vertical: AppSpacing.s12,
+              ),
+            ),
+            child: isSubmitting
+                ? const SizedBox(
+                    width: AppSpacing.s16,
+                    height: AppSpacing.s16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    'Simpan',
+                    style: AppTextStyles.roboto14w400.copyWith(
+                      color: AppColors.surface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+          );
+        }),
+      ],
     );
   }
 }

@@ -82,7 +82,7 @@ class TransactionItemWidget extends StatelessWidget {
               child: AppIcon(
                 categoryIcon,
                 color: categoryColor,
-                size: 24,
+                size: 28,
               ),
             ),
           ),

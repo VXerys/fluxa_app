@@ -66,7 +66,7 @@ class TampilanMenuPage extends GetView<ProfileController> {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.black.withOpacity(0.06)),
+                  border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -150,7 +150,7 @@ class _PreviewMenuItem extends StatelessWidget {
             color: bgColor,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: AppIcon(icon, color: iconColor, size: 28),
+          child: AppIcon(icon, color: iconColor, size: 32),
         ),
         const SizedBox(height: AppSpacing.s8),
         Text(
@@ -193,7 +193,7 @@ class _PaletteCard extends StatelessWidget {
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? AppColors.primary : Colors.black.withOpacity(0.08),
+              color: isSelected ? AppColors.primary : Colors.black.withValues(alpha: 0.08),
               width: isSelected ? 2.2 : 1,
             ),
           ),

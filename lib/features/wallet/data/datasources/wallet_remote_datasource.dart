@@ -50,7 +50,7 @@ class WalletRemoteDataSourceImpl implements WalletRemoteDataSource {
           .eq('user_id', userId)
           .single();
 
-      return WalletModel.fromJson(response as Map<String, dynamic>);
+      return WalletModel.fromJson(response);
     } on supabase.AuthException catch (e) {
       throw AuthException(e.message);
     } on supabase.PostgrestException catch (e) {
@@ -73,7 +73,7 @@ class WalletRemoteDataSourceImpl implements WalletRemoteDataSource {
           .select()
           .single();
 
-      return WalletModel.fromJson(response as Map<String, dynamic>);
+      return WalletModel.fromJson(response);
     } on supabase.AuthException catch (e) {
       throw AuthException(e.message);
     } on supabase.PostgrestException catch (e) {
@@ -99,7 +99,7 @@ class WalletRemoteDataSourceImpl implements WalletRemoteDataSource {
           .select()
           .single();
 
-      return WalletModel.fromJson(response as Map<String, dynamic>);
+      return WalletModel.fromJson(response);
     } on supabase.AuthException catch (e) {
       throw AuthException(e.message);
     } on supabase.PostgrestException catch (e) {

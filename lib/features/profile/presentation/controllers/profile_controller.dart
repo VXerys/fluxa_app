@@ -252,7 +252,7 @@ class ProfileController extends GetxController {
   }
 
   Color menuBgColorAt(int index) {
-    return menuAccentColorAt(index).withOpacity(0.14);
+    return menuAccentColorAt(index).withValues(alpha: 0.14);
   }
 
   bool _isValidMenuOrder(List<String> order) {

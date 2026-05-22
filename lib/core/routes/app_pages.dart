@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../core/storage/storage_service.dart';
 import '../../features/auth/presentation/bindings/auth_binding.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/navigation/presentation/bindings/main_navigation_binding.dart';
 import '../../features/navigation/presentation/pages/main_navigation_page.dart';
@@ -27,7 +28,12 @@ class AppPages {
 
   static String get initial {
     final token = StorageService.read<String>('access_token');
-    return token != null ? Routes.main : Routes.login;
+    if (token != null) {
+      return Routes.main;
+    }
+
+    // Onboarding dinonaktifkan sementara, langsung arahkan ke login
+    return Routes.login;
   }
 
   static final routes = <GetPage<dynamic>>[
@@ -44,6 +50,11 @@ class AppPages {
     GetPage(
       name: Routes.login,
       page: () => const LoginPage(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.onboarding,
+      page: () => const OnboardingPage(),
       binding: AuthBinding(),
     ),
     GetPage(

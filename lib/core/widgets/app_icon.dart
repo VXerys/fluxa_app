@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../icons/app_huge_icons.dart';
@@ -52,6 +53,27 @@ class AppIcon extends StatelessWidget {
         color: color,
         semanticLabel: semanticLabel,
       );
+    }
+
+    if (icon is String) {
+      final double baseSize = size ?? 24;
+      final double renderSize = _hugeIconRenderSize(baseSize);
+      if ((icon as String).endsWith('.svg')) {
+        return SizedBox.square(
+          dimension: baseSize,
+          child: Center(
+            child: SvgPicture.asset(
+              icon as String,
+              width: renderSize,
+              height: renderSize,
+              colorFilter: color != null
+                  ? ColorFilter.mode(color!, BlendMode.srcIn)
+                  : null,
+              semanticsLabel: semanticLabel,
+            ),
+          ),
+        );
+      }
     }
 
     return SizedBox.square(dimension: size ?? 24);

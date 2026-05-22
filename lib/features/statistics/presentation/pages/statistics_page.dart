@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:fluxa_app/core/icons/app_huge_icons.dart';
 import 'package:fluxa_app/core/widgets/app_icon.dart';
+import 'package:fluxa_app/core/widgets/placeholder_page.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -11,10 +12,12 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/utils/category_color_parser.dart';
 import '../../../../core/utils/category_icon_mapper.dart';
 import '../../domain/entities/category_breakdown_entity.dart';
+import '../../domain/entities/top_expense_transaction_entity.dart';
 import '../controllers/statistics_controller.dart';
 
 class StatisticsPage extends GetView<StatisticsController> {
   const StatisticsPage({super.key});
+  static const int _maxCategoryCards = 5;
 
   static final NumberFormat _amountFormatter = NumberFormat.currency(
     locale: 'id_ID',
@@ -33,18 +36,23 @@ class StatisticsPage extends GetView<StatisticsController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Statistik', style: AppTextStyles.roboto18w600),
+              Text(
+                'Statistik',
+                style: AppTextStyles.lora24w400.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: AppSpacing.s16),
               _buildPeriodTabs(),
               const SizedBox(height: AppSpacing.s12),
               _buildPeriodNavigator(context),
-              const SizedBox(height: AppSpacing.s20),
-              _buildTypeToggle(),
-              const SizedBox(height: AppSpacing.s20),
-              _buildDonutChartArea(_amountFormatter),
               const SizedBox(height: AppSpacing.s16),
+              _buildTypeToggle(),
+              const SizedBox(height: AppSpacing.s16),
+              _buildDonutChartArea(_amountFormatter),
+              const SizedBox(height: AppSpacing.s20),
               _buildCategoryBreakdownSection(_amountFormatter),
-              const SizedBox(height: AppSpacing.s12),
+              const SizedBox(height: AppSpacing.s2),
               _buildTopCategorySection(_amountFormatter),
               const SizedBox(height: 120),
             ],
@@ -67,6 +75,14 @@ class StatisticsPage extends GetView<StatisticsController> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.04), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Obx(
         () => Row(
@@ -75,13 +91,23 @@ class StatisticsPage extends GetView<StatisticsController> {
                 (tab) => Expanded(
                   child: GestureDetector(
                     onTap: () => controller.changePeriod(tab.value),
-                    child: Container(
-                      height: 40,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      height: 38,
                       decoration: BoxDecoration(
                         color: controller.selectedPeriod == tab.value
                             ? Colors.white
                             : Colors.transparent,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: controller.selectedPeriod == tab.value
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.06),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                )
+                              ]
+                            : null,
                       ),
                       alignment: Alignment.center,
                       child: Text(
@@ -91,7 +117,7 @@ class StatisticsPage extends GetView<StatisticsController> {
                               ? AppColors.textPrimary
                               : AppColors.textSecondary,
                           fontWeight: controller.selectedPeriod == tab.value
-                              ? FontWeight.w700
+                              ? FontWeight.w600
                               : FontWeight.w400,
                         ),
                       ),
@@ -108,100 +134,169 @@ class StatisticsPage extends GetView<StatisticsController> {
   Widget _buildPeriodNavigator(BuildContext context) {
     return Obx(() {
       if (controller.selectedPeriod == 'range') {
-        return InkWell(
-          onTap: () async {
-            final now = DateTime.now();
-            final initialStart =
-                controller.rangeStart ??
-                DateTime(now.year, now.month, now.day - 6);
-            final initialEnd =
-                controller.rangeEnd ?? DateTime(now.year, now.month, now.day);
+        return Center(
+          child: InkWell(
+            onTap: () async {
+              final now = DateTime.now();
+              final DateTime rawStart =
+                  controller.rangeStart ??
+                  DateTime(now.year, now.month, now.day - 6);
+              final DateTime rawEnd =
+                  controller.rangeEnd ?? DateTime(now.year, now.month, now.day);
+              final DateTime initialStart = rawStart.isAfter(rawEnd)
+                  ? rawEnd
+                  : rawStart;
+              final DateTime initialEnd = rawStart.isAfter(rawEnd)
+                  ? rawStart
+                  : rawEnd;
 
-            final picked = await showDateRangePicker(
-              context: context,
-              firstDate: DateTime(2000, 1, 1),
-              lastDate: DateTime(2100, 12, 31),
-              initialDateRange: DateTimeRange(
-                start: initialStart,
-                end: initialEnd,
+              final picked = await showDateRangePicker(
+                context: context,
+                firstDate: DateTime(2000, 1, 1),
+                lastDate: DateTime(2100, 12, 31),
+                initialDateRange: DateTimeRange(
+                  start: initialStart,
+                  end: initialEnd,
+                ),
+                locale: const Locale('id', 'ID'),
+              );
+              if (picked == null) return;
+              controller.setRange(picked.start, picked.end);
+            },
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s16,
+                vertical: AppSpacing.s8,
               ),
-              locale: const Locale('id', 'ID'),
-            );
-            if (picked == null) return;
-            controller.setRange(picked.start, picked.end);
-          },
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.s8),
-            child: Row(
-              children: [
-                const AppIcon(
-                  AppHugeIcons.calendar_today_rounded,
-                  size: 18,
-                  color: AppColors.textSecondary,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  width: 1,
                 ),
-                const SizedBox(width: AppSpacing.s8),
-                Text(
-                  controller.periodLabel,
-                  style: AppTextStyles.roboto16w600.copyWith(
-                    color: AppColors.textPrimary,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
                   ),
-                ),
-              ],
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const AppIcon(
+                    AppHugeIcons.calendar_today_rounded,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  Text(
+                    controller.periodLabel,
+                    style: AppTextStyles.roboto14w500.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s4),
+                  const AppIcon(
+                    AppHugeIcons.keyboard_arrow_down_rounded,
+                    size: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
             ),
           ),
         );
       }
 
-      return Row(
-        children: [
-          IconButton(
-            onPressed: () => controller.navigatePeriod(-1),
-            icon: const AppIcon(AppHugeIcons.chevron_left_rounded),
-            color: AppColors.textPrimary,
+      return Container(
+        height: 48,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.black.withValues(alpha: 0.04),
+            width: 1,
           ),
-          Expanded(
-            child: Center(
-              child: Text(
-                controller.periodLabel,
-                style: AppTextStyles.roboto16w600,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            IconButton(
+              onPressed: () => controller.navigatePeriod(-1),
+              icon: const AppIcon(AppHugeIcons.chevron_left_rounded, size: 20),
+              color: AppColors.textSecondary,
+              splashRadius: 20,
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  controller.periodLabel,
+                  style: AppTextStyles.roboto14w500.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
               ),
             ),
-          ),
-          IconButton(
-            onPressed: () => controller.navigatePeriod(1),
-            icon: const AppIcon(AppHugeIcons.chevron_right_rounded),
-            color: AppColors.textPrimary,
-          ),
-        ],
+            IconButton(
+              onPressed: () => controller.navigatePeriod(1),
+              icon: const AppIcon(AppHugeIcons.chevron_right_rounded, size: 20),
+              color: AppColors.textSecondary,
+              splashRadius: 20,
+            ),
+          ],
+        ),
       );
     });
   }
 
   Widget _buildTypeToggle() {
-    return Obx(
-      () => Row(
-        children: [
-          Expanded(
-            child: _TypeToggleItem(
-              label: 'Pemasukan',
-              isActive: controller.selectedType == 'income',
-              activeBackground: AppColors.success.withOpacity(0.1),
-              activeTextColor: AppColors.success,
-              onTap: () => controller.changeType('income'),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.s12),
-          Expanded(
-            child: _TypeToggleItem(
-              label: 'Pengeluaran',
-              isActive: controller.selectedType == 'expense',
-              activeBackground: AppColors.error.withOpacity(0.1),
-              activeTextColor: AppColors.error,
-              onTap: () => controller.changeType('expense'),
-            ),
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s4),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.04), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
+      ),
+      child: Obx(
+        () => Row(
+          children: [
+            Expanded(
+              child: _TypeToggleItem(
+                label: 'Pemasukan',
+                icon: AppHugeIcons.arrow_upward,
+                isActive: controller.selectedType == 'income',
+                activeColor: AppColors.success,
+                onTap: () => controller.changeType('income'),
+              ),
+            ),
+            Expanded(
+              child: _TypeToggleItem(
+                label: 'Pengeluaran',
+                icon: AppHugeIcons.arrow_downward,
+                isActive: controller.selectedType == 'expense',
+                activeColor: AppColors.error,
+                onTap: () => controller.changeType('expense'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -212,12 +307,20 @@ class StatisticsPage extends GetView<StatisticsController> {
       padding: const EdgeInsets.all(AppSpacing.s16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.04), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Obx(() {
         if (controller.isLoading) {
           return const SizedBox(
-            height: 280,
+            height: 200,
             child: Center(child: CircularProgressIndicator()),
           );
         }
@@ -226,7 +329,7 @@ class StatisticsPage extends GetView<StatisticsController> {
             controller.summary?.breakdown ?? <CategoryBreakdownEntity>[];
         if (controller.errorMessage.isNotEmpty && breakdown.isEmpty) {
           return SizedBox(
-            height: 280,
+            height: 200,
             child: Center(
               child: Text(
                 controller.errorMessage,
@@ -240,7 +343,7 @@ class StatisticsPage extends GetView<StatisticsController> {
         }
         if (breakdown.isEmpty) {
           return SizedBox(
-            height: 280,
+            height: 200,
             child: Center(
               child: Text(
                 'Tidak ada data',
@@ -253,19 +356,20 @@ class StatisticsPage extends GetView<StatisticsController> {
         }
 
         final legendItems = breakdown.take(5).toList();
+        final bool isExpense = controller.selectedType == 'expense';
+
         return SizedBox(
-          height: 280,
+          height: 200,
           child: Row(
             children: [
               Expanded(
-                flex: 3,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     PieChart(
                       PieChartData(
-                        centerSpaceRadius: 80,
-                        sectionsSpace: 2,
+                        centerSpaceRadius: 50,
+                        sectionsSpace: 3,
                         sections: breakdown
                             .map(
                               (category) => PieChartSectionData(
@@ -275,7 +379,7 @@ class StatisticsPage extends GetView<StatisticsController> {
                                   fallback: AppColors.primary,
                                 ),
                                 title: '',
-                                radius: 26,
+                                radius: 30,
                               ),
                             )
                             .toList(),
@@ -285,9 +389,10 @@ class StatisticsPage extends GetView<StatisticsController> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Total',
+                          isExpense ? 'Pengeluaran' : 'Pemasukan',
                           style: AppTextStyles.roboto12w400.copyWith(
                             color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.s4),
@@ -296,7 +401,7 @@ class StatisticsPage extends GetView<StatisticsController> {
                             controller.summary?.totalAmount ?? 0,
                           ),
                           textAlign: TextAlign.center,
-                          style: AppTextStyles.roboto14w500.copyWith(
+                          style: AppTextStyles.roboto16w600.copyWith(
                             color: AppColors.textPrimary,
                           ),
                         ),
@@ -307,9 +412,9 @@ class StatisticsPage extends GetView<StatisticsController> {
               ),
               const SizedBox(width: AppSpacing.s16),
               Expanded(
-                flex: 2,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: legendItems
                       .map(
                         (item) => Padding(
@@ -319,8 +424,8 @@ class StatisticsPage extends GetView<StatisticsController> {
                           child: Row(
                             children: [
                               Container(
-                                width: 10,
-                                height: 10,
+                                width: 8,
+                                height: 8,
                                 decoration: BoxDecoration(
                                   color: CategoryColorParser.parse(
                                     item.categoryColor,
@@ -332,18 +437,20 @@ class StatisticsPage extends GetView<StatisticsController> {
                               const SizedBox(width: AppSpacing.s8),
                               Expanded(
                                 child: Text(
-                                  _truncateCategoryName(item.categoryName),
+                                  item.categoryName,
                                   style: AppTextStyles.roboto12w400.copyWith(
                                     color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              const SizedBox(width: AppSpacing.s6),
+                              const SizedBox(width: AppSpacing.s8),
                               Text(
                                 '${item.percentage.toStringAsFixed(0)}%',
                                 style: AppTextStyles.roboto12w400.copyWith(
                                   color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
@@ -360,11 +467,6 @@ class StatisticsPage extends GetView<StatisticsController> {
     );
   }
 
-  String _truncateCategoryName(String name) {
-    if (name.length <= 10) return name;
-    return '${name.substring(0, 10)}...';
-  }
-
   Widget _buildCategoryBreakdownSection(NumberFormat amountFormatter) {
     return Obx(() {
       if (controller.isLoading) return const SizedBox.shrink();
@@ -372,38 +474,129 @@ class StatisticsPage extends GetView<StatisticsController> {
       final breakdown =
           controller.summary?.breakdown ?? <CategoryBreakdownEntity>[];
       if (breakdown.isEmpty) return const SizedBox.shrink();
+      final visibleBreakdown = breakdown.take(_maxCategoryCards).toList();
+      final bool hasMoreBreakdown = breakdown.length > _maxCategoryCards;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Rincian Kategori', style: AppTextStyles.roboto16w600),
-          const SizedBox(height: AppSpacing.s10),
+          Text(
+            'Rincian Kategori',
+            style: AppTextStyles.lora24w400.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s12),
           ListView.separated(
-            itemCount: breakdown.length,
+            itemCount: visibleBreakdown.length,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s10),
+            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.s12),
             itemBuilder: (_, index) {
-              final item = breakdown[index];
+              final item = visibleBreakdown[index];
               return _CategoryBreakdownCard(
                 item: item,
                 amountFormatter: amountFormatter,
               );
             },
           ),
+          if (hasMoreBreakdown) ...[
+            const SizedBox(height: AppSpacing.s8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: controller.openMoreTransactions,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Rincian kategori lainnya',
+                  style: AppTextStyles.roboto14w500.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       );
     });
+  }
+
+  Widget _buildDropdownChip<T>({
+    required T value,
+    required List<T> items,
+    required ValueChanged<T> onChanged,
+  }) {
+    return PopupMenuButton<T>(
+      onSelected: onChanged,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      color: Colors.white,
+      elevation: 4,
+      offset: const Offset(0, 36),
+      itemBuilder: (context) {
+        return items.map((item) {
+          final isSelected = item == value;
+          return PopupMenuItem<T>(
+            value: item,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.black.withValues(alpha: 0.06)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                item.toString(),
+                style: AppTextStyles.roboto14w400.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+            ),
+          );
+        }).toList();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              value.toString(),
+              style: AppTextStyles.roboto12w400.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const AppIcon(
+              AppHugeIcons.keyboard_arrow_down_rounded,
+              size: 14,
+              color: AppColors.textSecondary,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildTopCategorySection(NumberFormat amountFormatter) {
     return Obx(() {
       if (controller.isLoading) return const SizedBox.shrink();
 
-      final topItems =
-          (controller.summary?.breakdown ?? <CategoryBreakdownEntity>[])
-              .take(5)
-              .toList();
+      final topItems = controller.topTransactions;
       if (topItems.isEmpty) return const SizedBox.shrink();
 
       final String titlePrefix = controller.selectedType == 'income'
@@ -412,87 +605,165 @@ class StatisticsPage extends GetView<StatisticsController> {
 
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.s16),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.s16,
+          AppSpacing.s16,
+          AppSpacing.s16,
+          AppSpacing.s14,
+        ),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.black.withValues(alpha: 0.04), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               '$titlePrefix Terbesar',
-              style: AppTextStyles.roboto16w600.copyWith(
-                color: AppColors.textPrimary,
+              style: AppTextStyles.lora24w400.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: AppSpacing.s10),
-            Wrap(
-              spacing: AppSpacing.s8,
-              children: const [
-                _StaticChoiceChip(label: 'Kategori'),
-                _StaticChoiceChip(label: 'Top 5'),
+            const SizedBox(height: AppSpacing.s12),
+            Row(
+              children: [
+                _buildDropdownChip<String>(
+                  value: controller.selectedGroupType,
+                  items: const ['Kategori', 'Subkategori', 'Judul', 'Dompet'],
+                  onChanged: controller.changeGroupType,
+                ),
               ],
             ),
-            const SizedBox(height: AppSpacing.s12),
-            ListView.separated(
-              itemCount: topItems.length,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: AppSpacing.s10),
-              itemBuilder: (_, index) {
+            const SizedBox(height: AppSpacing.s10),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List<Widget>.generate(topItems.length, (index) {
                 final item = topItems[index];
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(
-                      width: 24,
-                      child: Text(
-                        '${index + 1}',
-                        style: AppTextStyles.roboto12w400.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
+                    _TopTransactionItem(
+                      item: item,
+                      amountFormatter: amountFormatter,
+                      rank: index + 1,
                     ),
-                    const SizedBox(width: AppSpacing.s8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.categoryName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.roboto14w500.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.s4),
-                          Text(
-                            '${item.transactionCount} transaksi',
-                            style: AppTextStyles.roboto12w400.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.s8),
-                    Text(
-                      amountFormatter.format(item.amount),
-                      style: AppTextStyles.roboto14w400.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
+                    if (index != topItems.length - 1)
+                      const Divider(height: AppSpacing.s16, thickness: 0.5),
                   ],
                 );
-              },
+              }),
             ),
+            if (controller.hasMoreTopTransactions) ...[
+              const SizedBox(height: AppSpacing.s8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: controller.openMoreTransactions,
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.black.withValues(alpha: 0.08)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.s12),
+                  ),
+                  child: Text(
+                    'Transaksi lainnya',
+                    style: AppTextStyles.roboto14w500.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       );
     });
+  }
+}
+
+class _TopTransactionItem extends StatelessWidget {
+  final TopExpenseTransactionEntity item;
+  final NumberFormat amountFormatter;
+  final int rank;
+
+  const _TopTransactionItem({
+    required this.item,
+    required this.amountFormatter,
+    required this.rank,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final DateFormat dateFormatter = DateFormat('d MMM yyyy', 'id_ID');
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.s4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.04),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              '$rank',
+              style: AppTextStyles.roboto12w400.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.s10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.roboto14w500.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${item.groupLabel} - ${dateFormatter.format(item.date)}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.roboto12w400.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.s12),
+          Text(
+            amountFormatter.format(item.amount),
+            style: AppTextStyles.roboto14w500.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -515,145 +786,145 @@ class _CategoryBreakdownCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.s12),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: categoryColor.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: AppIcon(
-              CategoryIconMapper.fromKey(item.categoryIcon),
-              color: categoryColor,
-              size: 24,
-            ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.04), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
-          const SizedBox(width: AppSpacing.s12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => Get.to(() => PlaceholderPage(
+                title: item.categoryName,
+                message: 'Detail transaksi Kategori "${item.categoryName}" sedang dalam proses pengembangan.',
+              )),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.s12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  item.categoryName,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.roboto16w600.copyWith(
-                    color: AppColors.textPrimary,
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: categoryColor.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: AppIcon(
+                    CategoryIconMapper.fromKey(item.categoryIcon),
+                    color: categoryColor,
+                    size: 26,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.s8),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final double maxWidth = constraints.maxWidth;
-                    return Stack(
-                      children: [
-                        Container(
-                          width: maxWidth,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            color: AppColors.background,
-                            borderRadius: BorderRadius.circular(3),
+                const SizedBox(width: AppSpacing.s12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.categoryName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.roboto14w500.copyWith(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
-                        Container(
-                          width: maxWidth * progress,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            color: categoryColor,
-                            borderRadius: BorderRadius.circular(3),
+                          const SizedBox(width: AppSpacing.s8),
+                          Text(
+                            amountFormatter.format(item.amount),
+                            style: AppTextStyles.roboto14w500.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: AppSpacing.s8),
-                Text(
-                  '${item.transactionCount} transaksi',
-                  style: AppTextStyles.roboto12w400.copyWith(
-                    color: AppColors.textSecondary,
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.s8),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final double maxWidth = constraints.maxWidth;
+                          return Stack(
+                            children: [
+                              Container(
+                                width: maxWidth,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: categoryColor.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              Container(
+                                width: maxWidth * progress,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: categoryColor,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.s6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '${item.transactionCount} transaksi',
+                            style: AppTextStyles.roboto12w400.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            '${item.percentage.toStringAsFixed(0)}%',
+                            style: AppTextStyles.roboto12w400.copyWith(
+                              color: categoryColor,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.s12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${item.percentage.toStringAsFixed(0)}%',
-                style: AppTextStyles.roboto16w600.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s6),
-              Text(
-                amountFormatter.format(item.amount),
-                style: AppTextStyles.roboto14w400.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
-    );
-  }
-}
-
-class _StaticChoiceChip extends StatelessWidget {
-  final String label;
-
-  const _StaticChoiceChip({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return ChoiceChip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label),
-          const SizedBox(width: 4),
-          const AppIcon(AppHugeIcons.keyboard_arrow_down_rounded, size: 14),
-        ],
-      ),
-      selected: true,
-      showCheckmark: false,
-      onSelected: (_) {},
-      labelStyle: AppTextStyles.roboto12w400.copyWith(
-        color: AppColors.textPrimary,
-      ),
-      backgroundColor: AppColors.background,
-      selectedColor: AppColors.background,
-      side: BorderSide.none,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
     );
   }
 }
 
 class _TypeToggleItem extends StatelessWidget {
   final String label;
+  final AppIconData icon;
   final bool isActive;
-  final Color activeBackground;
-  final Color activeTextColor;
+  final Color activeColor;
   final VoidCallback onTap;
 
   const _TypeToggleItem({
     required this.label,
+    required this.icon,
     required this.isActive,
-    required this.activeBackground,
-    required this.activeTextColor,
+    required this.activeColor,
     required this.onTap,
   });
 
@@ -661,21 +932,31 @@ class _TypeToggleItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         height: 40,
         decoration: BoxDecoration(
-          color: isActive ? activeBackground : Colors.transparent,
+          color: isActive ? activeColor.withValues(alpha: 0.08) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isActive ? activeTextColor : AppColors.neutral,
-          ),
         ),
         alignment: Alignment.center,
-        child: Text(
-          label,
-          style: AppTextStyles.roboto14w500.copyWith(
-            color: isActive ? activeTextColor : AppColors.textSecondary,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AppIcon(
+              icon,
+              color: isActive ? activeColor : AppColors.textSecondary,
+              size: 16,
+            ),
+            const SizedBox(width: AppSpacing.s6),
+            Text(
+              label,
+              style: AppTextStyles.roboto14w500.copyWith(
+                color: isActive ? activeColor : AppColors.textSecondary,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );
