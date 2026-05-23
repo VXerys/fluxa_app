@@ -319,9 +319,12 @@ class HomePage extends GetView<HomeController> {
             ),
             PopupMenuButton<String>(
               color: AppColors.surface,
-              icon: const AppIcon(
-                AppHugeIcons.more_vert,
-                color: AppColors.textSecondary,
+              child: const Padding(
+                padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+                child: AppIcon(
+                  AppHugeIcons.more_vert,
+                  color: AppColors.textSecondary,
+                ),
               ),
               onSelected: (String value) {
                 if (value == 'tampilan_menu') {

@@ -55,7 +55,7 @@ class StatisticsPage extends GetView<StatisticsController> {
               _buildDonutChartArea(_amountFormatter),
               const SizedBox(height: AppSpacing.s20),
               _buildCategoryBreakdownSection(_amountFormatter),
-              const SizedBox(height: AppSpacing.s2),
+              const SizedBox(height: AppSpacing.s20),
               _buildTopCategorySection(_amountFormatter),
               const SizedBox(height: 120),
             ],
@@ -393,27 +393,38 @@ class StatisticsPage extends GetView<StatisticsController> {
                             .toList(),
                       ),
                     ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          isExpense ? 'Pengeluaran' : 'Pemasukan',
-                          style: AppTextStyles.roboto12w400.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
+                    SizedBox(
+                      width: 80,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              isExpense ? 'Pengeluaran' : 'Pemasukan',
+                              style: AppTextStyles.roboto12w400.copyWith(
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: AppSpacing.s4),
-                        Text(
-                          amountFormatter.format(
-                            controller.summary?.totalAmount ?? 0,
+                          const SizedBox(height: AppSpacing.s4),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              NumberFormat.currency(
+                                locale: 'id_ID',
+                                symbol: 'Rp',
+                                decimalDigits: 0,
+                              ).format(controller.summary?.totalAmount ?? 0),
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.roboto16w600.copyWith(
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
                           ),
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.roboto16w600.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -497,6 +508,7 @@ class StatisticsPage extends GetView<StatisticsController> {
           ),
           const SizedBox(height: AppSpacing.s12),
           ListView.separated(
+            padding: EdgeInsets.zero,
             itemCount: visibleBreakdown.length,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

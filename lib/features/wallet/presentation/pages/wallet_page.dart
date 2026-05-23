@@ -11,6 +11,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/utils/category_color_parser.dart';
+import '../../domain/entities/monthly_cashflow_comparison_entity.dart';
 import '../../domain/entities/wallet_entity.dart';
 import '../controllers/wallet_controller.dart';
 import '../widgets/add_wallet_bottom_sheet.dart';
@@ -106,6 +107,7 @@ class WalletPage extends GetView<WalletController> {
       final selectedThemeIndex = profileController.selectedThemeIndex.value;
       final theme = ProfileController.cardThemes[selectedThemeIndex];
       final colors = theme['colors'] as List<Color>;
+      final comparison = controller.monthlyCashflowComparison;
 
       return Container(
         width: double.infinity,
@@ -162,11 +164,13 @@ class WalletPage extends GetView<WalletController> {
                     vertical: AppSpacing.s4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.2),
+                    color: _comparisonBadgeColor(
+                      comparison,
+                    ).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppSpacing.s24),
                   ),
                   child: Text(
-                    '↓ -10.0%',
+                    _comparisonPercentageText(comparison),
                     style: AppTextStyles.roboto12w400.copyWith(
                       color: AppColors.surface,
                       fontWeight: FontWeight.w500,
@@ -174,7 +178,7 @@ class WalletPage extends GetView<WalletController> {
                   ),
                 ),
                 Text(
-                  '(${_currencyFormatter.format(50000)}) 30 hari terakhir',
+                  _comparisonDeltaText(comparison),
                   style: AppTextStyles.roboto12w400.copyWith(
                     color: AppColors.surface,
                   ),
@@ -255,6 +259,49 @@ class WalletPage extends GetView<WalletController> {
         ),
       );
     });
+  }
+
+  Color _comparisonBadgeColor(MonthlyCashflowComparisonEntity? comparison) {
+    if (comparison == null ||
+        !comparison.hasComparison ||
+        comparison.delta == 0) {
+      return AppColors.neutral;
+    }
+
+    return comparison.delta > 0 ? AppColors.success : AppColors.error;
+  }
+
+  String _comparisonPercentageText(
+    MonthlyCashflowComparisonEntity? comparison,
+  ) {
+    if (comparison == null ||
+        !comparison.hasComparison ||
+        comparison.percentage == null) {
+      return '—';
+    }
+
+    if (comparison.delta > 0) {
+      return '↑ +${comparison.percentage!.toStringAsFixed(1)}%';
+    }
+    if (comparison.delta < 0) {
+      return '↓ ${comparison.percentage!.toStringAsFixed(1)}%';
+    }
+
+    return '${comparison.percentage!.toStringAsFixed(1)}%';
+  }
+
+  String _comparisonDeltaText(MonthlyCashflowComparisonEntity? comparison) {
+    if (comparison == null || !comparison.hasComparison) {
+      return 'Belum ada data bulan lalu';
+    }
+
+    final sign = comparison.delta > 0
+        ? '+'
+        : comparison.delta < 0
+        ? '-'
+        : '';
+    final amount = _currencyFormatter.format(comparison.delta.abs());
+    return '($sign$amount) dibanding bulan lalu';
   }
 
   Widget _buildSubInfoBox({

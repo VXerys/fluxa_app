@@ -4,10 +4,12 @@ import 'package:get/get.dart';
 
 import '../../../../core/sync/finance_sync_service.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../domain/entities/monthly_cashflow_comparison_entity.dart';
 import '../../domain/entities/wallet_entity.dart';
 import '../../domain/repositories/wallet_repository.dart';
 import '../../domain/usecases/archive_wallet_usecase.dart';
 import '../../domain/usecases/create_wallet_usecase.dart';
+import '../../domain/usecases/get_monthly_cashflow_comparison_usecase.dart';
 import '../../domain/usecases/get_total_balance_usecase.dart';
 import '../../domain/usecases/get_wallets_usecase.dart';
 import '../../domain/usecases/update_wallet_usecase.dart';
@@ -18,6 +20,8 @@ class WalletController extends GetxController {
   final UpdateWalletUseCase updateWalletUseCase;
   final ArchiveWalletUseCase archiveWalletUseCase;
   final GetTotalBalanceUseCase getTotalBalanceUseCase;
+  final GetMonthlyCashflowComparisonUseCase
+  getMonthlyCashflowComparisonUseCase;
   final FinanceSyncService financeSyncService;
 
   WalletController({
@@ -26,6 +30,7 @@ class WalletController extends GetxController {
     required this.updateWalletUseCase,
     required this.archiveWalletUseCase,
     required this.getTotalBalanceUseCase,
+    required this.getMonthlyCashflowComparisonUseCase,
     required this.financeSyncService,
   });
 
@@ -40,6 +45,11 @@ class WalletController extends GetxController {
 
   final Rx<double> _totalBalance = 0.0.obs;
   double get totalBalance => _totalBalance.value;
+
+  final Rx<MonthlyCashflowComparisonEntity?> _monthlyCashflowComparison =
+      Rx<MonthlyCashflowComparisonEntity?>(null);
+  MonthlyCashflowComparisonEntity? get monthlyCashflowComparison =>
+      _monthlyCashflowComparison.value;
 
   final RxString _errorMessage = ''.obs;
   String get errorMessage => _errorMessage.value;
@@ -65,6 +75,7 @@ class WalletController extends GetxController {
       await Future.wait([
         _loadWalletList(requestId),
         _loadTotalBalance(requestId),
+        _loadMonthlyCashflowComparison(requestId),
       ]);
     } finally {
       if (!_isStale(requestId)) {
@@ -100,6 +111,21 @@ class WalletController extends GetxController {
       },
       (total) {
         _totalBalance.value = total;
+      },
+    );
+  }
+
+  Future<void> _loadMonthlyCashflowComparison(int requestId) async {
+    final result = await getMonthlyCashflowComparisonUseCase(const NoParams());
+    if (_isStale(requestId)) return;
+
+    result.fold(
+      (failure) {
+        _errorMessage.value = failure.message;
+        _monthlyCashflowComparison.value = null;
+      },
+      (comparison) {
+        _monthlyCashflowComparison.value = comparison;
       },
     );
   }
