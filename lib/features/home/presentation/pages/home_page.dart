@@ -56,9 +56,12 @@ class HomePage extends GetView<HomeController> {
                           );
                         }),
                         const SizedBox(height: AppSpacing.s16),
-                        Obx(
-                          () => BalanceCardWidget(summary: controller.summary),
-                        ),
+                        Obx(() {
+                          if (controller.isLoading && controller.summary == null) {
+                            return _buildBalanceCardShimmer();
+                          }
+                          return BalanceCardWidget(summary: controller.summary);
+                        }),
                         const SizedBox(height: AppSpacing.s8),
                         _buildMenu(),
                         const SizedBox(height: AppSpacing.s16),
@@ -286,18 +289,137 @@ class HomePage extends GetView<HomeController> {
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.s8),
           child: Shimmer.fromColors(
-            baseColor: AppColors.background,
+            baseColor: AppColors.neutral.withValues(alpha: 0.1),
             highlightColor: AppColors.surface,
             child: Container(
-              height: AppSpacing.s48,
+              padding: const EdgeInsets.all(AppSpacing.s16),
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.s12),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: 80,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: 70,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
         );
       }),
+    );
+  }
+
+  Widget _buildBalanceCardShimmer() {
+    return Shimmer.fromColors(
+      baseColor: AppColors.neutral.withValues(alpha: 0.15),
+      highlightColor: AppColors.surface,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.s16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 120,
+              height: 14,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.s12),
+            Container(
+              width: 200,
+              height: 32,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.s20),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.s8),
+                Expanded(
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
