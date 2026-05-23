@@ -38,11 +38,7 @@ class WalletPage extends GetView<WalletController> {
 
         title: Text(
           'Dompet Saya',
-          style: AppTextStyles.lora24w400.copyWith(
-            color: AppColors.textPrimary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.lora24w400.copyWith(fontWeight: FontWeight.w400),
         ),
         actions: [
           IconButton(
@@ -53,7 +49,11 @@ class WalletPage extends GetView<WalletController> {
                 duration: const Duration(milliseconds: 260),
               );
             },
-            icon: const AppIcon(AppHugeIcons.add, color: AppColors.textPrimary, size: 28),
+            icon: const AppIcon(
+              AppHugeIcons.add,
+              color: AppColors.textPrimary,
+              size: 28,
+            ),
           ),
         ],
       ),
@@ -68,7 +68,9 @@ class WalletPage extends GetView<WalletController> {
               children: [
                 const SizedBox(height: AppSpacing.s8),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s16,
+                  ),
                   child: _buildSummaryCard(),
                 ),
                 const SizedBox(height: AppSpacing.s24),
@@ -131,7 +133,7 @@ class WalletPage extends GetView<WalletController> {
               children: [
                 Text(
                   'Dapat Dibelanjakan (IDR)',
-                  style: AppTextStyles.roboto14w400.copyWith(
+                  style: AppTextStyles.lora14w600.copyWith(
                     color: AppColors.surface.withValues(alpha: 0.9),
                   ),
                 ),
@@ -141,7 +143,7 @@ class WalletPage extends GetView<WalletController> {
             Center(
               child: Text(
                 _currencyFormatter.format(controller.totalBalance),
-                style: AppTextStyles.lora36w400.copyWith(
+                style: AppTextStyles.roboto36w400.copyWith(
                   color: AppColors.surface,
                   fontWeight: FontWeight.bold,
                   fontSize: 36,
@@ -190,10 +192,13 @@ class WalletPage extends GetView<WalletController> {
                         value: _currencyFormatter.format(
                           controller.totalBalance,
                         ),
-                        onTap: () => Get.to(() => const PlaceholderPage(
-                              title: 'Saldo Bersih',
-                              message: 'Detail Halaman Saldo Bersih sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
-                            )),
+                        onTap: () => Get.to(
+                          () => const PlaceholderPage(
+                            title: 'Saldo Bersih',
+                            message:
+                                'Detail Halaman Saldo Bersih sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.s8),
@@ -201,10 +206,13 @@ class WalletPage extends GetView<WalletController> {
                       child: _buildSubInfoBox(
                         title: 'Hutang Aktif',
                         value: _currencyFormatter.format(0),
-                        onTap: () => Get.to(() => const PlaceholderPage(
-                              title: 'Hutang Aktif',
-                              message: 'Detail Halaman Hutang Aktif sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
-                            )),
+                        onTap: () => Get.to(
+                          () => const PlaceholderPage(
+                            title: 'Hutang Aktif',
+                            message:
+                                'Detail Halaman Hutang Aktif sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -216,10 +224,13 @@ class WalletPage extends GetView<WalletController> {
                       child: _buildSubInfoBox(
                         title: 'Tabungan Aktif',
                         value: _currencyFormatter.format(0),
-                        onTap: () => Get.to(() => const PlaceholderPage(
-                              title: 'Tabungan Aktif',
-                              message: 'Detail Halaman Tabungan Aktif sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
-                            )),
+                        onTap: () => Get.to(
+                          () => const PlaceholderPage(
+                            title: 'Tabungan Aktif',
+                            message:
+                                'Detail Halaman Tabungan Aktif sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.s8),
@@ -227,10 +238,13 @@ class WalletPage extends GetView<WalletController> {
                       child: _buildSubInfoBox(
                         title: 'Pembayaran Mendatang',
                         value: _currencyFormatter.format(0),
-                        onTap: () => Get.to(() => const PlaceholderPage(
-                              title: 'Pembayaran Mendatang',
-                              message: 'Detail Halaman Pembayaran Mendatang sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
-                            )),
+                        onTap: () => Get.to(
+                          () => const PlaceholderPage(
+                            title: 'Pembayaran Mendatang',
+                            message:
+                                'Detail Halaman Pembayaran Mendatang sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -470,7 +484,7 @@ class WalletPage extends GetView<WalletController> {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
-      child: Text(title, style: AppTextStyles.roboto16w600),
+      child: Text(title, style: AppTextStyles.lora16w600),
     );
   }
 
@@ -503,7 +517,11 @@ class WalletPage extends GetView<WalletController> {
               shape: BoxShape.circle,
               color: AppColors.neutral.withValues(alpha: 0.08),
             ),
-            child: AppIcon(icon, color: AppColors.neutral, size: AppSpacing.s24),
+            child: AppIcon(
+              icon,
+              color: AppColors.neutral,
+              size: AppSpacing.s24,
+            ),
           ),
           const SizedBox(width: AppSpacing.s12),
           Expanded(
@@ -581,8 +599,3 @@ class _AddWalletFlowPage extends StatelessWidget {
     );
   }
 }
-
-
-
-
-

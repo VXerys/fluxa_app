@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../../core/storage/storage_service.dart';
 import '../../features/auth/presentation/bindings/auth_binding.dart';
+import '../../features/auth/presentation/pages/auth_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
@@ -49,7 +50,7 @@ class AppPages {
     ),
     GetPage(
       name: Routes.login,
-      page: () => const LoginPage(),
+      page: () => const AuthPage(initialTab: 0),
       binding: AuthBinding(),
     ),
     GetPage(
@@ -59,7 +60,7 @@ class AppPages {
     ),
     GetPage(
       name: Routes.register,
-      page: () => const RegisterPage(),
+      page: () => const AuthPage(initialTab: 1),
       binding: AuthBinding(),
     ),
     GetPage(

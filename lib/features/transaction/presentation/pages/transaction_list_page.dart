@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fluxa_app/core/icons/app_huge_icons.dart';
 import 'package:fluxa_app/core/widgets/app_icon.dart';
+import 'package:fluxa_app/core/widgets/app_empty_state.dart';
+import 'package:fluxa_app/core/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -57,6 +59,7 @@ class _TransactionListBody extends StatefulWidget {
 
 class _TransactionListBodyState extends State<_TransactionListBody> {
   bool _didApplyRoutePrefilter = false;
+  final TextEditingController _searchTextController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -70,6 +73,12 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
         widget.controller.applyStatisticsPrefilter(args);
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _searchTextController.dispose();
+    super.dispose();
   }
 
   List<TransactionEntity> _applyLocalSearch(List<TransactionEntity> items) {
@@ -124,8 +133,20 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
         return _buildShimmerList();
       }
 
-      if (widget.controller.transactions.isEmpty) {
-        return const AppEmptyStateWidget(message: 'Belum ada transaksi');
+      final hasActiveFilters = widget.controller.searchQuery.isNotEmpty ||
+          widget.controller.filterType != 'Semua' ||
+          widget.controller.filterCategory != null ||
+          widget.controller.filterDateRange != 'Semua Waktu' ||
+          widget.controller.filterNominal != 'Rentang Nominal';
+
+      if (widget.controller.transactions.isEmpty && !hasActiveFilters) {
+        return AppEmptyState(
+          icon: AppHugeIcons.receipt,
+          title: 'Belum Ada Transaksi',
+          message: 'Mulai catat transaksi Anda untuk melacak keuangan dengan rapi!',
+          actionLabel: 'Tambah Transaksi',
+          onActionPressed: () => Get.toNamed(Routes.addTransaction),
+        );
       }
 
       final List<TransactionEntity> filtered = _applyLocalSearch(
@@ -140,6 +161,7 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
               vertical: AppSpacing.s8,
             ),
             child: TextField(
+              controller: _searchTextController,
               onChanged: widget.controller.setSearchQuery,
               decoration: InputDecoration(
                 hintText: 'Cari transaksi...',
@@ -170,29 +192,45 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
           ),
           const SizedBox(height: AppSpacing.s8),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: widget.controller.loadTransactions,
-              child: ListView.separated(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                itemCount: filtered.length,
-                separatorBuilder: (_, _) => Divider(
-                  color: AppColors.neutral.withValues(alpha: 0.1),
-                  height: 1,
-                ),
-                itemBuilder: (context, index) {
-                  final transaction = filtered[index];
+            child: filtered.isEmpty
+                ? AppEmptyState(
+                    icon: AppHugeIcons.search,
+                    title: 'Tidak Ada Transaksi Cocok',
+                    message: 'Coba ubah kata kunci pencarian Anda atau reset filter.',
+                    actionLabel: 'Reset Filter',
+                    onActionPressed: () {
+                      _searchTextController.clear();
+                      widget.controller.setSearchQuery('');
+                      widget.controller.setFilterType('Semua');
+                      widget.controller.setFilterCategory(null);
+                      widget.controller.setFilterDateRange('Semua Waktu');
+                      widget.controller.setFilterNominal('Rentang Nominal');
+                    },
+                    isCompact: true,
+                  )
+                : RefreshIndicator(
+                    onRefresh: widget.controller.loadTransactions,
+                    child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, _) => Divider(
+                        color: AppColors.neutral.withValues(alpha: 0.1),
+                        height: 1,
+                      ),
+                      itemBuilder: (context, index) {
+                        final transaction = filtered[index];
 
-                  return GestureDetector(
-                    onTap: () => Get.to(
-                      () => TransactionDetailPage(transaction: transaction),
+                        return GestureDetector(
+                          onTap: () => Get.to(
+                            () => TransactionDetailPage(transaction: transaction),
+                          ),
+                          onLongPress: () => _confirmDelete(transaction),
+                          child: TransactionItemWidget(transaction: transaction),
+                        );
+                      },
                     ),
-                    onLongPress: () => _confirmDelete(transaction),
-                    child: TransactionItemWidget(transaction: transaction),
-                  );
-                },
-              ),
-            ),
+                  ),
           ),
         ],
       );
@@ -418,24 +456,4 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
   }
 }
 
-class AppEmptyStateWidget extends StatelessWidget {
-  final String message;
 
-  const AppEmptyStateWidget({super.key, required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.s24),
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.roboto14w400.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-      ),
-    );
-  }
-}

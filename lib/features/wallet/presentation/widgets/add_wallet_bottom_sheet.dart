@@ -65,11 +65,23 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
       key: 'wallet_01',
       icon: AppHugeIcons.account_balance_wallet_outlined,
     ),
-    _WalletIconOption(key: 'wallet_02', icon: AppHugeIcons.account_balance_outlined),
-    _WalletIconOption(key: 'wallet_03', icon: AppHugeIcons.credit_card_outlined),
-    _WalletIconOption(key: 'wallet_04', icon: AppHugeIcons.request_quote_outlined),
+    _WalletIconOption(
+      key: 'wallet_02',
+      icon: AppHugeIcons.account_balance_outlined,
+    ),
+    _WalletIconOption(
+      key: 'wallet_03',
+      icon: AppHugeIcons.credit_card_outlined,
+    ),
+    _WalletIconOption(
+      key: 'wallet_04',
+      icon: AppHugeIcons.request_quote_outlined,
+    ),
     _WalletIconOption(key: 'wallet_05', icon: AppHugeIcons.savings_outlined),
-    _WalletIconOption(key: 'wallet_06', icon: AppHugeIcons.attach_money_outlined),
+    _WalletIconOption(
+      key: 'wallet_06',
+      icon: AppHugeIcons.attach_money_outlined,
+    ),
     _WalletIconOption(
       key: 'wallet_07',
       icon: AppHugeIcons.account_balance_wallet_outlined,
@@ -77,30 +89,63 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
     _WalletIconOption(key: 'wallet_08', icon: AppHugeIcons.sync_alt_outlined),
     _WalletIconOption(key: 'wallet_09', icon: AppHugeIcons.badge_outlined),
     _WalletIconOption(key: 'wallet_10', icon: AppHugeIcons.swap_horiz_outlined),
-    _WalletIconOption(key: 'wallet_11', icon: AppHugeIcons.trending_up_outlined),
-    _WalletIconOption(key: 'wallet_12', icon: AppHugeIcons.receipt_long_outlined),
-    _WalletIconOption(key: 'wallet_13', icon: AppHugeIcons.currency_bitcoin_outlined),
-    _WalletIconOption(key: 'wallet_14', icon: AppHugeIcons.description_outlined),
-    _WalletIconOption(key: 'wallet_15', icon: AppHugeIcons.shopping_bag_outlined),
-    _WalletIconOption(key: 'wallet_16', icon: AppHugeIcons.shopping_cart_outlined),
+    _WalletIconOption(
+      key: 'wallet_11',
+      icon: AppHugeIcons.trending_up_outlined,
+    ),
+    _WalletIconOption(
+      key: 'wallet_12',
+      icon: AppHugeIcons.receipt_long_outlined,
+    ),
+    _WalletIconOption(
+      key: 'wallet_13',
+      icon: AppHugeIcons.currency_bitcoin_outlined,
+    ),
+    _WalletIconOption(
+      key: 'wallet_14',
+      icon: AppHugeIcons.description_outlined,
+    ),
+    _WalletIconOption(
+      key: 'wallet_15',
+      icon: AppHugeIcons.shopping_bag_outlined,
+    ),
+    _WalletIconOption(
+      key: 'wallet_16',
+      icon: AppHugeIcons.shopping_cart_outlined,
+    ),
     _WalletIconOption(key: 'wallet_17', icon: AppHugeIcons.storefront_outlined),
     _WalletIconOption(key: 'wallet_18', icon: AppHugeIcons.store_outlined),
-    _WalletIconOption(key: 'wallet_19', icon: AppHugeIcons.card_giftcard_outlined),
+    _WalletIconOption(
+      key: 'wallet_19',
+      icon: AppHugeIcons.card_giftcard_outlined,
+    ),
     _WalletIconOption(key: 'wallet_20', icon: AppHugeIcons.redeem_outlined),
-    _WalletIconOption(key: 'wallet_21', icon: AppHugeIcons.bookmark_border_outlined),
+    _WalletIconOption(
+      key: 'wallet_21',
+      icon: AppHugeIcons.bookmark_border_outlined,
+    ),
     _WalletIconOption(key: 'wallet_22', icon: AppHugeIcons.checkroom_outlined),
     _WalletIconOption(key: 'wallet_23', icon: AppHugeIcons.local_mall_outlined),
-    _WalletIconOption(key: 'wallet_24', icon: AppHugeIcons.directions_car_outlined),
+    _WalletIconOption(
+      key: 'wallet_24',
+      icon: AppHugeIcons.directions_car_outlined,
+    ),
     _WalletIconOption(key: 'wallet_25', icon: AppHugeIcons.train_outlined),
     _WalletIconOption(key: 'wallet_26', icon: AppHugeIcons.flight_outlined),
     _WalletIconOption(
       key: 'wallet_27',
       icon: AppHugeIcons.directions_railway_outlined,
     ),
-    _WalletIconOption(key: 'wallet_28', icon: AppHugeIcons.directions_bus_outlined),
+    _WalletIconOption(
+      key: 'wallet_28',
+      icon: AppHugeIcons.directions_bus_outlined,
+    ),
     _WalletIconOption(key: 'wallet_29', icon: AppHugeIcons.pedal_bike_outlined),
     _WalletIconOption(key: 'wallet_30', icon: AppHugeIcons.waves_outlined),
-    _WalletIconOption(key: 'wallet_31', icon: AppHugeIcons.medical_services_outlined),
+    _WalletIconOption(
+      key: 'wallet_31',
+      icon: AppHugeIcons.medical_services_outlined,
+    ),
     _WalletIconOption(key: 'wallet_32', icon: AppHugeIcons.local_hospital),
     _WalletIconOption(key: 'wallet_33', icon: AppHugeIcons.wifi_outlined),
     _WalletIconOption(key: 'wallet_34', icon: AppHugeIcons.flash_on_outlined),
@@ -109,14 +154,35 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
     _WalletIconOption(key: 'wallet_37', icon: AppHugeIcons.cake_outlined),
     _WalletIconOption(key: 'wallet_38', icon: AppHugeIcons.icecream_outlined),
     _WalletIconOption(key: 'wallet_39', icon: AppHugeIcons.fastfood_outlined),
-    _WalletIconOption(key: 'wallet_40', icon: AppHugeIcons.sports_esports_outlined),
+    _WalletIconOption(
+      key: 'wallet_40',
+      icon: AppHugeIcons.sports_esports_outlined,
+    ),
     _WalletIconOption(key: 'wallet_41', icon: AppHugeIcons.music_note_outlined),
-    _WalletIconOption(key: 'wallet_42', icon: AppHugeIcons.photo_camera_outlined),
-    _WalletIconOption(key: 'wallet_43', icon: AppHugeIcons.sports_basketball_outlined),
-    _WalletIconOption(key: 'wallet_44', icon: AppHugeIcons.sports_tennis_outlined),
-    _WalletIconOption(key: 'wallet_45', icon: AppHugeIcons.sports_golf_outlined),
-    _WalletIconOption(key: 'wallet_46', icon: AppHugeIcons.sports_soccer_outlined),
-    _WalletIconOption(key: 'wallet_47', icon: AppHugeIcons.beach_access_outlined),
+    _WalletIconOption(
+      key: 'wallet_42',
+      icon: AppHugeIcons.photo_camera_outlined,
+    ),
+    _WalletIconOption(
+      key: 'wallet_43',
+      icon: AppHugeIcons.sports_basketball_outlined,
+    ),
+    _WalletIconOption(
+      key: 'wallet_44',
+      icon: AppHugeIcons.sports_tennis_outlined,
+    ),
+    _WalletIconOption(
+      key: 'wallet_45',
+      icon: AppHugeIcons.sports_golf_outlined,
+    ),
+    _WalletIconOption(
+      key: 'wallet_46',
+      icon: AppHugeIcons.sports_soccer_outlined,
+    ),
+    _WalletIconOption(
+      key: 'wallet_47',
+      icon: AppHugeIcons.beach_access_outlined,
+    ),
     _WalletIconOption(key: 'wallet_48', icon: AppHugeIcons.self_improvement),
   ];
 
@@ -218,7 +284,7 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
                       'Tambah Dompet Baru',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.roboto18w600.copyWith(
+                      style: AppTextStyles.lora18w600.copyWith(
                         fontSize: 18,
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w700,
@@ -269,7 +335,7 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
                   children: [
                     Text(
                       'Detail Dompet',
-                      style: AppTextStyles.roboto18w600.copyWith(
+                      style: AppTextStyles.lora18w600.copyWith(
                         fontSize: 18,
                         color: AppColors.textPrimary,
                       ),
@@ -416,10 +482,10 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
   Widget _buildFieldLabel(String label) {
     return Text(
       label,
-      style: AppTextStyles.roboto16w600.copyWith(
+      style: AppTextStyles.lora16w600.copyWith(
         color: AppColors.textSecondary,
         fontSize: 13,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
       ),
     );
   }
@@ -447,11 +513,15 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.s16),
-        borderSide: BorderSide(color: AppColors.neutral.withValues(alpha: 0.12)),
+        borderSide: BorderSide(
+          color: AppColors.neutral.withValues(alpha: 0.12),
+        ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.s16),
-        borderSide: BorderSide(color: AppColors.neutral.withValues(alpha: 0.12)),
+        borderSide: BorderSide(
+          color: AppColors.neutral.withValues(alpha: 0.12),
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.s16),
@@ -539,8 +609,3 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
     );
   }
 }
-
-
-
-
-

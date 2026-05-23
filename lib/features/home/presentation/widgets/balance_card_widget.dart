@@ -76,7 +76,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
               children: [
                 Text(
                   'Total Saldo (IDR)',
-                  style: AppTextStyles.roboto14w400.copyWith(
+                  style: AppTextStyles.lora14w600.copyWith(
                     color: AppColors.surface.withValues(alpha: 0.9),
                   ),
                 ),
@@ -88,7 +88,9 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
                     });
                   },
                   child: AppIcon(
-                    _isObscured ? AppHugeIcons.visibility_off : AppHugeIcons.visibility,
+                    _isObscured
+                        ? AppHugeIcons.visibility_off
+                        : AppHugeIcons.visibility,
                     color: AppColors.surface.withValues(alpha: 0.9),
                     size: 18,
                   ),
@@ -98,7 +100,7 @@ class _BalanceCardWidgetState extends State<BalanceCardWidget> {
             const SizedBox(height: AppSpacing.s8),
             Text(
               balanceText,
-              style: AppTextStyles.lora36w400.copyWith(
+              style: AppTextStyles.roboto32w600.copyWith(
                 color: AppColors.surface,
                 fontWeight: FontWeight.bold,
                 fontSize: 36,
@@ -187,7 +189,7 @@ class _SummaryBox extends StatelessWidget {
                     color: AppColors.surface.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: AppIcon(icon, color: AppColors.surface, size: 14),
+                  child: AppIcon(icon, color: AppColors.surface, size: 20),
                 ),
                 const SizedBox(width: AppSpacing.s8),
                 Expanded(
@@ -223,8 +225,3 @@ class _SummaryBox extends StatelessWidget {
     );
   }
 }
-
-
-
-
-

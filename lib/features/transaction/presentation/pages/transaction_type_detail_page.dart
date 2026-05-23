@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fluxa_app/core/icons/app_huge_icons.dart';
 import 'package:fluxa_app/core/widgets/app_icon.dart';
+import 'package:fluxa_app/core/widgets/app_empty_state.dart';
+import 'package:fluxa_app/core/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -220,27 +222,14 @@ class _TransactionTypeDetailPageState extends State<TransactionTypeDetailPage> {
 
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AppIcon(
-            AppHugeIcons.attach_money,
-            size: 64,
-            color: AppColors.neutral.withValues(alpha: 0.2),
-          ),
-          const SizedBox(height: AppSpacing.s16),
-          Text(
-            widget.isIncome
-                ? 'Tidak ada pemasukan\nuntuk tanggal ini'
-                : 'Tidak ada pengeluaran\nuntuk tanggal ini',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.roboto16w400.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
+    return AppEmptyState(
+      icon: AppHugeIcons.receipt,
+      title: widget.isIncome ? 'Belum Ada Pemasukan' : 'Belum Ada Pengeluaran',
+      message: widget.isIncome
+          ? 'Catatan pemasukan Anda bulan ini akan muncul di sini.'
+          : 'Catatan pengeluaran Anda bulan ini akan muncul di sini.',
+      actionLabel: 'Tambah Transaksi',
+      onActionPressed: () => Get.toNamed(Routes.addTransaction),
     );
   }
 }

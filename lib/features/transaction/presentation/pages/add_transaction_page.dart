@@ -1270,26 +1270,19 @@ class _ParentCategoryItem extends StatelessWidget {
               height: 52,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelectedAsActive
+                color: isFocused
                     ? color
-                    : isFocused
-                    ? Color.alphaBlend(
-                        color.withValues(alpha: 0.15),
-                        AppColors.background,
-                      )
                     : Color.alphaBlend(
                         color.withValues(alpha: 0.06),
                         AppColors.background,
                       ),
-                border: isSelectedAsActive
+                border: isFocused
                     ? null
                     : Border.all(
-                        color: isFocused
-                            ? color
-                            : color.withValues(alpha: 0.18),
-                        width: isFocused ? 2 : 1,
+                        color: color.withValues(alpha: 0.18),
+                        width: 1,
                       ),
-                boxShadow: isSelectedAsActive
+                boxShadow: isFocused
                     ? [
                         BoxShadow(
                           color: color.withValues(alpha: 0.35),
@@ -1303,7 +1296,7 @@ class _ParentCategoryItem extends StatelessWidget {
               child: AppIcon(
                 icon,
                 size: 24,
-                color: isSelectedAsActive ? AppColors.surface : color,
+                color: isFocused ? AppColors.surface : color,
               ),
             ),
             const SizedBox(height: AppSpacing.s6),
@@ -1313,10 +1306,10 @@ class _ParentCategoryItem extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: AppTextStyles.roboto12w400.copyWith(
-                color: (isSelectedAsActive || isFocused)
+                color: isFocused
                     ? AppColors.textPrimary
                     : AppColors.textSecondary,
-                fontWeight: (isSelectedAsActive || isFocused)
+                fontWeight: isFocused
                     ? FontWeight.w600
                     : FontWeight.w400,
               ),

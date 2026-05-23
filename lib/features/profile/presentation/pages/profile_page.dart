@@ -22,9 +22,7 @@ class ProfilePage extends GetView<ProfileController> {
       appBar: AppBar(
         title: Text(
           'Profil',
-          style: AppTextStyles.roboto18w500.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.lora24w400.copyWith(fontWeight: FontWeight.w400),
         ),
         centerTitle: true,
         automaticallyImplyLeading: false,
@@ -49,34 +47,46 @@ class ProfilePage extends GetView<ProfileController> {
                 _buildCardItem(
                   icon: AppHugeIcons.upload_file,
                   title: 'Impor Data',
-                  onTap: () => Get.to(() => const PlaceholderPage(
-                        title: 'Impor Data',
-                        message: 'Fitur Impor Data sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
-                      )),
+                  onTap: () => Get.to(
+                    () => const PlaceholderPage(
+                      title: 'Impor Data',
+                      message:
+                          'Fitur Impor Data sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                    ),
+                  ),
                 ),
                 _buildCardItem(
                   icon: AppHugeIcons.date_range,
                   title: 'Periode Pencatatan',
-                  onTap: () => Get.to(() => const PlaceholderPage(
-                        title: 'Periode Pencatatan',
-                        message: 'Fitur Periode Pencatatan sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
-                      )),
+                  onTap: () => Get.to(
+                    () => const PlaceholderPage(
+                      title: 'Periode Pencatatan',
+                      message:
+                          'Fitur Periode Pencatatan sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                    ),
+                  ),
                 ),
                 _buildCardItem(
                   icon: AppHugeIcons.category,
                   title: 'Kategori',
-                  onTap: () => Get.to(() => const PlaceholderPage(
-                        title: 'Kategori',
-                        message: 'Fitur Kategori sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
-                      )),
+                  onTap: () => Get.to(
+                    () => const PlaceholderPage(
+                      title: 'Kategori',
+                      message:
+                          'Fitur Kategori sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                    ),
+                  ),
                 ),
                 _buildCardItem(
                   icon: AppHugeIcons.account_balance_wallet,
                   title: 'Pengaturan Dompet',
-                  onTap: () => Get.to(() => const PlaceholderPage(
-                        title: 'Pengaturan Dompet',
-                        message: 'Fitur Pengaturan Dompet sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
-                      )),
+                  onTap: () => Get.to(
+                    () => const PlaceholderPage(
+                      title: 'Pengaturan Dompet',
+                      message:
+                          'Fitur Pengaturan Dompet sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                    ),
+                  ),
                 ),
               ]),
               const SizedBox(height: AppSpacing.s16),
@@ -85,10 +95,13 @@ class ProfilePage extends GetView<ProfileController> {
                 _buildCardItem(
                   icon: AppHugeIcons.dark_mode,
                   title: 'Tema',
-                  onTap: () => Get.to(() => const PlaceholderPage(
-                        title: 'Tema',
-                        message: 'Fitur Tema sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
-                      )),
+                  onTap: () => Get.to(
+                    () => const PlaceholderPage(
+                      title: 'Tema',
+                      message:
+                          'Fitur Tema sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                    ),
+                  ),
                 ),
                 _buildCardItem(
                   icon: AppHugeIcons.credit_card,
@@ -108,10 +121,13 @@ class ProfilePage extends GetView<ProfileController> {
                 _buildCardItem(
                   icon: AppHugeIcons.bar_chart,
                   title: 'Urutan Section Statistik',
-                  onTap: () => Get.to(() => const PlaceholderPage(
-                        title: 'Urutan Statistik',
-                        message: 'Fitur Urutan Section Statistik sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
-                      )),
+                  onTap: () => Get.to(
+                    () => const PlaceholderPage(
+                      title: 'Urutan Statistik',
+                      message:
+                          'Fitur Urutan Section Statistik sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
+                    ),
+                  ),
                 ),
               ]),
               const SizedBox(height: AppSpacing.s16),
@@ -160,7 +176,10 @@ class ProfilePage extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildAvatarSection(BuildContext context, AuthController authController) {
+  Widget _buildAvatarSection(
+    BuildContext context,
+    AuthController authController,
+  ) {
     return Center(
       child: Column(
         children: [
@@ -211,7 +230,7 @@ class ProfilePage extends GetView<ProfileController> {
           Obx(
             () => Text(
               authController.currentUser?.displayName ?? 'Pengguna Fluxa',
-              style: AppTextStyles.roboto18w500.copyWith(
+              style: AppTextStyles.lora18w500.copyWith(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -230,9 +249,9 @@ class ProfilePage extends GetView<ProfileController> {
       ),
       child: Text(
         text,
-        style: AppTextStyles.roboto14w400.copyWith(
+        style: AppTextStyles.lora14w400.copyWith(
           color: AppColors.textSecondary,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -278,7 +297,7 @@ class ProfilePage extends GetView<ProfileController> {
             Expanded(
               child: Text(
                 title,
-                style: AppTextStyles.roboto16w400.copyWith(
+                style: AppTextStyles.roboto14w400.copyWith(
                   color: AppColors.textPrimary,
                 ),
               ),
@@ -286,7 +305,10 @@ class ProfilePage extends GetView<ProfileController> {
             if (trailing != null)
               trailing
             else
-              const AppIcon(AppHugeIcons.chevron_right, color: AppColors.textSecondary),
+              const AppIcon(
+                AppHugeIcons.chevron_right,
+                color: AppColors.textSecondary,
+              ),
           ],
         ),
       ),
@@ -357,7 +379,10 @@ class ProfilePage extends GetView<ProfileController> {
     );
   }
 
-  void _showEditNameDialog(BuildContext context, AuthController authController) {
+  void _showEditNameDialog(
+    BuildContext context,
+    AuthController authController,
+  ) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -399,14 +424,10 @@ class _EditNameDialogState extends State<_EditNameDialog> {
     return AlertDialog(
       backgroundColor: AppColors.surface,
       surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Text(
         'Ubah Nama',
-        style: AppTextStyles.roboto18w500.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
+        style: AppTextStyles.roboto18w500.copyWith(fontWeight: FontWeight.bold),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -470,8 +491,11 @@ class _EditNameDialogState extends State<_EditNameDialog> {
                       return;
                     }
                     final navigator = Navigator.of(context);
-                    await widget.authController.updateProfile(displayName: newName);
-                    if (widget.authController.currentUser?.displayName == newName) {
+                    await widget.authController.updateProfile(
+                      displayName: newName,
+                    );
+                    if (widget.authController.currentUser?.displayName ==
+                        newName) {
                       navigator.pop();
                     }
                   },
@@ -509,8 +533,3 @@ class _EditNameDialogState extends State<_EditNameDialog> {
     );
   }
 }
-
-
-
-
-

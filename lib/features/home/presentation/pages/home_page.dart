@@ -47,8 +47,13 @@ class HomePage extends GetView<HomeController> {
                       children: [
                         Obx(() {
                           final authController = Get.find<AuthController>();
-                          final name = authController.currentUser?.displayName ?? 'Pengguna Fluxa';
-                          return Text('~ Hai, $name!', style: AppTextStyles.lora24w400);
+                          final name =
+                              authController.currentUser?.displayName ??
+                              'Pengguna Fluxa';
+                          return Text(
+                            '~ Hai, $name!',
+                            style: AppTextStyles.lora24w400,
+                          );
                         }),
                         const SizedBox(height: AppSpacing.s16),
                         Obx(
@@ -62,7 +67,7 @@ class HomePage extends GetView<HomeController> {
                             Expanded(
                               child: Text(
                                 'Transaksi Terakhir',
-                                style: AppTextStyles.roboto16w400.copyWith(
+                                style: AppTextStyles.lora16w400.copyWith(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18,
                                 ),
@@ -78,7 +83,7 @@ class HomePage extends GetView<HomeController> {
                                   Get.toNamed(Routes.transactionList),
                               child: Text(
                                 'Lihat Semua',
-                                style: AppTextStyles.roboto14w400.copyWith(
+                                style: AppTextStyles.lora12w400.copyWith(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -114,7 +119,10 @@ class HomePage extends GetView<HomeController> {
     if (summary == null || recentGroups.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.s24, horizontal: AppSpacing.s16),
+          padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.s24,
+            horizontal: AppSpacing.s16,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -123,13 +131,13 @@ class HomePage extends GetView<HomeController> {
               const SizedBox(height: AppSpacing.s16),
               Text(
                 'Belum ada transaksi',
-                style: AppTextStyles.roboto18w600.copyWith(
+                style: AppTextStyles.lora18w600.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: AppSpacing.s12),
+              const SizedBox(height: AppSpacing.s10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
                 child: Text(
@@ -145,10 +153,7 @@ class HomePage extends GetView<HomeController> {
               OutlinedButton(
                 onPressed: () => Get.toNamed(Routes.addTransaction),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(
-                    color: AppColors.primary,
-                    width: 1.2,
-                  ),
+                  side: const BorderSide(color: AppColors.primary, width: 1.2),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 12,
@@ -159,11 +164,7 @@ class HomePage extends GetView<HomeController> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.add,
-                      color: AppColors.primary,
-                      size: 18,
-                    ),
+                    const Icon(Icons.add, color: AppColors.primary, size: 18),
                     const SizedBox(width: AppSpacing.s6),
                     Text(
                       'Tambah Transaksi',
@@ -311,14 +312,17 @@ class HomePage extends GetView<HomeController> {
           children: [
             Text(
               'Menu',
-              style: AppTextStyles.roboto16w400.copyWith(
+              style: AppTextStyles.lora16w400.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
             ),
             PopupMenuButton<String>(
               color: AppColors.surface,
-              icon: const AppIcon(AppHugeIcons.more_vert, color: AppColors.textSecondary),
+              icon: const AppIcon(
+                AppHugeIcons.more_vert,
+                color: AppColors.textSecondary,
+              ),
               onSelected: (String value) {
                 if (value == 'tampilan_menu') {
                   Get.toNamed(Routes.tampilanMenu);
@@ -451,7 +455,7 @@ class HomePage extends GetView<HomeController> {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: AppTextStyles.roboto14w400.copyWith(
+              style: AppTextStyles.roboto12w400.copyWith(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
@@ -462,8 +466,3 @@ class HomePage extends GetView<HomeController> {
     );
   }
 }
-
-
-
-
-

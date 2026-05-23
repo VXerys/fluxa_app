@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:fluxa_app/core/icons/app_huge_icons.dart';
 import 'package:fluxa_app/core/widgets/app_icon.dart';
+import 'package:fluxa_app/core/widgets/app_empty_state.dart';
 import 'package:fluxa_app/core/widgets/placeholder_page.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -36,10 +37,12 @@ class StatisticsPage extends GetView<StatisticsController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Statistik',
-                style: AppTextStyles.lora24w400.copyWith(
-                  fontWeight: FontWeight.w600,
+              Center(
+                child: Text(
+                  'Statistik',
+                  style: AppTextStyles.lora24w400.copyWith(
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.s16),
@@ -75,7 +78,10 @@ class StatisticsPage extends GetView<StatisticsController> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.04), width: 1),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.04),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -89,6 +95,7 @@ class StatisticsPage extends GetView<StatisticsController> {
           children: tabs
               .map(
                 (tab) => Expanded(
+                  key: ValueKey(tab.value),
                   child: GestureDetector(
                     onTap: () => controller.changePeriod(tab.value),
                     child: AnimatedContainer(
@@ -97,17 +104,17 @@ class StatisticsPage extends GetView<StatisticsController> {
                       decoration: BoxDecoration(
                         color: controller.selectedPeriod == tab.value
                             ? Colors.white
-                            : Colors.transparent,
+                            : Colors.white.withValues(alpha: 0.0),
                         borderRadius: BorderRadius.circular(18),
-                        boxShadow: controller.selectedPeriod == tab.value
-                            ? [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.06),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                )
-                              ]
-                            : null,
+                        boxShadow: [
+                          BoxShadow(
+                            color: controller.selectedPeriod == tab.value
+                                ? Colors.black.withValues(alpha: 0.06)
+                                : Colors.black.withValues(alpha: 0.0),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       alignment: Alignment.center,
                       child: Text(
@@ -265,7 +272,10 @@ class StatisticsPage extends GetView<StatisticsController> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.04), width: 1),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.04),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -308,7 +318,10 @@ class StatisticsPage extends GetView<StatisticsController> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.04), width: 1),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.04),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -342,16 +355,11 @@ class StatisticsPage extends GetView<StatisticsController> {
           );
         }
         if (breakdown.isEmpty) {
-          return SizedBox(
-            height: 200,
-            child: Center(
-              child: Text(
-                'Tidak ada data',
-                style: AppTextStyles.roboto14w400.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
+          return const AppEmptyState(
+            icon: AppHugeIcons.receipt,
+            title: 'Belum Ada Transaksi',
+            message: 'Catat transaksi Anda hari ini untuk melihat analisis keuangan di sini.',
+            isCompact: true,
           );
         }
 
@@ -533,9 +541,7 @@ class StatisticsPage extends GetView<StatisticsController> {
   }) {
     return PopupMenuButton<T>(
       onSelected: onChanged,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: Colors.white,
       elevation: 4,
       offset: const Offset(0, 36),
@@ -614,7 +620,10 @@ class StatisticsPage extends GetView<StatisticsController> {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.black.withValues(alpha: 0.04), width: 1),
+          border: Border.all(
+            color: Colors.black.withValues(alpha: 0.04),
+            width: 1,
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.02),
@@ -670,11 +679,15 @@ class StatisticsPage extends GetView<StatisticsController> {
                 child: OutlinedButton(
                   onPressed: controller.openMoreTransactions,
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.black.withValues(alpha: 0.08)),
+                    side: BorderSide(
+                      color: Colors.black.withValues(alpha: 0.08),
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.s12),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.s12,
+                    ),
                   ),
                   child: Text(
                     'Transaksi lainnya',
@@ -789,7 +802,10 @@ class _CategoryBreakdownCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.04), width: 1),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.04),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -803,10 +819,13 @@ class _CategoryBreakdownCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () => Get.to(() => PlaceholderPage(
-                title: item.categoryName,
-                message: 'Detail transaksi Kategori "${item.categoryName}" sedang dalam proses pengembangan.',
-              )),
+          onTap: () => Get.to(
+            () => PlaceholderPage(
+              title: item.categoryName,
+              message:
+                  'Detail transaksi Kategori "${item.categoryName}" sedang dalam proses pengembangan.',
+            ),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.s12),
             child: Row(
@@ -936,7 +955,9 @@ class _TypeToggleItem extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         height: 40,
         decoration: BoxDecoration(
-          color: isActive ? activeColor.withValues(alpha: 0.08) : Colors.transparent,
+          color: isActive
+              ? activeColor.withValues(alpha: 0.08)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         alignment: Alignment.center,
@@ -962,7 +983,3 @@ class _TypeToggleItem extends StatelessWidget {
     );
   }
 }
-
-
-
-
