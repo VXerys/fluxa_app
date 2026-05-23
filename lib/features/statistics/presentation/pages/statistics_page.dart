@@ -32,33 +32,46 @@ class StatisticsPage extends GetView<StatisticsController> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.s16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Text(
-                  'Statistik',
-                  style: AppTextStyles.lora24w400.copyWith(
-                    fontWeight: FontWeight.w400,
+        child: RefreshIndicator(
+          onRefresh: controller.loadStatistics,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.s16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Text(
+                            'Statistik',
+                            style: AppTextStyles.lora24w400.copyWith(
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.s16),
+                        _buildPeriodTabs(),
+                        const SizedBox(height: AppSpacing.s12),
+                        _buildPeriodNavigator(context),
+                        const SizedBox(height: AppSpacing.s16),
+                        _buildTypeToggle(),
+                        const SizedBox(height: AppSpacing.s16),
+                        _buildDonutChartArea(_amountFormatter),
+                        const SizedBox(height: AppSpacing.s20),
+                        _buildCategoryBreakdownSection(_amountFormatter),
+                        const SizedBox(height: AppSpacing.s20),
+                        _buildTopCategorySection(_amountFormatter),
+                        const SizedBox(height: 120),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.s16),
-              _buildPeriodTabs(),
-              const SizedBox(height: AppSpacing.s12),
-              _buildPeriodNavigator(context),
-              const SizedBox(height: AppSpacing.s16),
-              _buildTypeToggle(),
-              const SizedBox(height: AppSpacing.s16),
-              _buildDonutChartArea(_amountFormatter),
-              const SizedBox(height: AppSpacing.s20),
-              _buildCategoryBreakdownSection(_amountFormatter),
-              const SizedBox(height: AppSpacing.s20),
-              _buildTopCategorySection(_amountFormatter),
-              const SizedBox(height: 120),
-            ],
+              );
+            },
           ),
         ),
       ),

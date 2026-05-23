@@ -96,7 +96,7 @@ class HomePage extends GetView<HomeController> {
                         ),
                         const SizedBox(height: AppSpacing.s4),
                         Obx(() => _buildRecentTransactions(controller)),
-                        const SizedBox(height: 80),
+                        const SizedBox(height: 120),
                       ],
                     ),
                   ),
