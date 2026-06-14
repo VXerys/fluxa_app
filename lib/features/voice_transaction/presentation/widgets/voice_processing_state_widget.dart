@@ -172,6 +172,12 @@ class VoiceProcessingStateWidget extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.surface,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.s14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     child: const Text('Rekam ulang'),
                   ),

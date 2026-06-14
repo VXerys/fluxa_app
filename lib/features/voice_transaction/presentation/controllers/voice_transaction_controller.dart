@@ -2,7 +2,15 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 
+import '../../../../core/routes/app_routes.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../../transaction/domain/entities/category_entity.dart';
+import '../../../transaction/domain/repositories/transaction_repository.dart';
+import '../../../transaction/domain/usecases/add_transaction_usecase.dart';
+import '../../../transaction/domain/usecases/get_categories_usecase.dart';
+import '../../../wallet/domain/entities/wallet_entity.dart';
+import '../../../wallet/domain/usecases/get_wallets_usecase.dart';
+import '../../domain/entities/voice_transaction_draft_params.dart';
 import '../../domain/entities/voice_transaction_result_entity.dart';
 import '../../domain/usecases/cancel_voice_recording_usecase.dart';
 import '../../domain/usecases/dispose_voice_recorder_usecase.dart';
@@ -27,6 +35,9 @@ class VoiceTransactionController extends GetxController {
   final ParseVoiceTransactionUseCase parseVoiceTransactionUseCase;
   final DisposeVoiceRecorderUseCase disposeVoiceRecorderUseCase;
   final GetVoiceRecordingAmplitudeUseCase getVoiceRecordingAmplitudeUseCase;
+  final GetCategoriesUseCase getCategoriesUseCase;
+  final GetWalletsUseCase getWalletsUseCase;
+  final AddTransactionUseCase addTransactionUseCase;
 
   VoiceTransactionController({
     required this.startVoiceRecordingUseCase,
@@ -35,6 +46,9 @@ class VoiceTransactionController extends GetxController {
     required this.parseVoiceTransactionUseCase,
     required this.disposeVoiceRecorderUseCase,
     required this.getVoiceRecordingAmplitudeUseCase,
+    required this.getCategoriesUseCase,
+    required this.getWalletsUseCase,
+    required this.addTransactionUseCase,
   });
 
   static const int minRecordingDurationMs = 1500;
@@ -52,6 +66,10 @@ class VoiceTransactionController extends GetxController {
       Rx<VoiceTransactionResultEntity?>(null);
   VoiceTransactionResultEntity? get result => _result.value;
 
+  final Rx<VoiceTransactionDraftParams?> _draft =
+      Rx<VoiceTransactionDraftParams?>(null);
+  VoiceTransactionDraftParams? get draft => _draft.value;
+
   final RxString _failureMessage = ''.obs;
   String get failureMessage => _failureMessage.value;
 
@@ -67,6 +85,9 @@ class VoiceTransactionController extends GetxController {
   final RxBool _showContinuingHint = false.obs;
   bool get showContinuingHint => _showContinuingHint.value;
 
+  final RxBool _isSavingDraft = false.obs;
+  bool get isSavingDraft => _isSavingDraft.value;
+
   Timer? _amplitudeTimer;
   DateTime? _recordingStartedAt;
   DateTime? _lastSpeechAt;
@@ -77,11 +98,17 @@ class VoiceTransactionController extends GetxController {
       state == VoiceTransactionState.uploading ||
       state == VoiceTransactionState.processing;
 
+  bool get isDraftComplete => _getMissingDraftFields(_draft.value).isEmpty;
+
+  List<String> get missingDraftFields => _getMissingDraftFields(_draft.value);
+
   Future<void> startRecording() async {
     if (isBusy || state == VoiceTransactionState.recording) return;
 
     _failureMessage.value = '';
     _result.value = null;
+    _draft.value = null;
+    _lastAudioPath.value = '';
     final result = await startVoiceRecordingUseCase(const NoParams());
     result.fold(
       (failure) => _setFailure(failure.message),
@@ -119,15 +146,7 @@ class VoiceTransactionController extends GetxController {
     final result = await cancelVoiceRecordingUseCase(const NoParams());
     result.fold(
       (failure) => _setFailure(failure.message),
-      (_) {
-        _lastAudioPath.value = '';
-        _result.value = null;
-        _failureMessage.value = '';
-        _recordingElapsedMs.value = 0;
-        _hasDetectedSpeech.value = false;
-        _showContinuingHint.value = false;
-        _state.value = VoiceTransactionState.idle;
-      },
+      (_) => _clearDraftState(),
     );
   }
 
@@ -142,30 +161,89 @@ class VoiceTransactionController extends GetxController {
   }
 
   void resetDraft() {
-    if (isBusy) return;
-    _failureMessage.value = '';
-    _result.value = null;
-    _recordingElapsedMs.value = 0;
-    _hasDetectedSpeech.value = false;
-    _showContinuingHint.value = false;
-    _state.value = VoiceTransactionState.idle;
+    if (isBusy || _isSavingDraft.value) return;
+    _clearDraftState();
   }
 
-  void handleSaveDraftTodo() {
-    Get.snackbar(
-      'Belum tersedia',
-      'Integrasi simpan transaksi final belum dihubungkan.',
+  Future<void> saveDraftAsTransaction() async {
+    if (_isSavingDraft.value) return;
+
+    final VoiceTransactionDraftParams? resolvedDraft = await _ensureDraft();
+    if (resolvedDraft == null) {
+      Get.snackbar('Draft belum siap', 'Coba proses ulang rekaman suara.');
+      return;
+    }
+
+    if (!isDraftComplete) {
+      await openAddTransactionWithDraft();
+      return;
+    }
+
+    final String? type = _sanitizeType(resolvedDraft.type);
+    final double? amount = resolvedDraft.amount;
+    final String? walletId = _normalizedOrNull(resolvedDraft.walletId);
+    final String? categoryId = _normalizedOrNull(
+      resolvedDraft.resolvedTransactionCategoryId,
     );
+
+    if (type == null || amount == null || walletId == null || categoryId == null) {
+      await openAddTransactionWithDraft();
+      return;
+    }
+
+    _isSavingDraft.value = true;
+    try {
+      final result = await addTransactionUseCase(
+        AddTransactionParams(
+          type: type,
+          amount: amount,
+          categoryId: categoryId,
+          walletId: walletId,
+          note: resolvedDraft.displayDescription,
+          date: resolvedDraft.occurredAt,
+          time: resolvedDraft.timeString,
+        ),
+      );
+
+      result.fold(
+        (failure) {
+          Get.snackbar('Gagal menyimpan', failure.message);
+        },
+        (_) {
+          Get.snackbar('Sukses', 'Transaksi berhasil disimpan');
+          _clearDraftState();
+          Get.offNamed(Routes.transactionList);
+        },
+      );
+    } finally {
+      _isSavingDraft.value = false;
+    }
   }
 
-  void handleEditDraftTodo() {
-    Get.snackbar(
-      'Belum tersedia',
-      'Edit draft manual belum dihubungkan.',
+  Future<void> editDraft() async {
+    await openAddTransactionWithDraft();
+  }
+
+  Future<void> openAddTransactionWithDraft() async {
+    final VoiceTransactionDraftParams? resolvedDraft = await _ensureDraft();
+    if (resolvedDraft == null) {
+      Get.snackbar('Draft belum siap', 'Coba proses ulang rekaman suara.');
+      return;
+    }
+
+    final dynamic saveResult = await Get.toNamed(
+      Routes.addTransaction,
+      arguments: resolvedDraft,
     );
+
+    if (saveResult == true) {
+      resetDraft();
+      Get.offNamed(Routes.transactionList);
+    }
   }
 
   Future<void> _parseAudioPath(String audioPath) async {
+    _draft.value = null;
     _state.value = VoiceTransactionState.uploading;
     final resultFuture = parseVoiceTransactionUseCase(
       ParseVoiceTransactionParams(audioFilePath: audioPath),
@@ -175,10 +253,11 @@ class VoiceTransactionController extends GetxController {
       _state.value = VoiceTransactionState.processing;
     }
     final result = await resultFuture;
-    result.fold(
-      (failure) => _setFailure(failure.message),
-      (voiceResult) {
+    await result.fold(
+      (failure) async => _setFailure(failure.message),
+      (voiceResult) async {
         _result.value = voiceResult;
+        _draft.value = await _resolveDraftFromResult(voiceResult);
         _failureMessage.value = '';
         _state.value = VoiceTransactionState.success;
       },
@@ -278,7 +357,296 @@ class VoiceTransactionController extends GetxController {
   void _setFailure(String message) {
     _stopRecordingMonitoring();
     _failureMessage.value = message;
+    _draft.value = null;
     _state.value = VoiceTransactionState.failure;
+  }
+
+  Future<VoiceTransactionDraftParams?> _ensureDraft() async {
+    final VoiceTransactionDraftParams? existingDraft = _draft.value;
+    if (existingDraft != null) {
+      return existingDraft;
+    }
+
+    final VoiceTransactionResultEntity? currentResult = _result.value;
+    if (currentResult == null) {
+      return null;
+    }
+
+    final VoiceTransactionDraftParams resolvedDraft =
+        await _resolveDraftFromResult(currentResult);
+    _draft.value = resolvedDraft;
+    return resolvedDraft;
+  }
+
+  Future<VoiceTransactionDraftParams> _resolveDraftFromResult(
+    VoiceTransactionResultEntity voiceResult,
+  ) async {
+    final String? type = _sanitizeType(
+      voiceResult.transaction.type,
+      voiceResult.classification.resolvedType,
+      voiceResult.classification.rawType,
+    );
+    final double? amount = voiceResult.transaction.amount > 0
+        ? voiceResult.transaction.amount
+        : null;
+    final String categoryHint = _firstNonEmpty(
+      <String?>[
+        voiceResult.classification.category,
+        voiceResult.transaction.category,
+      ],
+    );
+    final String? walletHint = _normalizedOrNull(voiceResult.transaction.wallet);
+
+    final List<CategoryEntity> categories = await _loadCategories(type);
+    final List<WalletEntity> wallets = await _loadWallets();
+
+    final _ResolvedCategory? resolvedCategory = _resolveCategory(
+      type: type,
+      categoryHint: categoryHint,
+      categories: categories,
+    );
+    final WalletEntity? resolvedWallet = _resolveWallet(
+      walletHint: walletHint,
+      wallets: wallets,
+    );
+
+    return VoiceTransactionDraftParams(
+      type: type,
+      amount: amount,
+      categoryName: resolvedCategory?.parent.name ?? _normalizedOrNull(categoryHint),
+      categoryId: resolvedCategory?.parent.id,
+      subcategoryName: resolvedCategory?.child?.name,
+      subcategoryId: resolvedCategory?.child?.id,
+      walletName: resolvedWallet?.name ?? walletHint,
+      walletId: resolvedWallet?.id,
+      description: _normalizedOrNull(voiceResult.transaction.description),
+      currency: _normalizedOrNull(voiceResult.transaction.currency) ?? 'IDR',
+      transcriptRaw: voiceResult.transcript.raw,
+      transcriptNormalized: voiceResult.transcript.normalized,
+      occurredAt: DateTime.now(),
+    );
+  }
+
+  Future<List<CategoryEntity>> _loadCategories(String? type) async {
+    if (type == null) return <CategoryEntity>[];
+    final result = await getCategoriesUseCase(GetCategoriesParams(type: type));
+    List<CategoryEntity> categories = <CategoryEntity>[];
+    result.fold((_) {}, (data) => categories = data);
+    return categories;
+  }
+
+  Future<List<WalletEntity>> _loadWallets() async {
+    final result = await getWalletsUseCase(const NoParams());
+    List<WalletEntity> wallets = <WalletEntity>[];
+    result.fold((_) {}, (data) => wallets = data);
+    return wallets;
+  }
+
+  _ResolvedCategory? _resolveCategory({
+    required String? type,
+    required String categoryHint,
+    required List<CategoryEntity> categories,
+  }) {
+    final String normalizedHint = _normalizeLookup(categoryHint);
+    if (type == null || normalizedHint.isEmpty || categories.isEmpty) {
+      return null;
+    }
+
+    final List<CategoryEntity> typedCategories = categories
+        .where((category) => category.type == type)
+        .toList();
+    if (typedCategories.isEmpty) return null;
+
+    final List<CategoryEntity> parentCategories = typedCategories
+        .where((category) => category.parentId == null)
+        .toList();
+    final List<CategoryEntity> childCategories = typedCategories
+        .where((category) => category.parentId != null)
+        .toList();
+
+    final CategoryEntity? exactChild = _pickBestCategoryMatch(
+      childCategories,
+      normalizedHint,
+      exactOnly: true,
+    );
+    if (exactChild != null) {
+      final CategoryEntity? parent = parentCategories.firstWhereOrNull(
+        (category) => category.id == exactChild.parentId,
+      );
+      return _ResolvedCategory(parent: parent ?? exactChild, child: parent == null ? null : exactChild);
+    }
+
+    final CategoryEntity? exactParent = _pickBestCategoryMatch(
+      parentCategories,
+      normalizedHint,
+      exactOnly: true,
+    );
+    if (exactParent != null) {
+      return _ResolvedCategory(parent: exactParent);
+    }
+
+    final CategoryEntity? partialChild = _pickBestCategoryMatch(
+      childCategories,
+      normalizedHint,
+    );
+    if (partialChild != null) {
+      final CategoryEntity? parent = parentCategories.firstWhereOrNull(
+        (category) => category.id == partialChild.parentId,
+      );
+      return _ResolvedCategory(parent: parent ?? partialChild, child: parent == null ? null : partialChild);
+    }
+
+    final CategoryEntity? partialParent = _pickBestCategoryMatch(
+      parentCategories,
+      normalizedHint,
+    );
+    if (partialParent != null) {
+      return _ResolvedCategory(parent: partialParent);
+    }
+
+    return null;
+  }
+
+  CategoryEntity? _pickBestCategoryMatch(
+    List<CategoryEntity> candidates,
+    String normalizedHint, {
+    bool exactOnly = false,
+  }) {
+    CategoryEntity? bestMatch;
+    int bestScore = 0;
+
+    for (final CategoryEntity candidate in candidates) {
+      final int score = _matchScore(
+        candidate.name,
+        normalizedHint,
+        exactOnly: exactOnly,
+      );
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = candidate;
+      }
+    }
+
+    return bestMatch;
+  }
+
+  WalletEntity? _resolveWallet({
+    required String? walletHint,
+    required List<WalletEntity> wallets,
+  }) {
+    if (wallets.isEmpty) return null;
+
+    if (walletHint == null) {
+      return _pickDefaultWallet(wallets);
+    }
+
+    final String normalizedHint = _normalizeLookup(walletHint);
+    if (normalizedHint.isEmpty) {
+      return _pickDefaultWallet(wallets);
+    }
+
+    WalletEntity? bestMatch;
+    int bestScore = 0;
+    for (final WalletEntity wallet in wallets) {
+      final int score = _matchScore(wallet.name, normalizedHint);
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = wallet;
+      }
+    }
+
+    return bestScore > 0 ? bestMatch : null;
+  }
+
+  WalletEntity? _pickDefaultWallet(List<WalletEntity> wallets) {
+    if (wallets.isEmpty) return null;
+    return wallets.firstWhereOrNull((wallet) => wallet.includeInTotal) ??
+        wallets.first;
+  }
+
+  List<String> _getMissingDraftFields(VoiceTransactionDraftParams? draft) {
+    if (draft == null) return <String>[];
+
+    final List<String> missingFields = <String>[];
+    if (_sanitizeType(draft.type) == null) {
+      missingFields.add('Jenis transaksi');
+    }
+    if (draft.amount == null || draft.amount! <= 0) {
+      missingFields.add('Nominal');
+    }
+    if (_normalizedOrNull(draft.resolvedTransactionCategoryId) == null) {
+      missingFields.add('Kategori');
+    }
+    if (_normalizedOrNull(draft.walletId) == null) {
+      missingFields.add('Dompet');
+    }
+    return missingFields;
+  }
+
+  void _clearDraftState() {
+    _failureMessage.value = '';
+    _result.value = null;
+    _draft.value = null;
+    _lastAudioPath.value = '';
+    _recordingElapsedMs.value = 0;
+    _hasDetectedSpeech.value = false;
+    _showContinuingHint.value = false;
+    _state.value = VoiceTransactionState.idle;
+  }
+
+  String? _sanitizeType(String? primary, [String? secondary, String? tertiary]) {
+    for (final String? candidate in <String?>[primary, secondary, tertiary]) {
+      final String? normalized = _normalizedOrNull(candidate)?.toLowerCase();
+      if (normalized == 'income' || normalized == 'expense') {
+        return normalized;
+      }
+    }
+    return null;
+  }
+
+  String _firstNonEmpty(List<String?> values) {
+    for (final String? value in values) {
+      final String? normalized = _normalizedOrNull(value);
+      if (normalized != null) {
+        return normalized;
+      }
+    }
+    return '';
+  }
+
+  String? _normalizedOrNull(String? value) {
+    if (value == null) return null;
+    final String trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  String _normalizeLookup(String? value) {
+    final String normalized = (value ?? '').toLowerCase().trim();
+    return normalized.replaceAll(RegExp(r'[^a-z0-9]+'), '');
+  }
+
+  int _matchScore(
+    String candidateName,
+    String normalizedHint, {
+    bool exactOnly = false,
+  }) {
+    final String normalizedCandidate = _normalizeLookup(candidateName);
+    if (normalizedCandidate.isEmpty || normalizedHint.isEmpty) {
+      return 0;
+    }
+    if (normalizedCandidate == normalizedHint) {
+      return 400;
+    }
+    if (exactOnly) return 0;
+    if (normalizedCandidate.startsWith(normalizedHint) ||
+        normalizedHint.startsWith(normalizedCandidate)) {
+      return 260;
+    }
+    if (normalizedCandidate.contains(normalizedHint) ||
+        normalizedHint.contains(normalizedCandidate)) {
+      return 180;
+    }
+    return 0;
   }
 
   @override
@@ -287,4 +655,14 @@ class VoiceTransactionController extends GetxController {
     unawaited(disposeVoiceRecorderUseCase(const NoParams()));
     super.onClose();
   }
+}
+
+class _ResolvedCategory {
+  final CategoryEntity parent;
+  final CategoryEntity? child;
+
+  const _ResolvedCategory({
+    required this.parent,
+    this.child,
+  });
 }

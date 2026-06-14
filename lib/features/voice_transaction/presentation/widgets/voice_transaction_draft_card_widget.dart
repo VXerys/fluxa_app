@@ -4,20 +4,17 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
-import '../../../../core/icons/app_huge_icons.dart';
-import '../../../../core/widgets/app_icon.dart';
+import '../../domain/entities/voice_transaction_draft_params.dart';
 import '../../domain/entities/voice_transaction_entity.dart';
 
 class VoiceTransactionDraftCardWidget extends StatelessWidget {
   final VoiceTransactionEntity transaction;
-  final VoidCallback onSave;
-  final VoidCallback onEdit;
+  final VoiceTransactionDraftParams? draft;
 
   const VoiceTransactionDraftCardWidget({
     super.key,
     required this.transaction,
-    required this.onSave,
-    required this.onEdit,
+    this.draft,
   });
 
   static final NumberFormat _currencyFormatter = NumberFormat.currency(
@@ -28,6 +25,17 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String categoryLabel =
+        draft?.displayCategory ??
+        (transaction.category.isEmpty ? 'Belum terdeteksi' : transaction.category);
+    final String? walletLabel = draft?.displayWallet ?? _normalizedOrNull(transaction.wallet);
+    final String descriptionLabel =
+        draft?.displayDescription ??
+        _normalizedOrNull(transaction.description) ??
+        '-';
+    final String currencyLabel = draft?.effectiveCurrency ?? transaction.currency;
+    final String typeLabel = _formatType(draft?.type ?? transaction.type);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.s16),
@@ -38,33 +46,43 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Text(
+            'Draft transaksi',
+            style: AppTextStyles.roboto16w600.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s8),
+          Text(
+            _currencyFormatter.format(transaction.amount),
+            style: AppTextStyles.roboto32w600.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: 34,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s14),
+          Wrap(
+            spacing: AppSpacing.s8,
+            runSpacing: AppSpacing.s8,
+            alignment: WrapAlignment.start,
             children: [
-              const AppIcon(
-                AppHugeIcons.receipt,
+              _ValueChip(
+                label: typeLabel,
+                color: (draft?.type ?? transaction.type) == 'income'
+                    ? AppColors.success
+                    : AppColors.error,
+              ),
+              _ValueChip(
+                label: categoryLabel,
                 color: AppColors.primary,
-                size: 24,
               ),
-              const SizedBox(width: AppSpacing.s8),
-              Expanded(
-                child: Text(
-                  'Draft transaksi',
-                  style: AppTextStyles.roboto18w600.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
+              _WalletChip(wallet: walletLabel),
             ],
           ),
-          const SizedBox(height: AppSpacing.s16),
+          const SizedBox(height: AppSpacing.s18),
           _DraftRow(
             label: 'Jenis',
-            valueWidget: _ValueChip(
-              label: _formatType(transaction.type),
-              color: transaction.type == 'income'
-                  ? AppColors.success
-                  : AppColors.error,
-            ),
+            valueText: typeLabel,
           ),
           _DraftRow(
             label: 'Nominal',
@@ -72,46 +90,17 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
           ),
           _DraftRow(
             label: 'Kategori',
-            valueWidget: _ValueChip(
-              label: transaction.category.isEmpty
-                  ? 'Belum terdeteksi'
-                  : transaction.category,
-              color: AppColors.primary,
-            ),
+            valueText: categoryLabel,
           ),
           _DraftRow(
             label: 'Dompet',
-            valueWidget: _WalletValue(wallet: transaction.wallet),
+            valueWidget: _WalletValue(wallet: walletLabel),
           ),
           _DraftRow(
             label: 'Deskripsi',
-            valueText: transaction.description ?? '-',
+            valueText: descriptionLabel,
           ),
-          _DraftRow(label: 'Mata uang', valueText: transaction.currency),
-          const SizedBox(height: AppSpacing.s16),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: onEdit,
-              child: const Text('Edit draft'),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.s8),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onSave,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.surface,
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.s14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: const Text('Simpan draft'),
-            ),
-          ),
+          _DraftRow(label: 'Mata uang', valueText: currencyLabel),
         ],
       ),
     );
@@ -192,6 +181,25 @@ class _ValueChip extends StatelessWidget {
   }
 }
 
+class _WalletChip extends StatelessWidget {
+  final String? wallet;
+
+  const _WalletChip({required this.wallet});
+
+  @override
+  Widget build(BuildContext context) {
+    final String? detectedWallet = wallet;
+    return _ValueChip(
+      label: detectedWallet != null && detectedWallet.isNotEmpty
+          ? detectedWallet
+          : 'Belum terdeteksi',
+      color: detectedWallet != null && detectedWallet.isNotEmpty
+          ? AppColors.accent
+          : AppColors.warning,
+    );
+  }
+}
+
 class _WalletValue extends StatelessWidget {
   final String? wallet;
 
@@ -207,7 +215,7 @@ class _WalletValue extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        const _ValueChip(label: 'Belum terdeteksi', color: AppColors.warning),
+        const _WalletChip(wallet: null),
         const SizedBox(height: AppSpacing.s6),
         Text(
           'Nanti bisa dipilih manual sebelum transaksi disimpan.',
@@ -231,4 +239,10 @@ String _formatType(String type) {
     default:
       return type.isEmpty ? 'Belum terdeteksi' : type;
   }
+}
+
+String? _normalizedOrNull(String? value) {
+  if (value == null) return null;
+  final String trimmed = value.trim();
+  return trimmed.isEmpty ? null : trimmed;
 }

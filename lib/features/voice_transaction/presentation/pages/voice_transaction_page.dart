@@ -40,17 +40,27 @@ class VoiceTransactionPage extends GetView<VoiceTransactionController> {
         child: Obx(() {
           final VoiceTransactionState state = controller.state;
           final result = controller.result;
+          final voiceResult = result;
+          final bool showSuccessState =
+              state == VoiceTransactionState.success && voiceResult != null;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.s16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Center(
-                  child: VoiceRecordButtonWidget(
-                    state: state,
-                    onStart: controller.startRecording,
-                    onCancel: controller.cancelRecording,
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.s24),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Center(
+                    child: VoiceRecordButtonWidget(
+                      state: state,
+                      onStart: controller.startRecording,
+                      onCancel: controller.cancelRecording,
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s24),
@@ -62,30 +72,139 @@ class VoiceTransactionPage extends GetView<VoiceTransactionController> {
                   onRetry: controller.retryParse,
                   onRecordAgain: controller.resetDraft,
                 ),
-                if (result != null) ...[
+                if (showSuccessState) ...[
                   const SizedBox(height: AppSpacing.s16),
-                  VoiceTranscriptPreviewWidget(transcript: result.transcript),
-                  if (result.warnings.isNotEmpty) ...[
+                  VoiceTranscriptPreviewWidget(
+                    transcript: voiceResult!.transcript,
+                  ),
+                  if (voiceResult.warnings.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.s16),
-                    _WarningsCard(warnings: result.warnings),
+                    _WarningsCard(warnings: voiceResult.warnings),
                   ],
                   const SizedBox(height: AppSpacing.s16),
                   VoiceTransactionDraftCardWidget(
-                    transaction: result.transaction,
-                    onSave: controller.handleSaveDraftTodo,
-                    onEdit: controller.handleEditDraftTodo,
+                    transaction: voiceResult.transaction,
+                    draft: controller.draft,
                   ),
-                  const SizedBox(height: AppSpacing.s12),
-                  OutlinedButton(
-                    onPressed: controller.resetDraft,
-                    child: const Text('Rekam ulang'),
-                  ),
+                  if (controller.missingDraftFields.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.s16),
+                    _DraftMissingFieldsCard(
+                      missingFields: controller.missingDraftFields,
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.s16),
+                  _SuccessActions(controller: controller),
                 ],
                 const SizedBox(height: AppSpacing.s32),
               ],
             ),
           );
         }),
+      ),
+    );
+  }
+}
+
+class _SuccessActions extends StatelessWidget {
+  final VoiceTransactionController controller;
+
+  const _SuccessActions({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final bool isComplete = controller.isDraftComplete;
+      final bool isSaving = controller.isSavingDraft;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ElevatedButton(
+            onPressed: isSaving
+                ? null
+                : isComplete
+                ? controller.saveDraftAsTransaction
+                : controller.openAddTransactionWithDraft,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.surface,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.s16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: Text(
+              isSaving
+                  ? 'Menyimpan...'
+                  : isComplete
+                  ? 'Simpan Transaksi'
+                  : 'Lengkapi Detail',
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s10),
+          if (isComplete) ...[
+            OutlinedButton(
+              onPressed: isSaving ? null : controller.editDraft,
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.s14),
+                side: BorderSide(
+                  color: AppColors.neutral.withValues(alpha: 0.24),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: const Text('Edit Detail'),
+            ),
+            const SizedBox(height: AppSpacing.s4),
+          ],
+          TextButton(
+            onPressed: isSaving ? null : controller.resetDraft,
+            child: Text(
+              'Rekam ulang',
+              style: AppTextStyles.roboto13w500.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _DraftMissingFieldsCard extends StatelessWidget {
+  final List<String> missingFields;
+
+  const _DraftMissingFieldsCard({required this.missingFields});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s16),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Masih perlu dilengkapi',
+            style: AppTextStyles.roboto16w600.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s6),
+          Text(
+            missingFields.join(', '),
+            style: AppTextStyles.roboto13w400.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.35,
+            ),
+          ),
+        ],
       ),
     );
   }
