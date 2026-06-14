@@ -229,8 +229,11 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
     } else if (widget.voiceDraft != null) {
       final VoiceTransactionDraftParams draft = widget.voiceDraft!;
       _amountStr = _formatInitialAmount(draft.amount);
-      _titleController.text = draft.displayDescription ?? '';
-      _noteController.clear();
+      _titleController.text = draft.displayTitle ?? '';
+      _noteController.text =
+          draft.displayDescription != draft.displayTitle
+          ? (draft.displayDescription ?? '')
+          : '';
       _selectedDate = draft.occurredAt;
       _selectedWalletId = draft.walletId;
       _selectedWallet = draft.displayWallet ?? 'Pilih dompet';

@@ -1,4 +1,5 @@
 class VoiceTransactionDraftParams {
+  final String title;
   final String? type;
   final double? amount;
   final String? categoryName;
@@ -14,6 +15,7 @@ class VoiceTransactionDraftParams {
   final DateTime occurredAt;
 
   const VoiceTransactionDraftParams({
+    required this.title,
     required this.type,
     required this.amount,
     required this.categoryName,
@@ -28,6 +30,8 @@ class VoiceTransactionDraftParams {
     required this.transcriptNormalized,
     required this.occurredAt,
   });
+
+  String? get displayTitle => _normalizedOrNull(title);
 
   String get effectiveCurrency {
     final String trimmed = currency.trim();
@@ -49,6 +53,28 @@ class VoiceTransactionDraftParams {
   String? get displayWallet => _normalizedOrNull(walletName);
 
   String? get displayDescription => _normalizedOrNull(description);
+
+  bool get hasMeaningfulTitle {
+    final String? normalizedTitle = displayTitle;
+    if (normalizedTitle == null) return false;
+    return normalizedTitle.toLowerCase() != 'transaksi suara';
+  }
+
+  String? get combinedNote {
+    final String? normalizedTitle = displayTitle;
+    final String? normalizedDescription = displayDescription;
+
+    if (normalizedTitle == null && normalizedDescription == null) {
+      return null;
+    }
+    if (normalizedDescription == null || normalizedDescription == normalizedTitle) {
+      return normalizedTitle;
+    }
+    if (normalizedTitle == null) {
+      return normalizedDescription;
+    }
+    return '$normalizedTitle - $normalizedDescription';
+  }
 
   String? get timeString {
     final String hour = occurredAt.hour.toString().padLeft(2, '0');

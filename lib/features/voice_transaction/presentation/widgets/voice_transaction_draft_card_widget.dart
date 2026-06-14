@@ -25,6 +25,9 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String titleLabel =
+        draft?.displayTitle ?? 'Transaksi suara';
+    final double amountValue = draft?.amount ?? transaction.amount;
     final String categoryLabel =
         draft?.displayCategory ??
         (transaction.category.isEmpty ? 'Belum terdeteksi' : transaction.category);
@@ -54,7 +57,14 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.s8),
           Text(
-            _currencyFormatter.format(transaction.amount),
+            titleLabel,
+            style: AppTextStyles.roboto18w600.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s6),
+          Text(
+            _currencyFormatter.format(amountValue),
             style: AppTextStyles.roboto32w600.copyWith(
               color: AppColors.textPrimary,
               fontSize: 34,
@@ -81,12 +91,16 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.s18),
           _DraftRow(
+            label: 'Judul',
+            valueText: titleLabel,
+          ),
+          _DraftRow(
             label: 'Jenis',
             valueText: typeLabel,
           ),
           _DraftRow(
             label: 'Nominal',
-            valueText: _currencyFormatter.format(transaction.amount),
+            valueText: _currencyFormatter.format(amountValue),
           ),
           _DraftRow(
             label: 'Kategori',

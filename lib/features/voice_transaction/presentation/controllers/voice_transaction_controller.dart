@@ -199,7 +199,7 @@ class VoiceTransactionController extends GetxController {
           amount: amount,
           categoryId: categoryId,
           walletId: walletId,
-          note: resolvedDraft.displayDescription,
+          note: resolvedDraft.combinedNote,
           date: resolvedDraft.occurredAt,
           time: resolvedDraft.timeString,
         ),
@@ -410,7 +410,22 @@ class VoiceTransactionController extends GetxController {
       wallets: wallets,
     );
 
+    final String fallbackCategoryTitle =
+        resolvedCategory?.child?.name ??
+        resolvedCategory?.parent.name ??
+        _normalizedOrNull(categoryHint) ??
+        '';
+    final String derivedTitle = _deriveDraftTitle(
+      description: _normalizedOrNull(voiceResult.transaction.description),
+      normalizedTranscript: _normalizedOrNull(
+        voiceResult.transcript.normalized,
+      ),
+      rawTranscript: _normalizedOrNull(voiceResult.transcript.raw),
+      fallbackCategory: fallbackCategoryTitle,
+    );
+
     return VoiceTransactionDraftParams(
+      title: derivedTitle,
       type: type,
       amount: amount,
       categoryName: resolvedCategory?.parent.name ?? _normalizedOrNull(categoryHint),
@@ -568,6 +583,9 @@ class VoiceTransactionController extends GetxController {
     if (draft == null) return <String>[];
 
     final List<String> missingFields = <String>[];
+    if (!draft.hasMeaningfulTitle) {
+      missingFields.add('Judul');
+    }
     if (_sanitizeType(draft.type) == null) {
       missingFields.add('Jenis transaksi');
     }
@@ -581,6 +599,144 @@ class VoiceTransactionController extends GetxController {
       missingFields.add('Dompet');
     }
     return missingFields;
+  }
+
+  String _deriveDraftTitle({
+    required String? description,
+    required String? normalizedTranscript,
+    required String? rawTranscript,
+    required String fallbackCategory,
+  }) {
+    final String source = _firstNonEmpty(<String?>[
+      description,
+      normalizedTranscript,
+      rawTranscript,
+    ]);
+
+    final String cleanedTitle = _cleanTitleCandidate(source);
+    if (cleanedTitle.isNotEmpty) {
+      return cleanedTitle;
+    }
+
+    final String normalizedCategory = _toSentenceCase(fallbackCategory);
+    if (normalizedCategory.isNotEmpty) {
+      return normalizedCategory;
+    }
+
+    return 'Transaksi suara';
+  }
+
+  String _cleanTitleCandidate(String source) {
+    String normalized = source.toLowerCase().trim();
+    if (normalized.isEmpty) return '';
+
+    normalized = normalized.replaceAll(RegExp(r'[^a-z0-9\s]'), ' ');
+    normalized = normalized.replaceAllMapped(
+      RegExp(r'\b(go\s*pay|top\s*up)\b'),
+      (match) => match.group(0)?.replaceAll(RegExp(r'\s+'), '') ?? '',
+    );
+
+    final List<String> amountTokens = <String>[
+      'rp',
+      'idr',
+      'rebu',
+      'ribu',
+      'rb',
+      'ratus',
+      'puluh',
+      'belas',
+      'juta',
+      'miliar',
+      'triliun',
+      'perak',
+      'sen',
+      'nol',
+      'satu',
+      'dua',
+      'tiga',
+      'empat',
+      'lima',
+      'enam',
+      'tujuh',
+      'delapan',
+      'sembilan',
+      'sepuluh',
+      'sebelas',
+      'seratus',
+      'seribu',
+      'sejuta',
+    ];
+    final List<String> connectorTokens = <String>[
+      'dengan',
+      'pakai',
+      'pake',
+      'via',
+      'dari',
+      'di',
+    ];
+    final List<String> walletTokens = <String>[
+      'bca',
+      'dana',
+      'gopay',
+      'gopaylater',
+      'ovo',
+      'cash',
+      'tunai',
+      'mandiri',
+      'bri',
+      'bni',
+      'seabank',
+    ];
+    final List<String> removableLeadingVerbs = <String>[
+      'beli',
+      'bayar',
+      'mayar',
+      'jajan',
+      'transfer',
+      'topup',
+    ];
+
+    final List<String> sourceTokens = normalized
+        .split(RegExp(r'\s+'))
+        .where((token) => token.trim().isNotEmpty)
+        .toList();
+    final List<String> filteredTokens = <String>[];
+
+    for (final String token in sourceTokens) {
+      if (RegExp(r'^\d+([.,]\d+)?$').hasMatch(token)) {
+        continue;
+      }
+      if (amountTokens.contains(token)) {
+        continue;
+      }
+      if (connectorTokens.contains(token)) {
+        continue;
+      }
+      if (walletTokens.contains(token)) {
+        continue;
+      }
+      filteredTokens.add(token);
+    }
+
+    while (filteredTokens.isNotEmpty &&
+        removableLeadingVerbs.contains(filteredTokens.first) &&
+        filteredTokens.length > 1) {
+      filteredTokens.removeAt(0);
+    }
+
+    final String cleaned = filteredTokens.join(' ').replaceAll(
+      RegExp(r'\s+'),
+      ' ',
+    );
+    return _toSentenceCase(cleaned);
+  }
+
+  String _toSentenceCase(String value) {
+    final String trimmed = value.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (trimmed.isEmpty) return '';
+
+    final String lower = trimmed.toLowerCase();
+    return '${lower[0].toUpperCase()}${lower.substring(1)}';
   }
 
   void _clearDraftState() {
