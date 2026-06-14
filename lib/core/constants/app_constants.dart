@@ -7,6 +7,8 @@ class AppConstants {
   // TODO: Set SUPABASE_URL and SUPABASE_ANON_KEY in .env for local dev.
   static final String supabaseUrl = dotenv.env['SUPABASE_URL'] ?? '';
   static final String supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+  static final String fluxaAiApiBaseUrl =
+      dotenv.env['FLUXA_AI_API_BASE_URL'] ?? '';
 
   static const String appName = 'Fluxa';
   static const String localDbName = 'fluxa_local.db';

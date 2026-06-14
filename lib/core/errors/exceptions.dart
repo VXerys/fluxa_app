@@ -17,3 +17,13 @@ class AuthException implements Exception {
   final String message;
   AuthException(this.message);
 }
+
+class PermissionException implements Exception {
+  final String message;
+  PermissionException(this.message);
+}
+
+class ValidationException implements Exception {
+  final String message;
+  ValidationException(this.message);
+}

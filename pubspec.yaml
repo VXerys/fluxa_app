@@ -52,6 +52,9 @@ dependencies:
   flutter_slidable: ^4.0.3
   fl_chart: ^0.68.0
   hugeicons: ^1.1.7
+  dio: ^5.9.2
+  record: ^6.2.1
+  permission_handler: ^12.0.3
 
 dev_dependencies:
   flutter_test:
