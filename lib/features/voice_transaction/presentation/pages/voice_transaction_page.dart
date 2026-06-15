@@ -68,6 +68,7 @@ class VoiceTransactionPage extends GetView<VoiceTransactionController> {
                   state: state,
                   failureMessage: controller.failureMessage,
                   recordingElapsedMs: controller.recordingElapsedMs,
+                  hasDetectedSpeech: controller.hasDetectedSpeech,
                   showContinuingHint: controller.showContinuingHint,
                   onRetry: controller.retryParse,
                   onRecordAgain: controller.resetDraft,

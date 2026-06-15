@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:get/get.dart';
 
@@ -18,6 +19,7 @@ import '../../domain/usecases/get_voice_recording_amplitude_usecase.dart';
 import '../../domain/usecases/parse_voice_transaction_usecase.dart';
 import '../../domain/usecases/start_voice_recording_usecase.dart';
 import '../../domain/usecases/stop_voice_recording_usecase.dart';
+import '../services/voice_recording_feedback_service.dart';
 
 enum VoiceTransactionState {
   idle,
@@ -51,13 +53,19 @@ class VoiceTransactionController extends GetxController {
     required this.addTransactionUseCase,
   });
 
-  static const int minRecordingDurationMs = 1500;
-  static const int silenceBeforeSpeechTimeoutMs = 6000;
-  static const int silenceAfterSpeechTimeoutMs = 3500;
-  static const int maxRecordingDurationMs = 20000;
-  static const int amplitudePollIntervalMs = 250;
-  static const double speechAmplitudeThresholdDb = -35;
-  static const int speechSamplesRequired = 2;
+  static const int minRecordingDurationMs = 1200;
+  static const int initialNoSpeechTimeoutMs = 5500;
+  static const int thinkingGraceBeforeSpeechMs = 5500;
+  static const int silenceAfterSpeechTimeoutMs = 2000;
+  static const int longPauseGraceMs = 3500;
+  static const int maxRecordingDurationMs = 12000;
+  static const int amplitudePollIntervalMs = 150;
+  static const int speechHitRequiredSamples = 2;
+  static const int silenceHitRequiredMs = 2000;
+  static const int noiseFloorCalibrationMs = 750;
+  static const double fallbackNoiseFloorDb = -60;
+  static const double invalidAmplitudeFloorDb = -120;
+  static const double calibrationMaxNoiseSampleDb = -35;
 
   final Rx<VoiceTransactionState> _state = VoiceTransactionState.idle.obs;
   VoiceTransactionState get state => _state.value;
@@ -92,7 +100,12 @@ class VoiceTransactionController extends GetxController {
   DateTime? _recordingStartedAt;
   DateTime? _lastSpeechAt;
   bool _isEvaluatingRecording = false;
-  int _speechSamplesAboveThreshold = 0;
+  bool _isStopping = false;
+  int _consecutiveSpeechHits = 0;
+  int _consecutiveSilenceMs = 0;
+  double? _noiseFloorDb;
+  double _noiseFloorTotalDb = 0;
+  int _noiseFloorSampleCount = 0;
 
   bool get isBusy =>
       state == VoiceTransactionState.uploading ||
@@ -115,6 +128,7 @@ class VoiceTransactionController extends GetxController {
       (_) {
         _state.value = VoiceTransactionState.recording;
         _startRecordingMonitoring();
+        unawaited(VoiceRecordingFeedbackService.playStartFeedback());
       },
     );
   }
@@ -125,24 +139,33 @@ class VoiceTransactionController extends GetxController {
   }
 
   Future<void> _stopRecordingAndParse() async {
+    if (_isStopping) return;
+    _isStopping = true;
     _failureMessage.value = '';
     _stopRecordingMonitoring();
     _state.value = VoiceTransactionState.processing;
+    unawaited(VoiceRecordingFeedbackService.playStopFeedback());
 
     final stopResult = await stopVoiceRecordingUseCase(const NoParams());
     await stopResult.fold(
-      (failure) async => _setFailure(failure.message),
+      (failure) async {
+        _isStopping = false;
+        _setFailure(failure.message);
+      },
       (audioPath) async {
         _lastAudioPath.value = audioPath;
         await _parseAudioPath(audioPath);
       },
     );
+    _isStopping = false;
   }
 
   Future<void> cancelRecording() async {
     if (isBusy) return;
 
     _stopRecordingMonitoring();
+    _isStopping = false;
+    unawaited(VoiceRecordingFeedbackService.playCancelFeedback());
     final result = await cancelVoiceRecordingUseCase(const NoParams());
     result.fold(
       (failure) => _setFailure(failure.message),
@@ -186,7 +209,10 @@ class VoiceTransactionController extends GetxController {
       resolvedDraft.resolvedTransactionCategoryId,
     );
 
-    if (type == null || amount == null || walletId == null || categoryId == null) {
+    if (type == null ||
+        amount == null ||
+        walletId == null ||
+        categoryId == null) {
       await openAddTransactionWithDraft();
       return;
     }
@@ -271,7 +297,12 @@ class VoiceTransactionController extends GetxController {
     _recordingElapsedMs.value = 0;
     _hasDetectedSpeech.value = false;
     _showContinuingHint.value = false;
-    _speechSamplesAboveThreshold = 0;
+    _isStopping = false;
+    _consecutiveSpeechHits = 0;
+    _consecutiveSilenceMs = 0;
+    _noiseFloorDb = null;
+    _noiseFloorTotalDb = 0;
+    _noiseFloorSampleCount = 0;
     _amplitudeTimer = Timer.periodic(
       const Duration(milliseconds: amplitudePollIntervalMs),
       (_) => unawaited(_evaluateRecordingAmplitude()),
@@ -300,18 +331,46 @@ class VoiceTransactionController extends GetxController {
       final amplitudeResult = await getVoiceRecordingAmplitudeUseCase(
         const NoParams(),
       );
-      amplitudeResult.fold((_) {}, (amplitudeDb) {
-        if (amplitudeDb >= speechAmplitudeThresholdDb) {
-          _speechSamplesAboveThreshold += 1;
-          if (_speechSamplesAboveThreshold >= speechSamplesRequired) {
-            _hasDetectedSpeech.value = true;
-            _lastSpeechAt = DateTime.now();
-            _showContinuingHint.value = false;
-          }
-        } else {
-          _speechSamplesAboveThreshold = 0;
+      final double? amplitudeDb = amplitudeResult.fold(
+        (_) => null,
+        (value) => value,
+      );
+      final bool hasUsableAmplitude =
+          amplitudeDb != null && amplitudeDb > invalidAmplitudeFloorDb;
+
+      if (hasUsableAmplitude &&
+          elapsedMs <= noiseFloorCalibrationMs &&
+          amplitudeDb <= calibrationMaxNoiseSampleDb) {
+        _noiseFloorTotalDb += amplitudeDb;
+        _noiseFloorSampleCount += 1;
+        _noiseFloorDb = _noiseFloorTotalDb / _noiseFloorSampleCount;
+      }
+
+      final double effectiveNoiseFloorDb =
+          _noiseFloorDb ?? fallbackNoiseFloorDb;
+      final double speechThresholdDb = math.max(
+        effectiveNoiseFloorDb + 10,
+        -45,
+      );
+      final bool isSpeechSample =
+          hasUsableAmplitude && amplitudeDb >= speechThresholdDb;
+
+      if (isSpeechSample) {
+        _consecutiveSpeechHits += 1;
+        _consecutiveSilenceMs = 0;
+        _showContinuingHint.value = false;
+
+        if (_consecutiveSpeechHits >= speechHitRequiredSamples) {
+          _hasDetectedSpeech.value = true;
+          _lastSpeechAt = DateTime.now();
         }
-      });
+      } else {
+        _consecutiveSpeechHits = 0;
+        if (_hasDetectedSpeech.value) {
+          _consecutiveSilenceMs += amplitudePollIntervalMs;
+          _showContinuingHint.value = _consecutiveSilenceMs >= 600;
+        }
+      }
 
       if (state != VoiceTransactionState.recording) return;
 
@@ -323,20 +382,24 @@ class VoiceTransactionController extends GetxController {
       if (elapsedMs < minRecordingDurationMs) return;
 
       if (!_hasDetectedSpeech.value &&
-          elapsedMs >= silenceBeforeSpeechTimeoutMs) {
+          elapsedMs >=
+              math.max(initialNoSpeechTimeoutMs, thinkingGraceBeforeSpeechMs)) {
         await _cancelNoSpeechRecording();
         return;
       }
 
+      final int requiredSilenceMs = math.min(
+        longPauseGraceMs,
+        math.max(silenceAfterSpeechTimeoutMs, silenceHitRequiredMs),
+      );
       final DateTime? lastSpeechAt = _lastSpeechAt;
-      if (_hasDetectedSpeech.value && lastSpeechAt != null) {
-        final int silenceMs = DateTime.now()
-            .difference(lastSpeechAt)
-            .inMilliseconds;
-        _showContinuingHint.value = silenceMs >= 1250;
-        if (silenceMs >= silenceAfterSpeechTimeoutMs) {
-          await _stopRecordingAndParse();
-        }
+      final int silenceSinceLastSpeechMs = lastSpeechAt == null
+          ? 0
+          : DateTime.now().difference(lastSpeechAt).inMilliseconds;
+      if (_hasDetectedSpeech.value &&
+          _consecutiveSilenceMs >= requiredSilenceMs &&
+          silenceSinceLastSpeechMs >= requiredSilenceMs) {
+        await _stopRecordingAndParse();
       }
     } finally {
       _isEvaluatingRecording = false;
@@ -345,6 +408,8 @@ class VoiceTransactionController extends GetxController {
 
   Future<void> _cancelNoSpeechRecording() async {
     _stopRecordingMonitoring();
+    _isStopping = false;
+    unawaited(VoiceRecordingFeedbackService.playCancelFeedback());
     final result = await cancelVoiceRecordingUseCase(const NoParams());
     result.fold(
       (failure) => _setFailure(failure.message),
@@ -356,6 +421,7 @@ class VoiceTransactionController extends GetxController {
 
   void _setFailure(String message) {
     _stopRecordingMonitoring();
+    _isStopping = false;
     _failureMessage.value = message;
     _draft.value = null;
     _state.value = VoiceTransactionState.failure;
@@ -747,6 +813,12 @@ class VoiceTransactionController extends GetxController {
     _recordingElapsedMs.value = 0;
     _hasDetectedSpeech.value = false;
     _showContinuingHint.value = false;
+    _isStopping = false;
+    _consecutiveSpeechHits = 0;
+    _consecutiveSilenceMs = 0;
+    _noiseFloorDb = null;
+    _noiseFloorTotalDb = 0;
+    _noiseFloorSampleCount = 0;
     _state.value = VoiceTransactionState.idle;
   }
 

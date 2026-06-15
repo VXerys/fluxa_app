@@ -11,6 +11,7 @@ class VoiceProcessingStateWidget extends StatelessWidget {
   final VoiceTransactionState state;
   final String failureMessage;
   final int recordingElapsedMs;
+  final bool hasDetectedSpeech;
   final bool showContinuingHint;
   final VoidCallback onRetry;
   final VoidCallback onRecordAgain;
@@ -20,6 +21,7 @@ class VoiceProcessingStateWidget extends StatelessWidget {
     required this.state,
     required this.failureMessage,
     required this.recordingElapsedMs,
+    required this.hasDetectedSpeech,
     required this.showContinuingHint,
     required this.onRetry,
     required this.onRecordAgain,
@@ -73,20 +75,15 @@ class VoiceProcessingStateWidget extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.s8),
             Text(
-              'Bicara natural, sistem akan berhenti otomatis.',
+              showContinuingHint
+                  ? 'Memproses sebentar...'
+                  : hasDetectedSpeech
+                  ? 'Bicara natural, sistem akan berhenti otomatis.'
+                  : 'Silakan mulai bicara.',
               style: AppTextStyles.roboto13w400.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
-            if (showContinuingHint) ...[
-              const SizedBox(height: AppSpacing.s10),
-              Text(
-                'Menunggu jika masih ingin melanjutkan...',
-                style: AppTextStyles.roboto12w500.copyWith(
-                  color: AppColors.warning,
-                ),
-              ),
-            ],
           ],
         ),
       );
