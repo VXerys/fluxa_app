@@ -40,6 +40,7 @@ class VoiceTransactionController extends GetxController {
   final GetCategoriesUseCase getCategoriesUseCase;
   final GetWalletsUseCase getWalletsUseCase;
   final AddTransactionUseCase addTransactionUseCase;
+  final VoiceRecordingFeedbackService feedbackService;
 
   VoiceTransactionController({
     required this.startVoiceRecordingUseCase,
@@ -51,6 +52,7 @@ class VoiceTransactionController extends GetxController {
     required this.getCategoriesUseCase,
     required this.getWalletsUseCase,
     required this.addTransactionUseCase,
+    required this.feedbackService,
   });
 
   static const int minRecordingDurationMs = 1200;
@@ -124,11 +126,14 @@ class VoiceTransactionController extends GetxController {
     _lastAudioPath.value = '';
     final result = await startVoiceRecordingUseCase(const NoParams());
     result.fold(
-      (failure) => _setFailure(failure.message),
+      (failure) {
+        unawaited(feedbackService.playError());
+        _setFailure(failure.message, playFeedback: false);
+      },
       (_) {
         _state.value = VoiceTransactionState.recording;
         _startRecordingMonitoring();
-        unawaited(VoiceRecordingFeedbackService.playStartFeedback());
+        unawaited(feedbackService.playStart());
       },
     );
   }
@@ -144,7 +149,6 @@ class VoiceTransactionController extends GetxController {
     _failureMessage.value = '';
     _stopRecordingMonitoring();
     _state.value = VoiceTransactionState.processing;
-    unawaited(VoiceRecordingFeedbackService.playStopFeedback());
 
     final stopResult = await stopVoiceRecordingUseCase(const NoParams());
     await stopResult.fold(
@@ -153,6 +157,7 @@ class VoiceTransactionController extends GetxController {
         _setFailure(failure.message);
       },
       (audioPath) async {
+        unawaited(feedbackService.playStop());
         _lastAudioPath.value = audioPath;
         await _parseAudioPath(audioPath);
       },
@@ -161,15 +166,17 @@ class VoiceTransactionController extends GetxController {
   }
 
   Future<void> cancelRecording() async {
-    if (isBusy) return;
+    if (isBusy || state != VoiceTransactionState.recording) return;
 
     _stopRecordingMonitoring();
     _isStopping = false;
-    unawaited(VoiceRecordingFeedbackService.playCancelFeedback());
     final result = await cancelVoiceRecordingUseCase(const NoParams());
     result.fold(
       (failure) => _setFailure(failure.message),
-      (_) => _clearDraftState(),
+      (_) {
+        unawaited(feedbackService.playCancel());
+        _clearDraftState();
+      },
     );
   }
 
@@ -409,7 +416,6 @@ class VoiceTransactionController extends GetxController {
   Future<void> _cancelNoSpeechRecording() async {
     _stopRecordingMonitoring();
     _isStopping = false;
-    unawaited(VoiceRecordingFeedbackService.playCancelFeedback());
     final result = await cancelVoiceRecordingUseCase(const NoParams());
     result.fold(
       (failure) => _setFailure(failure.message),
@@ -419,9 +425,12 @@ class VoiceTransactionController extends GetxController {
     );
   }
 
-  void _setFailure(String message) {
+  void _setFailure(String message, {bool playFeedback = true}) {
     _stopRecordingMonitoring();
     _isStopping = false;
+    if (playFeedback) {
+      unawaited(feedbackService.playError());
+    }
     _failureMessage.value = message;
     _draft.value = null;
     _state.value = VoiceTransactionState.failure;

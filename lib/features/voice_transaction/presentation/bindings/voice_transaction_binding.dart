@@ -25,6 +25,7 @@ import '../../domain/usecases/parse_voice_transaction_usecase.dart';
 import '../../domain/usecases/start_voice_recording_usecase.dart';
 import '../../domain/usecases/stop_voice_recording_usecase.dart';
 import '../controllers/voice_transaction_controller.dart';
+import '../services/voice_recording_feedback_service.dart';
 
 class VoiceTransactionBinding extends Bindings {
   @override
@@ -112,6 +113,11 @@ class VoiceTransactionBinding extends Bindings {
         () => GetVoiceRecordingAmplitudeUseCase(repository: Get.find()),
       );
     }
+    if (!Get.isRegistered<VoiceRecordingFeedbackService>()) {
+      Get.lazyPut<VoiceRecordingFeedbackService>(
+        () => const VoiceRecordingFeedbackService(),
+      );
+    }
     if (!Get.isRegistered<VoiceTransactionController>()) {
       Get.lazyPut(
         () => VoiceTransactionController(
@@ -124,6 +130,7 @@ class VoiceTransactionBinding extends Bindings {
           getCategoriesUseCase: Get.find(),
           getWalletsUseCase: Get.find(),
           addTransactionUseCase: Get.find(),
+          feedbackService: Get.find(),
         ),
       );
     }

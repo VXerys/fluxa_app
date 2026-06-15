@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 
 class VoiceRecordingFeedbackService {
-  VoiceRecordingFeedbackService._();
+  const VoiceRecordingFeedbackService();
 
-  static Future<void> playStartFeedback() async {
+  Future<void> playStart() async {
     try {
       await SystemSound.play(SystemSoundType.click);
       await HapticFeedback.mediumImpact();
@@ -12,25 +12,36 @@ class VoiceRecordingFeedbackService {
     }
   }
 
-  static Future<void> playStopFeedback() async {
+  Future<void> playStop() async {
     try {
       await SystemSound.play(SystemSoundType.alert);
       await HapticFeedback.selectionClick();
     } catch (_) {
       try {
         await SystemSound.play(SystemSoundType.click);
-        await HapticFeedback.lightImpact();
+        await HapticFeedback.selectionClick();
       } catch (_) {
         // Feedback is best-effort and must never block upload/processing.
       }
     }
   }
 
-  static Future<void> playCancelFeedback() async {
+  Future<void> playCancel() async {
     try {
       await HapticFeedback.lightImpact();
     } catch (_) {
       // Feedback is best-effort and must never block cancellation.
     }
   }
+
+  Future<void> playError() async {
+    try {
+      await HapticFeedback.heavyImpact();
+    } catch (_) {
+      // Feedback is best-effort and must never block failure handling.
+    }
+  }
+
+  // TODO: For reliable custom voice assistant sounds, add short audio assets
+  // and an audio player package later.
 }
