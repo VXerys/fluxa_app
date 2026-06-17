@@ -13,6 +13,7 @@ import '../../../../core/utils/category_icon_mapper.dart';
 import '../../domain/entities/category_entity.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../controllers/transaction_controller.dart';
+import '../../../voice_transaction/domain/entities/voice_transaction_draft_params.dart';
 import '../../../wallet/domain/entities/wallet_entity.dart';
 import '../../../wallet/presentation/controllers/wallet_controller.dart';
 
@@ -32,12 +33,17 @@ class _AddTransactionPageState extends State<AddTransactionPage>
   bool _isClosing = false;
   late final TransactionController controller;
   late final WalletController walletController;
+  late final VoiceTransactionDraftParams? voiceDraft;
 
   @override
   void initState() {
     super.initState();
     controller = Get.find<TransactionController>();
     walletController = Get.find<WalletController>();
+    final dynamic routeArguments = Get.arguments;
+    voiceDraft = routeArguments is VoiceTransactionDraftParams
+        ? routeArguments
+        : null;
     if (walletController.wallets.isEmpty && !walletController.isLoading) {
       walletController.loadWallets();
     }
@@ -64,14 +70,14 @@ class _AddTransactionPageState extends State<AddTransactionPage>
     super.dispose();
   }
 
-  void _close() {
+  void _close([bool? result]) {
     if (_isClosing) return;
     setState(() {
       _isClosing = true;
     });
     _animationController.reverse().then((_) {
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(result);
       }
     });
   }
@@ -133,6 +139,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                         child: _AddTransactionForm(
                           controller: controller,
                           transactionToEdit: widget.transactionToEdit,
+                          voiceDraft: voiceDraft,
                           onClose: _close,
                         ),
                       ),
@@ -151,11 +158,13 @@ class _AddTransactionPageState extends State<AddTransactionPage>
 class _AddTransactionForm extends StatefulWidget {
   final TransactionController controller;
   final TransactionEntity? transactionToEdit;
-  final VoidCallback onClose;
+  final VoiceTransactionDraftParams? voiceDraft;
+  final ValueChanged<bool?> onClose;
 
   const _AddTransactionForm({
     required this.controller,
     this.transactionToEdit,
+    this.voiceDraft,
     required this.onClose,
   });
 
@@ -217,11 +226,42 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
         );
         await _syncWalletSelection(walletController);
       });
+    } else if (widget.voiceDraft != null) {
+      final VoiceTransactionDraftParams draft = widget.voiceDraft!;
+      _amountStr = _formatInitialAmount(draft.amount);
+      _titleController.text = draft.displayTitle ?? '';
+      _noteController.text =
+          draft.displayDescription != draft.displayTitle
+          ? (draft.displayDescription ?? '')
+          : '';
+      _selectedDate = draft.occurredAt;
+      _selectedWalletId = draft.walletId;
+      _selectedWallet = draft.displayWallet ?? 'Pilih dompet';
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final String draftType =
+            draft.type == 'income' || draft.type == 'expense'
+            ? draft.type!
+            : widget.controller.selectedType;
+        await widget.controller.changeType(draftType);
+        await widget.controller.selectCategoryById(
+          draft.resolvedTransactionCategoryId,
+        );
+        await _syncWalletSelection(walletController);
+      });
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _syncWalletSelection(walletController);
       });
     }
+  }
+
+  String _formatInitialAmount(double? amount) {
+    if (amount == null || amount <= 0) return '0';
+    if (amount == amount.roundToDouble()) {
+      return amount.toInt().toString();
+    }
+    return amount.toString();
   }
 
   Future<void> _syncWalletSelection(WalletController walletController) async {
@@ -484,7 +524,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
     }
 
     if (success) {
-      widget.onClose();
+      widget.onClose(true);
     }
   }
 

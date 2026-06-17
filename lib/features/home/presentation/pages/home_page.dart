@@ -10,9 +10,9 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../profile/presentation/controllers/profile_controller.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../../core/widgets/placeholder_page.dart';
 import '../../domain/entities/home_summary_entity.dart';
 import '../controllers/home_controller.dart';
-import '../../../../core/widgets/placeholder_page.dart';
 import '../widgets/balance_card_widget.dart';
 import '../widgets/recent_transaction_item_widget.dart';
 import 'package:intl/intl.dart';
@@ -534,12 +534,7 @@ class HomePage extends GetView<HomeController> {
         Get.toNamed(Routes.transactionList);
         break;
       case 'voice_placeholder':
-        Get.to(
-          () => const PlaceholderPage(
-            title: 'Suara',
-            message: 'Fitur Suara masih dalam pengembangan',
-          ),
-        );
+        Get.toNamed(Routes.voiceTransaction);
         break;
       case 'card_placeholder':
         Get.to(

@@ -14,6 +14,8 @@
 		<string>6.0</string>
 		<key>CFBundleName</key>
 		<string>Fluxa</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Fluxa membutuhkan akses mikrofon untuk merekam voice transaction.</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>

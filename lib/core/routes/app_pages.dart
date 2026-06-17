@@ -20,6 +20,8 @@ import '../../features/statistics/presentation/pages/statistics_page.dart';
 import '../../features/transaction/presentation/bindings/transaction_binding.dart';
 import '../../features/transaction/presentation/pages/add_transaction_page.dart';
 import '../../features/transaction/presentation/pages/transaction_list_page.dart';
+import '../../features/voice_transaction/presentation/bindings/voice_transaction_binding.dart';
+import '../../features/voice_transaction/presentation/pages/voice_transaction_page.dart';
 import '../../features/wallet/presentation/bindings/wallet_binding.dart';
 import '../widgets/placeholder_page.dart';
 import 'app_routes.dart';
@@ -81,6 +83,11 @@ class AppPages {
         WalletBinding().dependencies();
         TransactionBinding().dependencies();
       }),
+    ),
+    GetPage(
+      name: Routes.voiceTransaction,
+      page: () => const VoiceTransactionPage(),
+      binding: VoiceTransactionBinding(),
     ),
     GetPage(
       name: Routes.statistics,
