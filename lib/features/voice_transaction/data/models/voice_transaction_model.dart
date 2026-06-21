@@ -7,6 +7,7 @@ class VoiceTransactionModel extends VoiceTransactionEntity {
     required super.amount,
     required super.category,
     super.wallet,
+    super.title,
     super.description,
     required super.currency,
   });
@@ -17,6 +18,7 @@ class VoiceTransactionModel extends VoiceTransactionEntity {
       amount: _parseDouble(json['amount']),
       category: json['category'] as String? ?? '',
       wallet: json['wallet'] as String?,
+      title: json['title'] as String?,
       description: json['description'] as String?,
       currency: json['currency'] as String? ?? AppConstants.defaultCurrency,
     );
@@ -28,6 +30,7 @@ class VoiceTransactionModel extends VoiceTransactionEntity {
       amount: amount,
       category: category,
       wallet: wallet,
+      title: title,
       description: description,
       currency: currency,
     );

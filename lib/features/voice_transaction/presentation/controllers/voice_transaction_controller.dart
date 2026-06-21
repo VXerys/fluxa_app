@@ -491,6 +491,7 @@ class VoiceTransactionController extends GetxController {
         _normalizedOrNull(categoryHint) ??
         '';
     final String derivedTitle = _deriveDraftTitle(
+      title: _normalizedOrNull(voiceResult.transaction.title),
       description: _normalizedOrNull(voiceResult.transaction.description),
       normalizedTranscript: _normalizedOrNull(
         voiceResult.transcript.normalized,
@@ -677,12 +678,14 @@ class VoiceTransactionController extends GetxController {
   }
 
   String _deriveDraftTitle({
+    required String? title,
     required String? description,
     required String? normalizedTranscript,
     required String? rawTranscript,
     required String fallbackCategory,
   }) {
     final String source = _firstNonEmpty(<String?>[
+      title,
       description,
       normalizedTranscript,
       rawTranscript,
@@ -836,6 +839,9 @@ class VoiceTransactionController extends GetxController {
       final String? normalized = _normalizedOrNull(candidate)?.toLowerCase();
       if (normalized == 'income' || normalized == 'expense') {
         return normalized;
+      }
+      if (normalized == 'transfer') {
+        return 'expense';
       }
     }
     return null;

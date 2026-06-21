@@ -26,7 +26,9 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String titleLabel =
-        draft?.displayTitle ?? 'Transaksi suara';
+        draft?.displayTitle ??
+        _normalizedOrNull(transaction.title) ??
+        'Transaksi suara';
     final double amountValue = draft?.amount ?? transaction.amount;
     final String categoryLabel =
         draft?.displayCategory ??
