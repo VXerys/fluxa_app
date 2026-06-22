@@ -30,9 +30,16 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
         _normalizedOrNull(transaction.title) ??
         'Transaksi suara';
     final double amountValue = draft?.amount ?? transaction.amount;
+    String transactionCategoryLabel = '';
+    if (transaction.category.isNotEmpty) {
+      transactionCategoryLabel = transaction.category;
+      if (transaction.subcategory != null && transaction.subcategory!.trim().isNotEmpty) {
+        transactionCategoryLabel += ' • ${transaction.subcategory}';
+      }
+    }
     final String categoryLabel =
         draft?.displayCategory ??
-        (transaction.category.isEmpty ? 'Belum terdeteksi' : transaction.category);
+        (transactionCategoryLabel.isEmpty ? 'Belum terdeteksi' : transactionCategoryLabel);
     final String? walletLabel = draft?.displayWallet ?? _normalizedOrNull(transaction.wallet);
     final String descriptionLabel =
         draft?.displayDescription ??

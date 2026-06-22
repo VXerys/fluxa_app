@@ -49,6 +49,7 @@ class UpdateTransactionParams {
 class GetTransactionsParams {
   final String? type;
   final String? categoryId;
+  final List<String>? categoryIds;
   final DateTime? startDate;
   final DateTime? endDate;
   final String? sortBy; // 'dateDesc', 'dateAsc', 'amountDesc', 'amountAsc'
@@ -58,6 +59,7 @@ class GetTransactionsParams {
   GetTransactionsParams({
     this.type,
     this.categoryId,
+    this.categoryIds,
     this.startDate,
     this.endDate,
     this.sortBy,

@@ -4,6 +4,7 @@ import 'package:fluxa_app/core/icons/app_huge_icons.dart';
 import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:fluxa_app/core/widgets/app_empty_state.dart';
 import 'package:fluxa_app/core/widgets/placeholder_page.dart';
+import 'package:fluxa_app/core/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -844,13 +845,21 @@ class _CategoryBreakdownCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () => Get.to(
-            () => PlaceholderPage(
-              title: item.categoryName,
-              message:
-                  'Detail transaksi Kategori "${item.categoryName}" sedang dalam proses pengembangan.',
-            ),
-          ),
+          onTap: () {
+            final statsController = Get.find<StatisticsController>();
+            final nextDay = statsController.periodEnd.add(const Duration(days: 1));
+            Get.toNamed(
+              AppRoutes.transactionList,
+              arguments: <String, dynamic>{
+                'source': 'statistics',
+                'type': statsController.selectedType,
+                'startDate': statsController.periodStart.toIso8601String(),
+                'endDateExclusive': nextDay.toIso8601String(),
+                'categoryId': item.categoryId,
+                'categoryName': item.categoryName,
+              },
+            );
+          },
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.s12),
             child: Row(

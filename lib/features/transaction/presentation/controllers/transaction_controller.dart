@@ -333,6 +333,20 @@ class TransactionController extends GetxController {
       minAmount = 100000;
     }
 
+    List<String>? categoryIds;
+    if (_filterCategory.value != null) {
+      final selectedCat = _filterCategory.value!;
+      if (selectedCat.parentId == null) {
+        final subIds = _filterCategories
+            .where((c) => c.parentId == selectedCat.id)
+            .map((c) => c.id)
+            .toList();
+        categoryIds = [selectedCat.id, ...subIds];
+      } else {
+        categoryIds = [selectedCat.id];
+      }
+    }
+
     final params = GetTransactionsParams(
       type: switch (_filterType.value) {
         'Pemasukan' => 'income',
@@ -340,6 +354,7 @@ class TransactionController extends GetxController {
         _ => null,
       },
       categoryId: _filterCategory.value?.id,
+      categoryIds: categoryIds,
       startDate: startDate,
       endDate: endDate,
       sortBy: sortByParam,
@@ -365,6 +380,7 @@ class TransactionController extends GetxController {
     final dynamic rawType = args['type'];
     final dynamic rawStartDate = args['startDate'];
     final dynamic rawEndDateExclusive = args['endDateExclusive'];
+    final dynamic rawCategoryId = args['categoryId'];
 
     if (rawType is! String ||
         rawStartDate is! String ||
@@ -399,6 +415,19 @@ class TransactionController extends GetxController {
       normalizedStart,
       displayEnd,
     );
+
+    await loadFilterCategories();
+
+    if (rawCategoryId is String && rawCategoryId.isNotEmpty) {
+      final matchedCategory = _filterCategories.firstWhereOrNull(
+        (c) => c.id == rawCategoryId,
+      );
+      if (matchedCategory != null) {
+        _filterCategory.value = matchedCategory;
+      }
+    } else {
+      _filterCategory.value = null;
+    }
 
     await loadTransactions();
   }

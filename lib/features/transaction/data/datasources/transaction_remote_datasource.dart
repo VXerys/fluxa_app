@@ -55,7 +55,9 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
         filterQuery = filterQuery.eq('type', params.type!);
       }
 
-      if (params.categoryId != null) {
+      if (params.categoryIds != null && params.categoryIds!.isNotEmpty) {
+        filterQuery = filterQuery.inFilter('category_id', params.categoryIds!);
+      } else if (params.categoryId != null) {
         filterQuery = filterQuery.eq('category_id', params.categoryId!);
       }
 

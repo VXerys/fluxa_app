@@ -471,6 +471,7 @@ class VoiceTransactionController extends GetxController {
       ],
     );
     final String? walletHint = _normalizedOrNull(voiceResult.transaction.wallet);
+    final String? subcategoryHint = _normalizedOrNull(voiceResult.transaction.subcategory);
 
     final List<CategoryEntity> categories = await _loadCategories(type);
     final List<WalletEntity> wallets = await _loadWallets();
@@ -478,6 +479,7 @@ class VoiceTransactionController extends GetxController {
     final _ResolvedCategory? resolvedCategory = _resolveCategory(
       type: type,
       categoryHint: categoryHint,
+      subcategoryHint: subcategoryHint,
       categories: categories,
     );
     final WalletEntity? resolvedWallet = _resolveWallet(
@@ -536,10 +538,11 @@ class VoiceTransactionController extends GetxController {
   _ResolvedCategory? _resolveCategory({
     required String? type,
     required String categoryHint,
+    String? subcategoryHint,
     required List<CategoryEntity> categories,
   }) {
     final String normalizedHint = _normalizeLookup(categoryHint);
-    if (type == null || normalizedHint.isEmpty || categories.isEmpty) {
+    if (type == null || categories.isEmpty) {
       return null;
     }
 
@@ -555,44 +558,80 @@ class VoiceTransactionController extends GetxController {
         .where((category) => category.parentId != null)
         .toList();
 
-    final CategoryEntity? exactChild = _pickBestCategoryMatch(
-      childCategories,
-      normalizedHint,
-      exactOnly: true,
-    );
-    if (exactChild != null) {
-      final CategoryEntity? parent = parentCategories.firstWhereOrNull(
-        (category) => category.id == exactChild.parentId,
+    // 1. Match subcategory first if subcategoryHint is provided
+    if (subcategoryHint != null) {
+      final String normalizedSubHint = _normalizeLookup(subcategoryHint);
+      if (normalizedSubHint.isNotEmpty) {
+        final CategoryEntity? exactChild = _pickBestCategoryMatch(
+          childCategories,
+          normalizedSubHint,
+          exactOnly: true,
+        );
+        if (exactChild != null) {
+          final CategoryEntity? parent = parentCategories.firstWhereOrNull(
+            (category) => category.id == exactChild.parentId,
+          );
+          if (parent != null) {
+            return _ResolvedCategory(parent: parent, child: exactChild);
+          }
+        }
+
+        final CategoryEntity? partialChild = _pickBestCategoryMatch(
+          childCategories,
+          normalizedSubHint,
+        );
+        if (partialChild != null) {
+          final CategoryEntity? parent = parentCategories.firstWhereOrNull(
+            (category) => category.id == partialChild.parentId,
+          );
+          if (parent != null) {
+            return _ResolvedCategory(parent: parent, child: partialChild);
+          }
+        }
+      }
+    }
+
+    // 2. Fallback to matching categoryHint
+    if (normalizedHint.isNotEmpty) {
+      final CategoryEntity? exactChild = _pickBestCategoryMatch(
+        childCategories,
+        normalizedHint,
+        exactOnly: true,
       );
-      return _ResolvedCategory(parent: parent ?? exactChild, child: parent == null ? null : exactChild);
-    }
+      if (exactChild != null) {
+        final CategoryEntity? parent = parentCategories.firstWhereOrNull(
+          (category) => category.id == exactChild.parentId,
+        );
+        return _ResolvedCategory(parent: parent ?? exactChild, child: parent == null ? null : exactChild);
+      }
 
-    final CategoryEntity? exactParent = _pickBestCategoryMatch(
-      parentCategories,
-      normalizedHint,
-      exactOnly: true,
-    );
-    if (exactParent != null) {
-      return _ResolvedCategory(parent: exactParent);
-    }
-
-    final CategoryEntity? partialChild = _pickBestCategoryMatch(
-      childCategories,
-      normalizedHint,
-    );
-    if (partialChild != null) {
-      final CategoryEntity? parent = parentCategories.firstWhereOrNull(
-        (category) => category.id == partialChild.parentId,
+      final CategoryEntity? exactParent = _pickBestCategoryMatch(
+        parentCategories,
+        normalizedHint,
+        exactOnly: true,
       );
-      return _ResolvedCategory(parent: parent ?? partialChild, child: parent == null ? null : partialChild);
-    }
+      if (exactParent != null) {
+        return _ResolvedCategory(parent: exactParent);
+      }
 
-    final CategoryEntity? partialParent = _pickBestCategoryMatch(
-      parentCategories,
-      normalizedHint,
-    );
-    if (partialParent != null) {
-      return _ResolvedCategory(parent: partialParent);
+      final CategoryEntity? partialChild = _pickBestCategoryMatch(
+        childCategories,
+        normalizedHint,
+      );
+      if (partialChild != null) {
+        final CategoryEntity? parent = parentCategories.firstWhereOrNull(
+          (category) => category.id == partialChild.parentId,
+        );
+        return _ResolvedCategory(parent: parent ?? partialChild, child: parent == null ? null : partialChild);
+      }
+
+      final CategoryEntity? partialParent = _pickBestCategoryMatch(
+        parentCategories,
+        normalizedHint,
+      );
+      if (partialParent != null) {
+        return _ResolvedCategory(parent: partialParent);
+      }
     }
 
     return null;

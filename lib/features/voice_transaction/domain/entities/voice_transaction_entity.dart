@@ -2,6 +2,7 @@ class VoiceTransactionEntity {
   final String type;
   final double amount;
   final String category;
+  final String? subcategory;
   final String? wallet;
   final String? title;
   final String? description;
@@ -12,6 +13,7 @@ class VoiceTransactionEntity {
     required this.type,
     required this.amount,
     required this.category,
+    this.subcategory,
     this.wallet,
     this.title,
     this.description,
