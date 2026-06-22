@@ -43,16 +43,17 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
   );
 
   static const List<_WalletTypeOption> _typeOptions = <_WalletTypeOption>[
-    _WalletTypeOption(
-      label: 'Bank',
-      value: 'bank',
-      icon: AppHugeIcons.account_balance_outlined,
-    ),
-    _WalletTypeOption(
-      label: 'E-Wallet',
-      value: 'ewallet',
-      icon: AppHugeIcons.account_balance_wallet_outlined,
-    ),
+    // Commented out non-cash types for now
+    // _WalletTypeOption(
+    //   label: 'Bank',
+    //   value: 'bank',
+    //   icon: AppHugeIcons.account_balance_outlined,
+    // ),
+    // _WalletTypeOption(
+    //   label: 'E-Wallet',
+    //   value: 'ewallet',
+    //   icon: AppHugeIcons.account_balance_wallet_outlined,
+    // ),
     _WalletTypeOption(
       label: 'Kas',
       value: 'cash',
@@ -190,7 +191,7 @@ class _AddWalletBottomSheetState extends State<AddWalletBottomSheet> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _balanceController = TextEditingController();
 
-  String _selectedType = 'bank';
+  String _selectedType = 'cash';
   int _selectedIconIndex = 0;
 
   @override

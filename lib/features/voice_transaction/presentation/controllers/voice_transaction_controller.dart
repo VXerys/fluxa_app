@@ -675,6 +675,16 @@ class VoiceTransactionController extends GetxController {
       return _pickDefaultWallet(wallets);
     }
 
+    // Direct match for cash/tunai to cash-like wallets
+    if (normalizedHint == 'cash' || normalizedHint == 'tunai') {
+      final cashWallet = wallets.firstWhereOrNull(
+        (wallet) => wallet.type == 'cash' ||
+            wallet.name.toLowerCase().contains('tunai') ||
+            wallet.name.toLowerCase().contains('cash'),
+      );
+      if (cashWallet != null) return cashWallet;
+    }
+
     WalletEntity? bestMatch;
     int bestScore = 0;
     for (final WalletEntity wallet in wallets) {
@@ -685,7 +695,7 @@ class VoiceTransactionController extends GetxController {
       }
     }
 
-    return bestScore > 0 ? bestMatch : null;
+    return bestScore > 0 ? bestMatch : _pickDefaultWallet(wallets);
   }
 
   WalletEntity? _pickDefaultWallet(List<WalletEntity> wallets) {

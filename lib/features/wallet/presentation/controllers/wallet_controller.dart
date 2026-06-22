@@ -40,8 +40,15 @@ class WalletController extends GetxController {
   final RxBool _isSubmitting = false.obs;
   bool get isSubmitting => _isSubmitting.value;
 
+  bool _isCashWallet(WalletEntity wallet) {
+    final nameLower = wallet.name.toLowerCase();
+    return wallet.type == 'cash' ||
+        nameLower.contains('tunai') ||
+        nameLower.contains('cash');
+  }
+
   final RxList<WalletEntity> _wallets = <WalletEntity>[].obs;
-  List<WalletEntity> get wallets => _wallets;
+  List<WalletEntity> get wallets => _wallets.where(_isCashWallet).toList();
 
   final Rx<double> _totalBalance = 0.0.obs;
   double get totalBalance => _totalBalance.value;
@@ -57,9 +64,9 @@ class WalletController extends GetxController {
   StreamSubscription<FinanceSyncEvent>? _syncSubscription;
   int _loadRequestId = 0;
 
-  List<WalletEntity> get cashWallets => getWalletsByType('cash');
-  List<WalletEntity> get bankWallets => getWalletsByType('bank');
-  List<WalletEntity> get ewalletWallets => getWalletsByType('ewallet');
+  List<WalletEntity> get cashWallets => _wallets.where(_isCashWallet).toList();
+  List<WalletEntity> get bankWallets => <WalletEntity>[];
+  List<WalletEntity> get ewalletWallets => <WalletEntity>[];
 
   @override
   void onInit() {

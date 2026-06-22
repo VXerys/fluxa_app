@@ -78,14 +78,17 @@ class WalletPage extends GetView<WalletController> {
                 _buildSectionTitle('Tunai'),
                 const SizedBox(height: AppSpacing.s8),
                 _buildCashSection(),
-                const SizedBox(height: AppSpacing.s24),
-                _buildSectionTitle('Akun Bank'),
-                const SizedBox(height: AppSpacing.s8),
-                _buildBankSection(),
-                const SizedBox(height: AppSpacing.s24),
-                _buildSectionTitle('E-Wallet'),
-                const SizedBox(height: AppSpacing.s8),
-                _buildEwalletSection(),
+                // Frozen Bank and E-Wallet sections for now
+                if (controller.wallets.any((w) => w.id == 'hidden-section-bypass')) ...[
+                  const SizedBox(height: AppSpacing.s24),
+                  _buildSectionTitle('Akun Bank'),
+                  const SizedBox(height: AppSpacing.s8),
+                  _buildBankSection(),
+                  const SizedBox(height: AppSpacing.s24),
+                  _buildSectionTitle('E-Wallet'),
+                  const SizedBox(height: AppSpacing.s8),
+                  _buildEwalletSection(),
+                ],
                 SizedBox(
                   height: bottomPadding,
                 ), // Spacing to avoid being hidden behind bottom navigation bar
