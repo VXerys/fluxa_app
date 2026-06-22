@@ -10,6 +10,7 @@ class VoiceTransactionModel extends VoiceTransactionEntity {
     super.title,
     super.description,
     required super.currency,
+    super.date,
   });
 
   factory VoiceTransactionModel.fromJson(Map<String, dynamic> json) {
@@ -21,6 +22,7 @@ class VoiceTransactionModel extends VoiceTransactionEntity {
       title: json['title'] as String?,
       description: json['description'] as String?,
       currency: json['currency'] as String? ?? AppConstants.defaultCurrency,
+      date: json['date'] as String?,
     );
   }
 
@@ -33,6 +35,7 @@ class VoiceTransactionModel extends VoiceTransactionEntity {
       title: title,
       description: description,
       currency: currency,
+      date: date,
     );
   }
 
@@ -42,3 +45,4 @@ class VoiceTransactionModel extends VoiceTransactionEntity {
     return 0;
   }
 }
+

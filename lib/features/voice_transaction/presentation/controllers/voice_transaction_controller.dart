@@ -514,7 +514,7 @@ class VoiceTransactionController extends GetxController {
       currency: _normalizedOrNull(voiceResult.transaction.currency) ?? 'IDR',
       transcriptRaw: voiceResult.transcript.raw,
       transcriptNormalized: voiceResult.transcript.normalized,
-      occurredAt: DateTime.now(),
+      occurredAt: _resolveOccurredAt(voiceResult.transaction.date),
     );
   }
 
@@ -855,6 +855,26 @@ class VoiceTransactionController extends GetxController {
       }
     }
     return '';
+  }
+
+  DateTime _resolveOccurredAt(String? dateString) {
+    if (dateString == null || dateString.trim().isEmpty) {
+      return DateTime.now();
+    }
+    final DateTime? parsed = DateTime.tryParse(dateString.trim());
+    if (parsed == null) {
+      return DateTime.now();
+    }
+    // Preserve the current time but use the parsed date.
+    final DateTime now = DateTime.now();
+    return DateTime(
+      parsed.year,
+      parsed.month,
+      parsed.day,
+      now.hour,
+      now.minute,
+      now.second,
+    );
   }
 
   String? _normalizedOrNull(String? value) {

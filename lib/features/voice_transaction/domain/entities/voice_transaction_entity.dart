@@ -6,6 +6,7 @@ class VoiceTransactionEntity {
   final String? title;
   final String? description;
   final String currency;
+  final String? date;
 
   const VoiceTransactionEntity({
     required this.type,
@@ -15,5 +16,6 @@ class VoiceTransactionEntity {
     this.title,
     this.description,
     required this.currency,
+    this.date,
   });
 }
