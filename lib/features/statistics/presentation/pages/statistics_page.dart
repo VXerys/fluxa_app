@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fluxa_app/core/icons/app_huge_icons.dart';
 import 'package:fluxa_app/core/widgets/app_icon.dart';
 import 'package:fluxa_app/core/widgets/app_empty_state.dart';
-import 'package:fluxa_app/core/widgets/placeholder_page.dart';
+
 import 'package:fluxa_app/core/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -849,7 +849,7 @@ class _CategoryBreakdownCard extends StatelessWidget {
             final statsController = Get.find<StatisticsController>();
             final nextDay = statsController.periodEnd.add(const Duration(days: 1));
             Get.toNamed(
-              AppRoutes.transactionList,
+              Routes.transactionList,
               arguments: <String, dynamic>{
                 'source': 'statistics',
                 'type': statsController.selectedType,
