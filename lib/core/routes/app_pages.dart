@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
-
-import '../../core/storage/storage_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/presentation/bindings/auth_binding.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
@@ -30,8 +29,8 @@ class AppPages {
   AppPages._();
 
   static String get initial {
-    final token = StorageService.read<String>('access_token');
-    if (token != null) {
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null) {
       return Routes.main;
     }
 

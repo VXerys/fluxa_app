@@ -73,13 +73,7 @@ class MainNavigationPage extends GetView<MainNavigationController> {
                 controller: controller,
               ),
               const SizedBox(width: 48), // Space for FAB
-              _NavItem(
-                icon: AppHugeIcons.account_balance_wallet_rounded,
-                activeIcon: AppHugeIcons.solid_wallet,
-                label: 'Wallet',
-                index: 2,
-                controller: controller,
-              ),
+
               _NavItem(
                 icon: AppHugeIcons.person_rounded,
                 activeIcon: AppHugeIcons.solid_user,

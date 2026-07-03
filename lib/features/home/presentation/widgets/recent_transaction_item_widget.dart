@@ -103,6 +103,7 @@ class RecentTransactionItemWidget extends StatelessWidget {
     final String title = hasNote
         ? note
         : (transaction.category?.name ?? 'Transaksi');
+    // ignore: unused_local_variable
     final String walletLabel =
         transaction.walletName?.trim().isNotEmpty == true
         ? transaction.walletName!
@@ -154,27 +155,7 @@ class RecentTransactionItemWidget extends StatelessWidget {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      AppIcon(
-                        AppHugeIcons.account_balance_wallet_outlined,
-                        size: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          walletLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.roboto12w400.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+
                 ],
               ),
             ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -91,35 +92,7 @@ class VoiceProcessingStateWidget extends StatelessWidget {
 
     if (state == VoiceTransactionState.processing ||
         state == VoiceTransactionState.uploading) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.s16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2.2),
-            ),
-            const SizedBox(width: AppSpacing.s12),
-            Expanded(
-              child: Text(
-                state == VoiceTransactionState.uploading
-                    ? 'Mengupload audio...'
-                    : 'Memproses suara dengan AI...\nIni bisa sedikit lebih lama karena server gratis.',
-                style: AppTextStyles.roboto14w500.copyWith(
-                  color: AppColors.textPrimary,
-                  height: 1.35,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
+      return _ProcessingStateBlock(state: state);
     }
 
     if (state == VoiceTransactionState.failure) {
@@ -255,6 +228,106 @@ class _MessageBlock extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProcessingStateBlock extends StatefulWidget {
+  final VoiceTransactionState state;
+
+  const _ProcessingStateBlock({required this.state});
+
+  @override
+  State<_ProcessingStateBlock> createState() => _ProcessingStateBlockState();
+}
+
+class _ProcessingStateBlockState extends State<_ProcessingStateBlock> {
+  late final List<String> _processingSteps;
+  int _currentStepIndex = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _processingSteps = const <String>[
+      'Membaca rekaman suara...',
+      'Mengekstrak nominal transaksi...',
+      'Menentukan kategori pengeluaran...',
+      'Menyusun draf transaksi...',
+    ];
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(milliseconds: 2500), (Timer timer) {
+      if (mounted) {
+        setState(() {
+          _currentStepIndex = (_currentStepIndex + 1) % _processingSteps.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String loadingText = widget.state == VoiceTransactionState.uploading
+        ? 'Mengupload audio...'
+        : _processingSteps[_currentStepIndex];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.s16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.2,
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.s12),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.0, 0.25),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: child,
+                  ),
+                );
+              },
+              child: Text(
+                loadingText,
+                key: ValueKey<String>(loadingText),
+                style: AppTextStyles.roboto14w500.copyWith(
+                  color: AppColors.textPrimary,
+                  height: 1.35,
+                ),
+              ),
             ),
           ),
         ],

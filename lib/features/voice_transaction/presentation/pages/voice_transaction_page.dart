@@ -78,10 +78,6 @@ class VoiceTransactionPage extends GetView<VoiceTransactionController> {
                   VoiceTranscriptPreviewWidget(
                     transcript: voiceResult!.transcript,
                   ),
-                  if (voiceResult.warnings.isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.s16),
-                    _WarningsCard(warnings: voiceResult.warnings),
-                  ],
                   const SizedBox(height: AppSpacing.s16),
                   VoiceTransactionDraftCardWidget(
                     transaction: voiceResult.transaction,
@@ -205,47 +201,6 @@ class _DraftMissingFieldsCard extends StatelessWidget {
               height: 1.35,
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _WarningsCard extends StatelessWidget {
-  final List<String> warnings;
-
-  const _WarningsCard({required this.warnings});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.s16),
-      decoration: BoxDecoration(
-        color: AppColors.warning.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.warning.withValues(alpha: 0.28)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Perlu perhatian',
-            style: AppTextStyles.roboto16w600.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.s8),
-          for (final warning in warnings)
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.s4),
-              child: Text(
-                '- $warning',
-                style: AppTextStyles.roboto13w400.copyWith(
-                  color: AppColors.textPrimary,
-                  height: 1.35,
-                ),
-              ),
-            ),
         ],
       ),
     );

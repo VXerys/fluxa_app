@@ -40,6 +40,7 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
     final String categoryLabel =
         draft?.displayCategory ??
         (transactionCategoryLabel.isEmpty ? 'Belum terdeteksi' : transactionCategoryLabel);
+    // ignore: unused_local_variable
     final String? walletLabel = draft?.displayWallet ?? _normalizedOrNull(transaction.wallet);
     final String descriptionLabel =
         draft?.displayDescription ??
@@ -47,6 +48,14 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
         '-';
     final String currencyLabel = draft?.effectiveCurrency ?? transaction.currency;
     final String typeLabel = _formatType(draft?.type ?? transaction.type);
+    final DateTime dateValue = draft?.occurredAt ??
+        (() {
+          if (transaction.date != null && transaction.date!.trim().isNotEmpty) {
+            return DateTime.tryParse(transaction.date!) ?? DateTime.now();
+          }
+          return DateTime.now();
+        })();
+    final String dateLabel = DateFormat('dd MMM yyyy', 'id_ID').format(dateValue);
 
     return Container(
       width: double.infinity,
@@ -95,7 +104,6 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
                 label: categoryLabel,
                 color: AppColors.primary,
               ),
-              _WalletChip(wallet: walletLabel),
             ],
           ),
           const SizedBox(height: AppSpacing.s18),
@@ -112,13 +120,14 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
             valueText: _currencyFormatter.format(amountValue),
           ),
           _DraftRow(
+            label: 'Tanggal',
+            valueText: dateLabel,
+          ),
+          _DraftRow(
             label: 'Kategori',
             valueText: categoryLabel,
           ),
-          _DraftRow(
-            label: 'Dompet',
-            valueWidget: _WalletValue(wallet: walletLabel),
-          ),
+
           _DraftRow(
             label: 'Deskripsi',
             valueText: descriptionLabel,
@@ -223,6 +232,7 @@ class _WalletChip extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _WalletValue extends StatelessWidget {
   final String? wallet;
 

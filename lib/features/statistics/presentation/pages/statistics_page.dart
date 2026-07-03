@@ -674,7 +674,7 @@ class StatisticsPage extends GetView<StatisticsController> {
               children: [
                 _buildDropdownChip<String>(
                   value: controller.selectedGroupType,
-                  items: const ['Kategori', 'Subkategori', 'Judul', 'Dompet'],
+                  items: const ['Kategori', 'Subkategori', 'Judul'],
                   onChanged: controller.changeGroupType,
                 ),
               ],

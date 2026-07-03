@@ -178,6 +178,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
   final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   String? _selectedWalletId;
+  // ignore: unused_field
   String _selectedWallet = 'Pilih dompet';
 
   @override
@@ -543,6 +544,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
     );
   }
 
+  // ignore: unused_element
   void _showWalletSelector() {
     final walletController = Get.find<WalletController>();
     Get.bottomSheet(
@@ -999,12 +1001,11 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
             ),
           ),
           const SizedBox(height: 8),
-          // Catatan & Wallet Selector Dropdown Row
+          // Catatan (Wallet Selector Dropdown Row hidden)
           Row(
             children: [
               // Catatan
               Expanded(
-                flex: 3,
                 child: GestureDetector(
                   onTap: _showDetailsPopup,
                   child: Container(
@@ -1041,49 +1042,6 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Wallet (Cash) Dropdown
-              Expanded(
-                flex: 2,
-                child: GestureDetector(
-                  onTap: _showWalletSelector,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: AppColors.neutral.withValues(alpha: 0.15),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _selectedWallet,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const AppIcon(
-                          AppHugeIcons.keyboard_arrow_down,
-                          color: AppColors.textSecondary,
-                          size: 20,
                         ),
                       ],
                     ),

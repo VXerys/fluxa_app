@@ -70,11 +70,7 @@ class TransactionFilterWidget extends GetView<TransactionController> {
                     controller.filterSortBy,
                     onTap: onOpenSortFilter,
                   ),
-                  const SizedBox(width: AppSpacing.s8),
-                  _buildFilterDropdown(
-                    'Semua Dompet',
-                    onTap: onOpenWalletFilter,
-                  ), // Static UI
+
                   const SizedBox(width: AppSpacing.s8),
                   _buildFilterDropdown(
                     controller.filterNominal,
