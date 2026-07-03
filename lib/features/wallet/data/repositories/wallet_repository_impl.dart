@@ -93,7 +93,7 @@ class WalletRepositoryImpl implements WalletRepository {
         userId: current.userId,
         name: params.name ?? current.name,
         type: current.type,
-        balance: current.balance,
+        balance: params.balance ?? current.balance,
         currency: current.currency,
         icon: params.icon ?? current.icon,
         color: params.color ?? current.color,

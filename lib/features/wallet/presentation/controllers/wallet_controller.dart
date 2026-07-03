@@ -103,6 +103,16 @@ class WalletController extends GetxController {
       (data) {
         _errorMessage.value = '';
         _wallets.value = data;
+        if (data.isEmpty && !_isSubmitting.value) {
+          createWallet(
+            name: 'Cash',
+            type: 'cash',
+            initialBalance: 0.0,
+            currency: 'IDR',
+            icon: 'wallet_01',
+            silent: true,
+          );
+        }
       },
     );
   }
@@ -144,17 +154,18 @@ class WalletController extends GetxController {
     required String currency,
     String? icon,
     String? color,
+    bool silent = false,
   }) async {
     if (_isSubmitting.value) return false;
 
     if (name.trim().isEmpty) {
       _errorMessage.value = 'Nama dompet tidak boleh kosong';
-      Get.snackbar('Error', _errorMessage.value);
+      if (!silent) Get.snackbar('Error', _errorMessage.value);
       return false;
     }
     if (type.trim().isEmpty) {
       _errorMessage.value = 'Tipe dompet tidak boleh kosong';
-      Get.snackbar('Error', _errorMessage.value);
+      if (!silent) Get.snackbar('Error', _errorMessage.value);
       return false;
     }
 
@@ -174,7 +185,7 @@ class WalletController extends GetxController {
       return await result.fold(
         (failure) async {
           _errorMessage.value = failure.message;
-          Get.snackbar('Error', failure.message);
+          if (!silent) Get.snackbar('Error', failure.message);
           return false;
         },
         (_) async {
@@ -184,7 +195,7 @@ class WalletController extends GetxController {
             FinanceSyncEventType.walletMutated,
             source: 'wallet.create',
           );
-          Get.snackbar('Sukses', 'Dompet berhasil ditambahkan');
+          if (!silent) Get.snackbar('Sukses', 'Dompet berhasil ditambahkan');
           return true;
         },
       );
@@ -199,6 +210,7 @@ class WalletController extends GetxController {
     String? icon,
     String? color,
     bool? includeInTotal,
+    double? balance,
   }) async {
     if (_isSubmitting.value) return false;
     _isSubmitting.value = true;
@@ -210,6 +222,7 @@ class WalletController extends GetxController {
           icon: icon,
           color: color,
           includeInTotal: includeInTotal,
+          balance: balance,
         ),
       );
 

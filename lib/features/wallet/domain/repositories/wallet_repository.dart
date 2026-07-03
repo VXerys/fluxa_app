@@ -28,6 +28,7 @@ class UpdateWalletParams {
   final String? color;
   final bool? includeInTotal;
   final int? sortOrder;
+  final double? balance;
 
   UpdateWalletParams({
     required this.id,
@@ -36,6 +37,7 @@ class UpdateWalletParams {
     this.color,
     this.includeInTotal,
     this.sortOrder,
+    this.balance,
   });
 }
 
