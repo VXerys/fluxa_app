@@ -362,7 +362,9 @@ class _TransactionListBodyState extends State<_TransactionListBody> {
   }
 
   void _showCategoryFilterBottomSheet() {
-    final categories = widget.controller.visibleFilterCategories;
+    final categories = widget.controller.visibleFilterCategories
+        .where((category) => category.parentId == null)
+        .toList();
     final allCategories = widget.controller.filterCategories;
     final parentNameById = {
       for (final category in allCategories.where(

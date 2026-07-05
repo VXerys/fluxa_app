@@ -33,9 +33,6 @@ class VoiceTransactionDraftCardWidget extends StatelessWidget {
     String transactionCategoryLabel = '';
     if (transaction.category.isNotEmpty) {
       transactionCategoryLabel = transaction.category;
-      if (transaction.subcategory != null && transaction.subcategory!.trim().isNotEmpty) {
-        transactionCategoryLabel += ' • ${transaction.subcategory}';
-      }
     }
     final String categoryLabel =
         draft?.displayCategory ??

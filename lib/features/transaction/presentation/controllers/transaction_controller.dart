@@ -632,7 +632,12 @@ class TransactionController extends GetxController {
       selectParentCategory(category);
       return;
     }
-    selectChildCategory(category);
+    final parent = _parentCategories.firstWhereOrNull(
+      (item) => item.id == category.parentId,
+    );
+    if (parent != null) {
+      selectParentCategory(parent);
+    }
   }
 
   /// Auto-select parent for visual purposes only (shows subcategory chips).
@@ -653,7 +658,8 @@ class TransactionController extends GetxController {
 
   /// Called when user explicitly taps a subcategory chip.
   void selectChildCategory(CategoryEntity category) {
-    _selectedChildCategory.value = category;
+    // Hidden/Disabled for subcategory hide
+    _selectedChildCategory.value = null;
     _categoryConfirmedByUser.value = true;
   }
 
@@ -671,7 +677,6 @@ class TransactionController extends GetxController {
       );
       if (child != null) {
         selectParentCategory(parent);
-        selectChildCategory(child);
         return;
       }
     }
@@ -687,15 +692,19 @@ class TransactionController extends GetxController {
         final category = categories.firstWhereOrNull(
           (item) => item.id == categoryId,
         );
-        final parentId = category?.parentId;
-        if (category == null || parentId == null) return;
+        if (category == null) return;
+        
+        final parentId = category.parentId;
+        if (parentId == null) {
+          selectParentCategory(category);
+          return;
+        }
 
         final parent = _parentCategories.firstWhereOrNull(
           (item) => item.id == parentId,
         );
         if (parent == null) return;
         selectParentCategory(parent);
-        selectChildCategory(category);
       },
     );
   }

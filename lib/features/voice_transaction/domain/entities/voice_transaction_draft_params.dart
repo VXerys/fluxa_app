@@ -38,17 +38,9 @@ class VoiceTransactionDraftParams {
     return trimmed.isEmpty ? 'IDR' : trimmed;
   }
 
-  String? get resolvedTransactionCategoryId => subcategoryId ?? categoryId;
+  String? get resolvedTransactionCategoryId => categoryId ?? subcategoryId;
 
-  String? get displayCategory {
-    final String? parent = _normalizedOrNull(categoryName);
-    final String? child = _normalizedOrNull(subcategoryName);
-
-    if (parent == null && child == null) return null;
-    if (parent == null) return child;
-    if (child == null) return parent;
-    return '$parent • $child';
-  }
+  String? get displayCategory => _normalizedOrNull(categoryName);
 
   String? get displayWallet => _normalizedOrNull(walletName);
 

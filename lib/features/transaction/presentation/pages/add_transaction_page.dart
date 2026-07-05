@@ -814,9 +814,7 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
   Widget _buildCategories() {
     return Obx(() {
       final parentCategories = widget.controller.parentCategories;
-      final childCategories = widget.controller.childCategories;
       final selectedParentId = widget.controller.selectedParentCategory?.id;
-      final selectedChildId = widget.controller.selectedChildCategory?.id;
 
       // Show shimmer ONLY if categories are empty AND loading
       if (parentCategories.isEmpty && widget.controller.isCategoryLoading) {
@@ -860,43 +858,6 @@ class _AddTransactionFormState extends State<_AddTransactionForm> {
               },
             ),
           ),
-          if (childCategories.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.s12),
-            SizedBox(
-              height: 48,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s24),
-                itemCount: childCategories.length,
-                itemBuilder: (context, index) {
-                  final category = childCategories[index];
-                  final parentCategory =
-                      widget.controller.selectedParentCategory;
-                  final isSelected = selectedChildId == category.id;
-                  return _ChildCategoryChip(
-                    key: ValueKey(category.id),
-                    category: category,
-                    parentCategory: parentCategory,
-                    isSelected: isSelected,
-                    onTap: () {
-                      final wasSelected = isSelected;
-                      widget.controller.selectChildCategory(category);
-                      final isSelectedAfter =
-                          widget.controller.selectedChildCategory?.id ==
-                          category.id;
-                      debugPrint(
-                        'Child chip tap: name=${category.name}, '
-                        'childColor=${category.color}, '
-                        'parentColor=${parentCategory?.color}, '
-                        'isSelectedBefore=$wasSelected, '
-                        'isSelectedAfter=$isSelectedAfter',
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
         ],
       );
     });
