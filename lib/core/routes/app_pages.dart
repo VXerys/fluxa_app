@@ -142,11 +142,6 @@ class AppPages {
       binding: AuthBinding(),
     ),
     GetPage(
-      name: Routes.pengaturanDompet,
-      page: () => const PengaturanDompetPage(),
-      binding: AuthBinding(),
-    ),
-    GetPage(
       name: Routes.tema,
       page: () => const TemaPage(),
       binding: AuthBinding(),

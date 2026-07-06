@@ -9,7 +9,6 @@ import '../../../../core/routes/app_routes.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../statistics/presentation/pages/statistics_page.dart';
-import 'package:fluxa_app/core/widgets/placeholder_page.dart';
 import '../controllers/main_navigation_controller.dart';
 
 // ... import tetap sama ...
@@ -29,11 +28,6 @@ class MainNavigationPage extends GetView<MainNavigationController> {
             children: const [
               HomePage(),
               StatisticsPage(),
-              PlaceholderPage(
-                title: 'Dompet',
-                message:
-                    'Fitur Dompet sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
-              ),
               ProfilePage(),
             ],
           ),
@@ -79,17 +73,10 @@ class MainNavigationPage extends GetView<MainNavigationController> {
               const SizedBox(width: 48), // Space for FAB
 
               _NavItem(
-                icon: AppHugeIcons.account_balance_wallet_rounded,
-                activeIcon: AppHugeIcons.solid_wallet,
-                label: 'Wallet',
-                index: 2,
-                controller: controller,
-              ),
-              _NavItem(
                 icon: AppHugeIcons.person_rounded,
                 activeIcon: AppHugeIcons.solid_user,
                 label: 'Profile',
-                index: 3,
+                index: 2,
                 controller: controller,
               ),
             ],

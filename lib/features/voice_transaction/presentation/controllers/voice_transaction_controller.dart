@@ -720,9 +720,6 @@ class VoiceTransactionController extends GetxController {
     if (_normalizedOrNull(draft.resolvedTransactionCategoryId) == null) {
       missingFields.add('Kategori');
     }
-    if (_normalizedOrNull(draft.walletId) == null) {
-      missingFields.add('Dompet');
-    }
     return missingFields;
   }
 

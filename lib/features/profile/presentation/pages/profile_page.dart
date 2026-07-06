@@ -77,18 +77,6 @@ class ProfilePage extends GetView<ProfileController> {
                     ),
                   ),
                 ),
-
-                _buildCardItem(
-                  icon: AppHugeIcons.account_balance_wallet,
-                  title: 'Pengaturan Dompet',
-                  onTap: () => Get.to(
-                    () => const PlaceholderPage(
-                      title: 'Pengaturan Dompet',
-                      message:
-                          'Fitur Pengaturan Dompet sedang dalam proses pengembangan. Kami sedang menyiapkan pengalaman terbaik untuk Anda!',
-                    ),
-                  ),
-                ),
               ]),
               const SizedBox(height: AppSpacing.s16),
               _buildSectionLabel('Preferensi'),
