@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
-import '../../../../core/routes/app_routes.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../statistics/presentation/pages/statistics_page.dart';
@@ -33,23 +32,12 @@ class MainNavigationPage extends GetView<MainNavigationController> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(Routes.addTransaction),
-        backgroundColor: AppColors.primary,
-        elevation: 4,
-        shape: const CircleBorder(),
-        child: const AppIcon(AppHugeIcons.add, color: Colors.white, size: 28),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         color: AppColors.surface, // Warna dasar yang kamu inginkan
         surfaceTintColor: Colors
             .transparent, // <-- TAMBAHKAN INI UNTUK MENGHILANGKAN ABU-ABU MATERIAL 3
         shadowColor: Colors
             .black26, // <-- (Opsional) Tambahkan ini agar bayangan elevation lebih natural, bukan abu-abu kusam
-        shape: const CircularNotchedRectangle(),
-        clipBehavior: Clip.antiAlias,
-        notchMargin: 8.0,
         elevation: 20,
         child: SizedBox(
           height: 64,
@@ -70,8 +58,6 @@ class MainNavigationPage extends GetView<MainNavigationController> {
                 index: 1,
                 controller: controller,
               ),
-              const SizedBox(width: 48), // Space for FAB
-
               _NavItem(
                 icon: AppHugeIcons.person_rounded,
                 activeIcon: AppHugeIcons.solid_user,

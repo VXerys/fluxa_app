@@ -59,12 +59,6 @@ class ProfileController extends GetxController {
 
   static const List<HomeMenuDefinition> homeMenus = [
     HomeMenuDefinition(
-      id: 'catat',
-      label: 'Catat',
-      icon: AppHugeIcons.add_circle_outline,
-      actionKey: 'add_transaction',
-    ),
-    HomeMenuDefinition(
       id: 'riwayat',
       label: 'Riwayat',
       icon: AppHugeIcons.history,
@@ -75,12 +69,6 @@ class ProfileController extends GetxController {
       label: 'Suara',
       icon: AppHugeIcons.mic_none,
       actionKey: 'voice_placeholder',
-    ),
-    HomeMenuDefinition(
-      id: 'kartu',
-      label: 'Kartu',
-      icon: AppHugeIcons.credit_card_outlined,
-      actionKey: 'card_placeholder',
     ),
   ];
 
@@ -151,10 +139,8 @@ class ProfileController extends GetxController {
   ];
 
   static const List<String> _defaultMenuOrder = [
-    'catat',
     'riwayat',
     'suara',
-    'kartu',
   ];
 
   final RxInt selectedThemeIndex = 0.obs;

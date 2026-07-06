@@ -10,7 +10,6 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../profile/presentation/controllers/profile_controller.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../../../core/widgets/placeholder_page.dart';
 import '../../domain/entities/home_summary_entity.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/balance_card_widget.dart';
@@ -527,22 +526,11 @@ class HomePage extends GetView<HomeController> {
 
   void _onMenuTap(String actionKey) {
     switch (actionKey) {
-      case 'add_transaction':
-        Get.toNamed(Routes.addTransaction);
-        break;
       case 'transaction_list':
         Get.toNamed(Routes.transactionList);
         break;
       case 'voice_placeholder':
         Get.toNamed(Routes.voiceTransaction);
-        break;
-      case 'card_placeholder':
-        Get.to(
-          () => const PlaceholderPage(
-            title: 'Kartu',
-            message: 'Fitur Kartu masih dalam pengembangan',
-          ),
-        );
         break;
       default:
         break;
